@@ -13,8 +13,5 @@ CORS(app, supports_credentials=True)
 # 初始化api
 handlers.init_app(app=app)
 
-# 数据库表
-from time import sleep
-# 7s 后启动
-sleep(7)
+# 创建数据库表
 models.init_app(app=app)
