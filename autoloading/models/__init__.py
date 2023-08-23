@@ -7,7 +7,7 @@ migrate = None
 
 def init_app(app):
     global migrate
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:root@db:3306/autoloading'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:root@localhost:3306/autoloading'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
