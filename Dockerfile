@@ -16,4 +16,4 @@ RUN pip install --no-cache-dir -r requirements.txt -i https://pypi.tuna.tsinghua
 
 # 开发测试命令 
 RUN pip install -e .
-CMD ["flask", "run", "-p", "8080", "-h", "0.0.0.0", "--debug"]
+CMD ["flask", "run", "-p", "5000", "-h", "0.0.0.0", "--debug"]
