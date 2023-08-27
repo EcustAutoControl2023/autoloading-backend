@@ -16,7 +16,8 @@ CORS(app, supports_credentials=True)
 
 
 def generate_frames():
-    video = "http://admin:12345678@192.168.1.11:8083/"
+    # video = "http://admin:12345678@192.168.1.11:8083/"
+    video = "rtsp://admin:ecust123456@192.168.1.103:554/Streaming/Channels/101?transportmode=unicast"
     capture = cv2.VideoCapture(video)
 
     while True:
