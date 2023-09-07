@@ -10,6 +10,12 @@ app.secret_key = "your_secret_key"
 # 开启跨域访问
 CORS(app, supports_credentials=True)
 
+
+app = Flask(__name__, static_folder='../static', static_url_path='/static', template_folder='../templates')
+app.secret_key = "your_secret_key"
+# 开启跨域访问
+CORS(app, supports_credentials=True)
+
 # # 初始化api
 # handlers.init_app(app=app)
 
@@ -22,6 +28,7 @@ def generate_frames():
     # 子码流
     # video = "rtsp://admin:ecust123456@192.168.1.103:554/h264/ch1/sub/av_stream"
     video ="rtsp://admin:ecust123456@192.168.1.103:554/mjpeg/ch1/sub/av_stream"
+
     capture = cv2.VideoCapture(video)
 
     while True:
@@ -46,7 +53,6 @@ def login():
     # 跳过登录界面
     if ENV is not 'production':
         return redirect('index')
-
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
