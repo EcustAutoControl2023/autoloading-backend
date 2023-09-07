@@ -2,6 +2,8 @@ from flask import Flask, render_template, Response,request,redirect,session
 import cv2
 from flask_cors import CORS
 
+ENV = 'development'
+
 
 app = Flask(__name__, static_folder='../static', static_url_path='/static', template_folder='../templates')
 app.secret_key = "your_secret_key"
@@ -14,22 +16,22 @@ CORS(app, supports_credentials=True)
 # # 创建数据库表
 # models.init_app(app=app)
 
-
 def generate_frames():
-    # video = "http://admin:12345678@192.168.1.11:8083/"
-    video = "rtsp://admin:ecust123456@192.168.1.103:554/Streaming/Channels/101?transportmode=unicast"
+    # 主码流
+    # video = "rtsp://admin:ecust123456@192.168.1.103:554/h264/ch1/main/av_stream"
+    # 子码流
+    # video = "rtsp://admin:ecust123456@192.168.1.103:554/h264/ch1/sub/av_stream"
+    video ="rtsp://admin:ecust123456@192.168.1.103:554/mjpeg/ch1/sub/av_stream"
     capture = cv2.VideoCapture(video)
 
     while True:
         success, img = capture.read()
         if not success:
             break
-        else:
-            ret, buffer = cv2.imencode('.jpg', img)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
+        ret, buffer = cv2.imencode('.jpg', img)
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 @app.route('/dl')
 def dl():
@@ -41,6 +43,10 @@ def index():
 
 @app.route('/', methods=['GET','POST'])
 def login():
+    # 跳过登录界面
+    if ENV is not 'production':
+        return redirect('index')
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
