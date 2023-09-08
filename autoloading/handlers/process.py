@@ -1,4 +1,3 @@
-
 from flask import request, jsonify
 import datetime
 
@@ -77,6 +76,7 @@ def task_info(time: str, operating_stations: dict, osi_in: dict):
 def error_confirm(time: str, operating_stations: dict, osi_in: dict):
     osi_out:dict = {}
     return gen_return_data(store_id=osi_in['store_id'], loader_id=osi_in['loader_id'], operating_stations=operating_stations, osi_in=osi_out)
+
 
 
 def process():
