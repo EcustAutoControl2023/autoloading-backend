@@ -280,114 +280,26 @@
                     </tr>
                     </tbody>
                 </table>
-                    <div>
-                        <div class="dialog">
-                            <div class="contents">
-                                <div class="aclose">
-                                    <span>测量信息录入</span>
-                                    <div class="close">
-                                        <a class="a" href="javascript:close();"></a>
-                                    </div>
+                <div>
+                    <div id="dialog" {% if show_popup %}style="display: block;"{% endif %}>
+                    {% if show_popup %}
+                        <div class="contents">
+                            <div class="aclose">
+                                <span>现场确认</span>
+                                <div class="close">
+                                    <a class="a" href="javascript:close_confirm();"></a>
                                 </div>
-                                <div class="contains">
-                                    <div class="aform">
-
-                                    <div class="form">
-                                        <form style="line-height: 2;">
-                                            <table>
-                                                <tr>
-                                                    <td>
-                                                        <label class="form-label" for="name">车辆最大载重(t)：</label>
-                                                    </td>
-                                                    <td>
-                                                        <label class="form-label" for="name"></label>本次装载量(t)：</label>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <input type="text" name="maxload" class="white-text">              
-                                                    </td>
-                                                    <td>
-                                                        <input type="text" name="load" class="white-text">
-                                                    </td>
-
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <label class="form-label" for="name">进场车辆重量(t)：</label>
-                                                    </td>
-                                                    <td>
-                                                        <label class="form-label" for="name">出场车辆重量(t)：</label>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <input type="text" name="inweight" class="white-text">              
-                                                    </td>
-                                                    <td>
-                                                        <input type="text" name="outweight" class="white-text">
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <label class="form-label" for="name">装货仓库编号：</label>   
-                                                    </td>
-                                                    <td>
-                                                        <label class="form-label" for="name">装料机编号：</label>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <input type="text" name="warehousenumber">                 
-                                                    </td>
-                                                    <td>
-                                                        <input type="text" name="machine number">
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <span style=color:white>货物类别：</span>
-                                                    </td>
-                                                    <td>
-                                                        <select name="category" class="select">
-                                                        <option value="material" class="select">原材料</option>
-                                                        <option value="food" class="select">食物</option>
-                                                        <option value="equipment" class="select">器具</option>
-                                                        <option value="furniture" class="select">家具</option>
-                                                        </select>
-                                                    </td>
-                                                </tr>
-                                                <tr >
-                                                    <td colspan="2">
-                                                        <label for="licenseplate" style=color:white style="line-height: 2;">车牌识别正确：</label>
-                                                    <input type="checkbox" id="licenseplate">
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="2">
-                                                        <label for="vehiclealignment" style=color:white style="line-height: 2;">车辆偏移物料口：</label>
-                                                        <input type="checkbox" id="vehiclealignment">
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="2">
-                                                        <label for="allowoperation" style=color:white style="line-height: 2;">允许作业：</label>
-                                                        <input type="checkbox" id="allowoperation">
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="2">
-                                                        <input type="submit" class="submit-btn" value="提交" >
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                            </form>
-                                        </div>
-                                    </div>
+                                <div class="img_container">
+                                    <img src={{img_url}}>
                                 </div>
                             </div>
+                            <div class="btn_container">
+                                <button class="btn" onclick="confirm()">允许作业</button>
+                            </div>
                         </div>
+                    {% endif %}
                     </div>
+                </div>
             </div>
         </div>
         <div class="main_right fr">

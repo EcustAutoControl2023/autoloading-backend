@@ -5,6 +5,12 @@ from ..config import ENV
 
 # @app.route('/index')
 def index():
+    # sp = request.args.get('show_popup', None)
+    # iu = request.args.get('img_url', None)
+    sp = session.get('show_popup', None)
+    iu = session.get('img_url', None)
+    if sp and iu is not None:
+        return render_template('index.html', show_popup=sp, img_url=iu)
     return render_template('index.html')
 
 # @app.route('/', methods=['GET','POST'])
