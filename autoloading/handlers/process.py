@@ -1,4 +1,5 @@
-from flask import request, jsonify
+from flask import redirect, request, jsonify, session, url_for
+
 import datetime
 
 # 返回默认值
@@ -127,4 +128,8 @@ def process():
 
         return ret
     else:
+
+        session['img_url'] = "https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png"
+        return redirect(url_for('popup'))
         return '不支持其他请求方式!'
+
