@@ -18,6 +18,10 @@ from .popup import (
     popup,
     popup_confirm
 )
+from .app import(
+    connect,
+    clear_session
+)
 
 
 def init_app(app:Flask):
@@ -34,3 +38,5 @@ def init_app(app:Flask):
     app.add_url_rule('/process', endpoint='process', view_func=process, methods=['GET','POST'])
     app.add_url_rule('/popup', endpoint='popup', view_func=popup, methods=['GET'])
     app.add_url_rule('/popup_confirm', endpoint='popup_confirm', view_func=popup_confirm, methods=['GET','POST'])
+    app.add_url_rule('/connect', view_func=connect,endpoint='connect', methods=['POST'])
+    app.add_url_rule('/clear_session', view_func=clear_session,endpoint='clear_session', methods=['GET'])

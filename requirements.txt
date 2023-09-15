@@ -1,5 +1,6 @@
 alembic==1.11.3
 aniso8601==9.0.1
+bidict==0.22.1
 blinker==1.6.2
 click==8.1.6
 colorama==0.4.6
@@ -7,10 +8,12 @@ Flask==2.3.2
 Flask-Cors==4.0.0
 Flask-Migrate==4.0.4
 Flask-RESTful==0.3.10
+Flask-SocketIO==5.3.6
 Flask-SQLAlchemy==3.0.5
 Flask-WTF==1.1.1
 greenlet==2.0.2
 gunicorn==21.2.0
+h11==0.14.0
 itsdangerous==2.1.2
 Jinja2==3.1.2
 Mako==1.2.4
@@ -20,9 +23,13 @@ numpy==1.25.2
 opencv-python-headless==4.8.0.76
 packaging==23.1
 PyMySQL==1.1.0
+python-engineio==4.7.1
+python-socketio==5.9.0
 pytz==2023.3
+simple-websocket==0.10.1
 six==1.16.0
 SQLAlchemy==2.0.20
 typing_extensions==4.7.1
 Werkzeug==2.3.6
+wsproto==1.2.0
 WTForms==3.0.1
