@@ -6,10 +6,12 @@ from flask import Flask
 conn = sqlite3.connect('database.db')
 cursor = conn.cursor()
 
+
 server_ip=('192.168.100.8',8234)
 hex_data='0103200200012E0A'
 byte_data = bytes.fromhex(hex_data)
 s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+
 running = False
 int_distance = 0
 
@@ -60,3 +62,4 @@ def stop():
     global running
     running = False
     return '测量停止'
+
