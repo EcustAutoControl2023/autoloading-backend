@@ -2,6 +2,7 @@ from flask import Flask, jsonify, session
 from flask_cors import CORS
 from autoloading import (
     handlers,
+    models
 )
 from flask_socketio import SocketIO
 from .config import *
@@ -49,8 +50,8 @@ def center_popup_confirm(confirm):
     session['center_popup_confirm'] = confirm['data']
     TRUCK_CONFIRM.put(confirm['data']) 
 
-# # 创建数据库表
-# models.init_app(app=app)
+# 创建数据库表
+models.init_sqlite(app=app)
 
 # 打印所有路由
 with app.app_context():
