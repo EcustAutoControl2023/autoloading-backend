@@ -23,7 +23,3 @@ models.init_sqlite(app=app)
 # 打印所有路由
 with app.app_context():
     print(app.url_map)
-
-# if __name__ == '__main__':
-#     # app.run(debug=True)
-#     socketio.run(app,debug=True)

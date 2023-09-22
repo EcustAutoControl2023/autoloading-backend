@@ -3,6 +3,7 @@ import cv2
 
 def generate_frames():
     # video = 'rtsp://admin:12345678@10.103.155.112:8554/live'
+    # video = 'rtsp://admin:12345678@10.103.155.112:8554/live'
     # 主码流
     # video = "rtsp://admin:1234567a@192.168.100.2:554/h264/ch1/main/av_stream"
     # 子码流
