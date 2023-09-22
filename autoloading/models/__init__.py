@@ -16,7 +16,7 @@ def init_sqlite(app):
 
     migrate = Migrate(app, db)
 
-def init_app(app):
+def init_mysql(app):
     global migrate
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:root@db:3306/autoloading'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
