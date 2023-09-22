@@ -115,7 +115,7 @@ def connect():
 
         if not truck_id_confirm:
             # 弹出物料确认窗口
-            from autoloading import center_popup
+            from .socket import center_popup
             center_popup({'img_url': picture_url_request})
 
             session['center_popup_confirm'] = TRUCK_CONFIRM.get()
@@ -198,7 +198,7 @@ def connect():
         truck_id_confirm = session.get('truck_id_popup_confirm', False)
         if not truck_id_confirm:
             # 弹出车牌勘误窗口
-            from autoloading import truck_id_popup
+            from .socket import truck_id_popup
             truck_id_popup({'img_url': picture_url_request})
 
             session['truck_id_popup_confirm'] = TRUCK_CONFIRM.get()

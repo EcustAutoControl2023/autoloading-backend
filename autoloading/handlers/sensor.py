@@ -35,6 +35,10 @@ def test_save_data():
     current_time = datetime.datetime.now()
     int_distance = int('157C',16)
     insert_data(int_distance,current_time)
+    from .socket import sensor_data
+    sensor_data({
+        'value': int_distance
+    })
     return "success"
 
 def test_read_data():
