@@ -64,33 +64,6 @@ def connect():
     picture_url_plate = operating_stations.get('picture_url_plate', 'https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
     picture_url_request = operating_stations.get('picture_url_request','https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
 
-    ''' time = request.form.get['time']
-    truck_id = request.form.get['operating_stations.truck_id']
-    box_length = request.form.get['operating_stations.box_length']
-    box_width = request.form.get['operating_stations.box_width']
-    box_height = request.form.get['operating_stations.box_height']
-    distance_0 = request.form.get['operating_stations.distance_0']
-    distance_1 = request.form.get['operating_stations.distance_1']
-    distance_2 = request.form.get['operating_stations.distance_2']
-    truck_load = request.form.get['operating_stations.truck_load']
-    load_current = request.form.get['operating_stations.load_current']
-    truck_weight_in = request.form.get['operating_stations.truck_weight_in']
-    truck_weight_out = request.form.get['operating_stations.truck_weight_out']
-    goads_type = request.form.get['operating_stations.goads_type']
-    store_id = request.form.get['operating_stations.store_id']
-    loader_id = request.form.get['operating_stations.loader_id']
-    flag_operate = request.form.get['operating_stations.flag_operate']
-    picture_url_plate = request.form.get['operating_stations.picture_url_plate']
-    picture_url_request = request.form.get['operating_stations.picture_url_request']
-    work_total = request.form.get['operating_stations.work_total']
-    weight_list = request.form.get['operating_stations.weight_list']
-    weight_status = request.form.get['operating_stations.weight_status']
-    weight_reality = request.form.get['operating_stations.weight_reality']
-    flag_load = request.form.get['operating_stations.flag_load']
-    height_load = request.form.get['operating_stations.height_load']
-    work_flag = request.form.get['operating_stations.work_flag']
-    plc_work = request.form.get['operating_stations.plc_work']'''
-
 
     if data_type == 0:
         # TODO: 接收到客户端请求，计算并发送装车策略

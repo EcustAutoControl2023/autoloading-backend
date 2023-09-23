@@ -15,11 +15,14 @@ from .app import(
 )
 from .sensor import(
     test_save_data,
-    test_read_data
+    test_read_data,
+    start,
+    stop,
 )
 from .socket import(
     socketio
 )
+
 
 
 def init_app(app:Flask):
@@ -32,3 +35,5 @@ def init_app(app:Flask):
     app.add_url_rule('/clear_session', view_func=clear_session,endpoint='clear_session', methods=['GET'])
     app.add_url_rule('/test_save_data', view_func=test_save_data,endpoint='test_save_data', methods=['GET'])
     app.add_url_rule('/test_read_data', view_func=test_read_data,endpoint='test_read_data', methods=['GET'])
+    app.add_url_rule('/start', endpoint='start', view_func=start)
+    app.add_url_rule('/stop', endpoint='stop', view_func=stop)
