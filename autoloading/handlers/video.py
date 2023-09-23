@@ -1,9 +1,8 @@
 from flask import Response
 import cv2
 
+
 def generate_frames():
-    # video = 'rtsp://admin:12345678@10.103.155.112:8554/live'
-    # video = 'rtsp://admin:12345678@10.103.155.112:8554/live'
     # 主码流
     # video = "rtsp://admin:1234567a@192.168.100.2:554/h264/ch1/main/av_stream"
     # 子码流
@@ -24,6 +23,5 @@ def generate_frames():
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
-# @app.route('/video_feed')
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')

@@ -1,6 +1,7 @@
 from .base import db
 
 
+# 初始化数据表及属性
 class Sensor(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
