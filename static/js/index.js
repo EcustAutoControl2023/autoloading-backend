@@ -109,8 +109,7 @@ sensor_socket.on('sensor_data', (data)=>{
 
 $(function () {
     echart_3();
-
-
+    sensor_socket.emit('sensor_data_request', {data: 1});
     //点击跳转
     // $('.t_btn7').click(function(){
     //     window.location.href = "./page/index.html?id=7";

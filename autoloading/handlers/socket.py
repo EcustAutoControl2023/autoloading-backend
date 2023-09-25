@@ -1,6 +1,7 @@
 from flask import session
 from flask_socketio import SocketIO
-from ..config import TRUCK_CONFIRM
+from ..config import TRUCK_CONFIRM, MEASURE_START
+from .sensor import start
 
 socketio = SocketIO()
 
@@ -39,3 +40,11 @@ def center_popup_confirm(confirm):
 def sensor_data(data):
     global socketio
     socketio.emit('sensor_data', data)
+
+# 接受前端发送的传感器测量请求
+@socketio.on('sensor_data_request')
+def sensor_data_request(data):
+    global MEASURE_START
+    if not MEASURE_START:
+        start()
+        MEASURE_START = True

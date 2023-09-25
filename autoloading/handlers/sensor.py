@@ -1,41 +1,73 @@
 import datetime
 import socket,time
-import threading
-from flask import Flask, current_app, jsonify
 from autoloading.models import db
 from autoloading.models.sensor import Sensor
 
 server_ip=('192.168.100.8',8234)#相机的ip地址、端口号
 hex_data='0103200200012E0A'#发送给物位计的命令
 byte_data = bytes.fromhex(hex_data)
-s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+# TCP s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+# UDP
+s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 running = False
 int_distance = 0
 timer = None
 
 
 def read_per_second():#每秒读取一次物位计数据
+
     global int_distance
     global current_time
     global running
-    # s.connect(server_ip)
+    from .socket import sensor_data
+
+    # try 语句，防止连接失败
+    try:
+        s.connect(server_ip)
+    except Exception as e:
+        print(e)
+        s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+        s.connect(server_ip)
+
     while running:  
-        # s.sendall(byte_data)
-        # received_data = s.recv(1024)
-        hex_received_data = '010302157cb735'# received_data.hex() 
+        # 发送modbus指令，接受数据
+        s.sendall(byte_data)
+        received_data = s.recv(1024)
+        hex_received_data = received_data.hex() 
         current_time = datetime.datetime.now()
         hex_distance = hex_received_data[6:10]
         int_distance = int(hex_distance,16)
-        #print('distance:', int_distance,'mm')
         insert_data(int_distance,current_time)
-        from .socket import sensor_data
+        
         # 发送物位计数据到前端
         sensor_data({
             'value': int_distance
         })
-        #return int_distance
         time.sleep(1)
     s.close()
+
+# 将测量值和时间存储在数据库中
+def insert_data(int_distance,current_time):
+    sensor = Sensor(data=int_distance,time=current_time)
+    db.session.add(sensor)
+    db.session.commit()
+
+# 开启请求物位计数据
+def start():
+    global running
+    if not running:
+        running = True
+        read_per_second()
+    return '测量开始'
+
+# 停止请求物位计数据
+def stop():
+    global running
+    global s
+    running = False
+    s.close()
+    return '测量停止'
+
 
 # 存数据测试
 # def test_save_data():
@@ -65,25 +97,3 @@ def read_per_second():#每秒读取一次物位计数据
 #     }
     # return jsonify(ret)
 
-
-def insert_data(int_distance,current_time):#将测量值和时间存储在数据库中
-    sensor = Sensor(data=int_distance,time=current_time)
-    db.session.add(sensor)
-    db.session.commit()
-
-
-
-#@app.route("/start")
-def start():#按下开始测量按键，读取物位计数据
-    global running
-    if not running:
-        running = True
-        read_per_second()
-        # threading.Thread(target=read_per_second).start()
-    return '测量开始'
-
-#@app.route("/stop")
-def stop():#按下停止测量按键，停止读取物位计数据
-    global running
-    running = False
-    return '测量停止'
