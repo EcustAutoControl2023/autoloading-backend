@@ -124,7 +124,7 @@ function show()
                                     <div class="aform">\
 \
                                     <div class="form">\
-                                        <form style="line-height: 2;">\
+                                        <form method="post" action="/store" style="line-height: 2;">\
                                             <table>\
                                                 <tr>\
                                                     <td>\

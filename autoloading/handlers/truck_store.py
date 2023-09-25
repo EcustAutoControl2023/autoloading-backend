@@ -14,11 +14,16 @@ def truck_content():
     goods_type = request.form['category']
     store_id = request.form['warehousenumber']  
     loader_id = request.form['machine number']  
-    information = Traffic(time = current_time,
-                          truckload = truck_load,loadcurrent = load_current,
-                          truckweightin = truck_weight_in,truckweightout = truck_weight_out,
-                          goodstype = goods_type,storeid = store_id,loaderid = loader_id,
-                          )  
+    information = Traffic(
+        time = current_time, 
+        truckload = truck_load,
+        loadcurrent = load_current,
+        truckweightin = truck_weight_in,
+        truckweightout = truck_weight_out,
+        goodstype = goods_type,
+        storeid = store_id,
+        loadid = loader_id,
+    )  
     db.session.add(information)  
     db.session.commit()  
     return "内容已存储到数据库"  
