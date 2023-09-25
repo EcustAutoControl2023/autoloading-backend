@@ -18,10 +18,13 @@
     <script src="{{url_for('static',filename='js/echarts.min.js')}}"></script>
     <script src="{{url_for('static',filename='js/dataTool.js')}}"></script>
     <script src="{{url_for('static',filename='js/index.js')}}"></script>
+    <script src="{{url_for('static',filename='js/control status.js')}}"></script>
+    <script src="{{url_for('static',filename='js/loading status.py')}}"></script>
+
     <style>
         table,th,tr{
             border-collapse:collapse;
-            font-size: 13px;
+            font-size: 12px;
             height:30px
         }
         *{
@@ -74,8 +77,8 @@
             width: 100%;
         }
         .t{
-            font-size: 20px;
-            line-height: 1.5;
+            font-size: 15px;
+            line-height: 1.2;
         }
         .myprogress{
             height: 20px;
@@ -112,7 +115,7 @@
 <div class="data_content">
     <div class="data_main">
         <div class="main_left fl">
-            <div class="left_1 t_btn6" style="cursor: pointer;">
+            <div class="left_1" style="cursor: pointer;">
 	<!--左上边框-->
                 <div class="t_line_box">
                     <i class="t_l_line"></i> 
@@ -137,13 +140,13 @@
                   装车信息
                 </div>
                 <div class="t">
-                    <p>装车状态：未装车/正在装车</p><br/>
+                    <p id="loading status">装车状态：未装车/正在装车</p><br/>
                 </div>
                 <div class="t">
-                    <p>装车进度：</p><progress value="20" max="100" class="myprogress"></progress>
+                  <!--  <p id="loading progress">装车进度：</p><progress value="20" max="100" class="myprogress"></progress> -->
                 </div><br>
                 <div class="t">
-                    <p>控制器状态：未启动/已启动</p>
+                    <p id="control status">控制器状态：未启动/已启动</p>
                 </div>
                 <div id="chart_1" class="chart" style="width:100%;height: 280px;"></div>
             </div>
@@ -236,9 +239,10 @@
                         <th style ="color: white" align="center">车箱长度(m)</th>
                         <th style ="color: white" align="center">车箱宽度(m)</th>
                         <th style ="color: white" align="center">车箱高度(m)</th>
-                        <th style ="color: white" align="center">装卸点1偏距(cm)</th>
-                        <th style ="color: white" align="center">装卸点2偏距(cm)</th>
-                        <th style ="color: white" align="center">车辆确认</th>
+                        <th style ="color: white" align="center">单次装卸点距离(cm)</th>
+                        <th style ="color: white" align="center">装卸点1距离(cm)</th>
+                        <th style ="color: white" align="center">装卸点2距离(cm)</th>
+                        <th style ="color: white" align="center">车辆信息</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -247,6 +251,7 @@
                         <td style ="color: white" align="center">6.1</td>
                          <td style ="color:white" align="center">2.44</td>
                         <td style ="color: white" align="center">2.59</td>
+                        <td style ="color: white" align="center">1.1</td>
                         <td style ="color: white" align="center">10</td>
                         <td style ="color: white" align="center">5</td>
                         <td align="center"> <button class="btn" onclick="show()">信息录入</button></td>
@@ -256,6 +261,7 @@
                         <td style ="color: white" align="center">6.1</td>
                         <td style ="color: white" align="center">2.44</td>
                         <td style ="color: white" align="center">2.59</td>
+                        <td style ="color: white" align="center">1.1</td>
                         <td style ="color: white" align="center">10</td>
                         <td style ="color: white" align="center">5</td>
                         <td align="center"><button class="btn" onclick="show()">信息录入</button></td>
@@ -266,6 +272,7 @@
                         <td style ="color: white" align="center">6.1</td>
                         <td style ="color: white" align="center">2.44</td>
                         <td style ="color: white" align="center">2.59</td>
+                        <td style ="color: white" align="center">1.1</td>
                         <td style ="color: white" align="center">10</td>
                         <td style ="color: white" align="center">5</td>
                         <td align="center"> <button class="btn" onclick="show()">信息录入</button></td> 
@@ -275,6 +282,7 @@
                         <td style ="color: white" align="center">6.1</td>
                         <td style ="color: white" align="center">2.44</td>
                         <td style ="color: white" align="center">2.59</td>
+                        <td style ="color: white" align="center">1.1</td>
                         <td style ="color: white" align="center">10</td>
                         <td style ="color: white" align="center">5</td>
                         <td align="center"> <button class="btn" onclick="show()">信息录入</button></td> 
@@ -284,6 +292,7 @@
                         <td style ="color: white" align="center">6.1</td>
                         <td style ="color: white" align="center">2.44</td>
                         <td style ="color: white" align="center">2.59</td>
+                        <td style ="color: white" align="center">1.1</td>
                         <td style ="color: white" align="center">10</td>
                         <td style ="color: white" align="center">5</td>
                         <td align="center"> <button class="btn" onclick="show()">信息录入</button></td> 

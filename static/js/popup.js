@@ -128,10 +128,10 @@ function show()
                                             <table>\
                                                 <tr>\
                                                     <td>\
-                                                        <label class="form-label" for="name">车辆最大载重(t)：</label>\
+                                                        <label class="form-label" for="name">车辆最大载重(t):</label>\
                                                     </td>\
                                                     <td>\
-                                                        <label class="form-label" for="name"></label>本次装载量(t)：</label>\
+                                                        <label class="form-label" for="name"></label>本次装载量(t):</label>\
                                                     </td>\
                                                 </tr>\
                                                 <tr>\
@@ -145,10 +145,10 @@ function show()
                                                 </tr>\
                                                 <tr>\
                                                     <td>\
-                                                        <label class="form-label" for="name">进场车辆重量(t)：</label>\
+                                                        <label class="form-label" for="name">进场车辆重量(t):</label>\
                                                     </td>\
                                                     <td>\
-                                                        <label class="form-label" for="name">出场车辆重量(t)：</label>\
+                                                        <label class="form-label" for="name">出场车辆重量(t):</label>\
                                                     </td>\
                                                 </tr>\
                                                 <tr>\

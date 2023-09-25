@@ -1,6 +1,6 @@
 from .base import db
 from flask_migrate import Migrate
-
+from .sensor import Traffic
 from .sensor import Sensor
 
 migrate = None
