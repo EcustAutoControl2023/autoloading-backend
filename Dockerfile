@@ -2,6 +2,9 @@ FROM python:3.10
 
 ENV FLASK_APP="autoloading"
 
+# 修改时区
+ENV TZ Asia/Shanghai
+
 WORKDIR /usr/src/app
 
 COPY . .

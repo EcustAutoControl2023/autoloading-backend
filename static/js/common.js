@@ -12,8 +12,6 @@ $(function () {
     })
 
 
-
-
     $("#add_ipt").on("click",function () {
         $('#modal_add').modal();
     })
@@ -26,9 +24,6 @@ $(function () {
     $("#video_ipt").on("click",function () {
         $('#Modal').modal();
     })
-
-
-
 
 
 
