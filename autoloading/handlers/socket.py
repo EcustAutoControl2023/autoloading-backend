@@ -1,7 +1,9 @@
 from flask import session
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO,emit
 from ..config import TRUCK_CONFIRM, MEASURE_START
 from .sensor import start
+from autoloading.models.sensor import Traffic
+
 
 socketio = SocketIO()
 
@@ -48,3 +50,13 @@ def sensor_data_request(data):
     if not MEASURE_START:
         start()
         MEASURE_START = True
+
+
+# @socketio.on('databaseconnect')
+# def test_connect():
+#     emit('my_response',{'data':'Connected'})
+
+# @socketio.on('get_traffics')
+# def get_traffics():
+#     traffics1 = Traffic.query.all()
+#     emit('my_response',{'data':str(traffics1)})

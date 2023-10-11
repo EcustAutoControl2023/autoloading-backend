@@ -14,8 +14,8 @@ class Sensor(db.Model):
 class Traffic(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
-    time = db.Column(db.DateTime)
-    #truckid = db.Column(db.Integer)
+    time = db.Column(db.Integer)
+    truckid = db.Column(db.Integer)
     #boxlength = db.Column(db.Integer)
     #boxwidth = db.Column(db.Integer)
     #boxheight = db.Column(db.Integer)
@@ -28,7 +28,7 @@ class Traffic(db.Model):
     truckweightout = db.Column(db.Integer)
     goodstype = db.Column(db.Integer)
     storeid = db.Column(db.Integer)
-    loadid = db.Column(db.Integer)
+    loaderid = db.Column(db.Integer)
 
 
     

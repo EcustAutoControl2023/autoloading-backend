@@ -1,5 +1,6 @@
 from flask import redirect, render_template, request, session
 from ..config import ENV
+from autoloading.models.sensor import Traffic
 
 
 def index():
@@ -7,7 +8,9 @@ def index():
     iu = session.get('img_url', None)
     if sp and iu is not None:
         return render_template('index.html', show_popup=sp, img_url=iu)
-    return render_template('index.html')
+    traffics1 = Traffic.query.all()
+
+    return render_template('index.html',traffics=traffics1)
 
 def login():
     # 跳过登录界面
