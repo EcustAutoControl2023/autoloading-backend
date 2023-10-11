@@ -58,6 +58,7 @@ def connect():
     load_current = operating_stations.get('load_current')
     truck_weight_in = operating_stations.get('truck_weight_in') 
     truck_weight_out = operating_stations.get('truck_weight_out') 
+    truck_weight_out = 0 if (truck_weight_out is None) or (len(truck_weight_out) == 0) else truck_weight_out
     goods_type = operating_stations.get('goods_type') 
     store_id = operating_stations.get('store_id') 
     loader_id = operating_stations.get('loader_id') 
@@ -68,7 +69,16 @@ def connect():
     picture_url_request = operating_stations.get('picture_url_request','https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
 
 
-    insert_truck_content(req_time,truck_load,load_current,truck_id,truck_weight_in,truck_weight_out,goods_type,store_id,loader_id)#数据存储到数据库中
+    insert_truck_content(req_time,
+                        truck_id,  
+                        truck_load,
+                        load_current,
+                        truck_weight_in,
+                        truck_weight_out,
+                        goods_type,
+                        store_id,
+                        loader_id
+    ) #数据存储到数据库中
 
 
     if data_type == 0:
