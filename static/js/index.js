@@ -114,8 +114,8 @@ class Queue {
   
   
   $(function () {
-      echart_3();
-      sensor_socket.emit('sensor_data_request',{data:1});
+    echart_3();
+    sensor_socket.emit('sensor_data_request', {data: 1});
   
       //点击跳转
       // $('.t_btn7').click(function(){

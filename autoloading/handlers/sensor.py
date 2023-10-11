@@ -1,5 +1,7 @@
 import datetime
 import socket,time
+
+from flask import jsonify
 from autoloading.models import db
 from autoloading.models.sensor import Sensor
 
@@ -32,23 +34,20 @@ def read_per_second():#每秒读取一次物位计数据
 
     while running:  
         # 发送modbus指令，接受数据
-        s.sendall(byte_data1)
-        received_data = s.recv(1024)
-        hex_received_data = received_data.hex() #'010302157cb735'
-        if hex_received_data == '0103020000b844':
-            s.sendall(byte_data)
-            received_data = s.recv(1024)
-            hex_received_data = received_data.hex()
-            current_time = datetime.datetime.now()
-            hex_distance = hex_received_data[6:10]
-            int_distance = int(hex_distance,16)
-            insert_data(int_distance,current_time)
-            # 发送物位计数据到前端
-            sensor_data({
-                'value': int_distance
-            })
-            time.sleep(1)
-    s.close()
+        #s.sendall(byte_data)
+        # received_data = s.recv(1024)
+        hex_received_data = '010302157cb735'#received_data.hex() 
+        current_time = datetime.datetime.now()
+        hex_distance = hex_received_data[6:10]
+        int_distance = int(hex_distance,16)
+        insert_data(int_distance,current_time)
+        
+        # 发送物位计数据到前端
+        sensor_data({
+            'value': int_distance
+        })
+        time.sleep(1)
+    # s.close()
 
 # 将测量值和时间存储在数据库中
 def insert_data(int_distance,current_time):
