@@ -1,5 +1,6 @@
 alembic==1.11.3
 aniso8601==9.0.1
+apscheduler==3.10.4
 bidict==0.22.1
 blinker==1.6.2
 click==8.1.6

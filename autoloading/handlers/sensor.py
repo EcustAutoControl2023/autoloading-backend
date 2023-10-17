@@ -1,4 +1,5 @@
 import datetime
+import logging
 import socket,time
 
 from flask import jsonify
@@ -10,8 +11,8 @@ hex_data='0103200200012E0A'#发送给物位计的命令
 hex_data1 = '0103200700013E0B'
 byte_data = bytes.fromhex(hex_data)
 byte_data1 = bytes.fromhex(hex_data1)
-#s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)# TCP
-s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)# UDP
+# s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)# TCP
+# s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)# UDP
 running = False
 int_distance = 0
 timer = None
@@ -21,7 +22,8 @@ def read_per_second():#每秒读取一次物位计数据
 
     global int_distance
     global current_time
-    global running
+    global s
+    # global running
     from .socket import sensor_data
 
     # try 语句，防止连接失败
@@ -32,28 +34,30 @@ def read_per_second():#每秒读取一次物位计数据
         #s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
         #s.connect(server_ip)
 
-    while running:  
+    # while running:  
         # 发送modbus指令，接受数据
         #s.sendall(byte_data)
         # received_data = s.recv(1024)
-        hex_received_data = '010302157cb735'#received_data.hex() 
-        current_time = datetime.datetime.now()
-        hex_distance = hex_received_data[6:10]
-        int_distance = int(hex_distance,16)
-        insert_data(int_distance,current_time)
-        
-        # 发送物位计数据到前端
-        sensor_data({
-            'value': int_distance
-        })
-        time.sleep(1)
+    hex_received_data = '010302157cb735'#received_data.hex() 
+    current_time = datetime.datetime.now()
+    hex_distance = hex_received_data[6:10]
+    int_distance = int(hex_distance,16)
+    insert_data(int_distance,current_time)
+    
+    # 发送物位计数据到前端
+    sensor_data({
+        'value': int_distance
+    })
     # s.close()
 
 # 将测量值和时间存储在数据库中
 def insert_data(int_distance,current_time):
-    sensor = Sensor(data=int_distance,time=current_time)
-    db.session.add(sensor)
-    db.session.commit()
+    logging.debug('insert data')
+    # XXX:滤波，至少5个数据（线性变化，
+    if int_distance < 4200: # 确保存入有效数据
+        sensor = Sensor(data=int_distance,time=current_time)
+        db.session.add(sensor)
+        db.session.commit()
 
 
 
