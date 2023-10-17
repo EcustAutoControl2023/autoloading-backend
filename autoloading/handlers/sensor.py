@@ -52,7 +52,7 @@ def read_per_second():#每秒读取一次物位计数据
 
 # 将测量值和时间存储在数据库中
 def insert_data(int_distance,current_time):
-    logging.debug('insert data')
+    # logging.info('insert data')
     # XXX:滤波，至少5个数据（线性变化，
     if int_distance < 4200: # 确保存入有效数据
         sensor = Sensor(data=int_distance,time=current_time)

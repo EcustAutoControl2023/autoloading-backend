@@ -17,4 +17,12 @@ def setup_logging():
     handler.setFormatter(formatter)
 
     logging.getLogger().addHandler(handler)
-    logging.getLogger().setLevel("DEBUG")
+    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger('apscheduler.executors.default').setLevel(logging.WARNING)
+    logging.getLogger('apscheduler.scheduler').setLevel(logging.WARNING)
+    class NoRunningFilter(logging.Filter):
+        def filter(self, record):
+            return not record.msg.startswith('Running job')
+
+    my_filter = NoRunningFilter()
+    logging.getLogger("apscheduler.scheduler").addFilter(my_filter)

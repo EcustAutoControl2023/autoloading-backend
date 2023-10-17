@@ -32,7 +32,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 def sensor():
     from autoloading.handlers.sensor import read_per_second
     with app.app_context():
-        logging.debug('Scheduler is alive!')
+        # logging.debug('Scheduler is alive!')
         read_per_second()
 
 sched = BackgroundScheduler(daemon=True)

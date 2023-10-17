@@ -124,7 +124,7 @@ def connect():
         # TODO: 请求允许作业
 
         # XXX: 中控确认标志，默认不弹窗
-        truck_id_confirm = session.get('center_popup_confirm', True)
+        truck_id_confirm = session.get('center_popup_confirm', False)
 
         if not truck_id_confirm:
             # 弹出物料确认窗口
@@ -138,6 +138,8 @@ def connect():
             # 中控确认，允许作业
             allow_work_flag = 1 if truck_id_confirm else 0 #车牌号正确，允许作业；否则不允许
             allow_plc_work = 1 if truck_id_confirm else 0 #车牌号正确，启动PLC；否则停止
+            work_weight_status = 0 # XXX: ?
+            flag_load = 0 # XXX: ?
             # 获取开始送料时的时间
             user['loadstarttime'] = datetime.datetime.now()
             result = gen_return_data(
