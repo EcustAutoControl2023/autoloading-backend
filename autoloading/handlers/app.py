@@ -59,28 +59,18 @@ def connect():
     truck_load = operating_stations.get('truck_load') 
     load_current = operating_stations.get('load_current')
     truck_weight_in = operating_stations.get('truck_weight_in') 
-    truck_weight_out = operating_stations.get('truck_weight_out')
+    #truck_weight_out = operating_stations.get('truck_weight_out')
     truck_weight_out = 0 if (truck_weight_out is None) or (len(truck_weight_out) == 0) else truck_weight_out
     goods_type = operating_stations.get('goods_type') 
     store_id = operating_stations.get('store_id') 
     loader_id = operating_stations.get('loader_id') 
-    flag_operate = operating_stations.get('flag_operate') 
-    allow_work_flag = operating_stations.get('allow_work_flag') 
-    allow_plc_work = operating_stations.get('allow_plc_work') 
+    #flag_operate = operating_stations.get('flag_operate') 
+    #allow_work_flag = operating_stations.get('allow_work_flag') 
+    #allow_plc_work = operating_stations.get('allow_plc_work') 
     picture_url_plate = operating_stations.get('picture_url_plate', 'https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
-    picture_url_request = operating_stations.get('picture_url_request','https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
+    #picture_url_request = operating_stations.get('picture_url_request','https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
 
 
-    # insert_truck_content(req_time,
-    #                     truck_id,  
-    #                     truck_load,
-    #                     load_current,
-    #                     truck_weight_in,
-    #                     truck_weight_out,
-    #                     goods_type,
-    #                     store_id,
-    #                     loader_id
-    # ) #数据存储到数据库中
 
 
     if data_type == 0:
@@ -124,7 +114,7 @@ def connect():
         # TODO: 请求允许作业
 
         # XXX: 中控确认标志，默认不弹窗
-        truck_id_confirm = session.get('center_popup_confirm', False)
+        truck_id_confirm = session.get('center_popup_confirm', True)
 
         if not truck_id_confirm:
             # 弹出物料确认窗口
@@ -138,8 +128,6 @@ def connect():
             # 中控确认，允许作业
             allow_work_flag = 1 if truck_id_confirm else 0 #车牌号正确，允许作业；否则不允许
             allow_plc_work = 1 if truck_id_confirm else 0 #车牌号正确，启动PLC；否则停止
-            work_weight_status = 0 # XXX: ?
-            flag_load = 0 # XXX: ?
             # 获取开始送料时的时间
             user['loadstarttime'] = datetime.datetime.now()
             result = gen_return_data(
@@ -205,7 +193,7 @@ def connect():
                 allow_work_flag = 0
                 session['center_popup_confirm'] = False
 
-                data_stop_time = datetime.datetime.now() # 获取停止送料时的时间
+                #data_stop_time = datetime.datetime.now() # 获取停止送料时的时间
 
             result = gen_return_data(
                 store_id=store_id, 

@@ -18,10 +18,12 @@ from .sensor import(
     stop,
 )
 from .socket import(
-    socketio
+    socketio,
+
 )
 from .truck_store import(
-    insert_truck_content
+    insert_truck_content,
+    #update_data
 )
 
 
@@ -36,6 +38,8 @@ def init_app(app:Flask):
     app.add_url_rule('/index', endpoint='index', view_func=index)
     app.add_url_rule('/connect', endpoint='connect',view_func=connect, methods=['POST'])
     app.add_url_rule('/clear_session', view_func=clear_session,endpoint='clear_session', methods=['GET'])
-    app.add_url_rule('/start', endpoint='start', view_func=start)
-    app.add_url_rule('/stop', endpoint='stop', view_func=stop)
-    app.add_url_rule('/store', endpoint='truck_content', view_func=insert_truck_content,methods=['POST'])
+    #app.add_url_rule('/start', endpoint='start', view_func=start)
+    #app.add_url_rule('/stop', endpoint='stop', view_func=stop)
+    app.add_url_rule('/store', endpoint='insert_truck_content', view_func=insert_truck_content,methods=['POST'])
+    #app.add_url_rule('/update', endpoint='update_data', view_func=update_data,methods=['GET'])
+

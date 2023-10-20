@@ -1,8 +1,9 @@
-from flask import Flask, request  
+from flask import Flask, request,jsonify  
 from flask_sqlalchemy import SQLAlchemy  
 from autoloading.models import db
 from autoloading.models.sensor import Traffic
 import datetime
+
 
 
 def update_truck_content(truck_id, update_data):  
@@ -55,4 +56,22 @@ def insert_truck_content(req_time,
 )
     db.session.add(traffic)
     db.session.commit()
+    from .socket import traffic_data
+    traffic_data({
+        'truckid': truck_id,
+        'truckweightin': truck_weight_in,
+        'truckweightout': truck_weight_out,
+        'goodstype': goods_type,
+        'truckload': truck_load,
+        'loadcurrent': load_current,
+        'storeid': store_id,
+        'loaderid': loader_id,
+    })
   
+
+# def query_latest_data_from_database():
+#   # 查询数据库中最新的数据
+#   data = Traffic.query.all()
+#   # 将查询到的数据转换为字典列表
+#   data_dict = [{'id': car.id, 'name': car.name, 'price': car.price} for car in data]
+#   return data_dict
