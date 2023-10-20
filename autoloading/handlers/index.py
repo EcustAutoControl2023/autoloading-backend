@@ -8,9 +8,9 @@ def index():
     iu = session.get('img_url', None)
     if sp and iu is not None:
         return render_template('index.html', show_popup=sp, img_url=iu)
-    traffics1 = Traffic.query.all()
+    traffics = Traffic.query.all()
 
-    return render_template('index.html',traffics=traffics1)
+    return render_template('index.html',traffics=traffics)
 
 def login():
     # 跳过登录界面

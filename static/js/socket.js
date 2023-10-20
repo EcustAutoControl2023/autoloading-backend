@@ -20,10 +20,4 @@ traffic_socket.on('traffic_data', function(data) {
     row.append($('<td style ="color: white" align="center">').text(data['storeid']));
     row.append($('<td style ="color: white" align="center">').text(data['loaderid']));
     $('#car-data').append(row);
-    // $.each(data, function(key, value) {
-        // console.log(key);
-        // console.log(value);
-    //     $('#car-data').append('<tr><td>' + value['id'] + '</td><td>' + value['time'] + '</td><td>' + value['speed'] + '</td><td>' + value['location'] + '</td><td>' + value['status'] + '</td></tr>');
-    // }
-    // );
 });
