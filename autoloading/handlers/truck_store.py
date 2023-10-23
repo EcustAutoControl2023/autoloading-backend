@@ -7,6 +7,7 @@ import logging
 
 
 
+
 def update_truck_content(truck_id, update_data):  
     traffic = Traffic.query.filter_by(truck_id=truck_id).last()
     traffic.truck_weight_out = update_data['truck_weight_out']
@@ -58,7 +59,6 @@ def insert_truck_content(req_time,
     db.session.add(traffic)
     db.session.commit()
     from .socket import traffic_data
-    logging.debug('send traffic data to frontend')
     traffic_data({
         'truckid': truck_id,
         'truckweightin': truck_weight_in,
