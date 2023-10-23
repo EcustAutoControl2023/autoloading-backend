@@ -181,7 +181,13 @@ def connect():
 
             # XXX:数据库中读取最相关的数据，估算当前重量（根据装料时间
             load_level = Sensor.query.order_by(Sensor.id.desc()).first()
-            logging.debug(load_level)
+            load_level_data = None
+            if load_level is None:
+                logging.debug(load_level)
+                # FIXME: 第一个数据读取不到
+                load_level_data = 4440
+            else:
+                load_level_data = load_level.data
             
             # XXX:基准问题（箱体+轮子
             # 4440: 物位计的高度
@@ -221,10 +227,10 @@ def connect():
                 
 
 
-            if load_level.data > load_level_height0:
+            if load_level_data > load_level_height0:
                 work_weight_status = 1 # 正在执行 # 作业执行情况：0 未开始 1 正在执行 2 已完成 3 检测溢出被动完成
                 flag_load = 1 # 1  # 装料机状态：0 未装车 1 装车中 2 故障
-            elif load_level_height0 > load_level.data > load_level_limit:
+            elif load_level_height0 > load_level_data > load_level_limit:
                 # 结束送料时的时间
                 user['loadendtime'] = datetime.datetime.now()
                 # XXX:更新数据库
