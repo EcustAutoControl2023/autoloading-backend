@@ -23,6 +23,7 @@ user = dict()
 
 # 生成返回值
 def gen_return_data(
+        time,
         store_id: int=1,
         loader_id: int=20,
         operating_stations: dict={},
@@ -35,7 +36,7 @@ def gen_return_data(
     res_os.update(operating_stations)
     # 返回json格式
     return {
-        # "time": res_time,
+        "time": time,
         "store_id": store_id,
         "loader_id": loader_id,
         "operating_stations": res_os,
@@ -45,46 +46,48 @@ def gen_return_data(
 def connect():
     global TRUCK_CONFIRM
     data = request.get_json()
-    data_type = data.get('data_type')
-    req_time = data.get('time')
-    operating_stations = data.get('operating_stations')
-    job_id = operating_stations.get('job_id') 
-    truck_id = operating_stations.get('truck_id') 
-    box_length = operating_stations.get('box_length') 
-    box_width = operating_stations.get('box_width') 
-    box_height = operating_stations.get('box_height') 
-    distance_0 = operating_stations.get('distance_0') 
-    distance_1 = operating_stations.get('distance_1') 
-    distance_2 = operating_stations.get('distance_2')
-    truck_load = operating_stations.get('truck_load') 
-    load_current = operating_stations.get('load_current')
-    truck_weight_in = operating_stations.get('truck_weight_in') 
-    truck_weight_out = operating_stations.get('truck_weight_out')
+    data_type = data.get('data_type', None)
+    req_time = data.get('time', None)
+    operating_stations = data.get('operating_stations', None)
+    job_id = operating_stations.get('job_id', None)
+    truck_id = operating_stations.get('truck_id', None)
+    box_length = operating_stations.get('box_length', None)
+    box_width = operating_stations.get('box_width', None)
+    box_height = operating_stations.get('box_height', None)
+    distance_0 = operating_stations.get('distance_1', None)
+    distance_1 = operating_stations.get('distance_2', None)
+    distance_2 = operating_stations.get('distance_3', None)
+    truck_load = operating_stations.get('truck_load', None)
+    load_current = operating_stations.get('load_current', None)
+    truck_weight_in = operating_stations.get('truck_weight_in', None)
+    truck_weight_out = operating_stations.get('truck_weight_out', None)
     truck_weight_out = 0 if (truck_weight_out is None) or (len(truck_weight_out) == 0) else truck_weight_out
-    goods_type = operating_stations.get('goods_type') 
-    store_id = operating_stations.get('store_id') 
-    loader_id = operating_stations.get('loader_id') 
-    flag_operate = operating_stations.get('flag_operate') 
-    allow_work_flag = operating_stations.get('allow_work_flag') 
-    allow_plc_work = operating_stations.get('allow_plc_work') 
-    picture_url_plate = operating_stations.get('picture_url_plate', 'https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
-    picture_url_request = operating_stations.get('picture_url_request','https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
+    goods_type = operating_stations.get('goods_type', None)
+    store_id = operating_stations.get('store_id', None)
+    loader_id = operating_stations.get('loader_id', None)
+    #flag_operate = operating_stations.get('flag_operate', None )
+    #allow_work_flag = operating_stations.get('allow_work_flag', None )
+    #allow_plc_work = operating_stations.get('allow_plc_work', None)
+    picture_url_plate = operating_stations.get('picture_url_plate', 'https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png', None)
+    picture_url_request = operating_stations.get('picture_url_request','https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png', None)
+    breakdowncode = operating_stations.get('breakdowncode', None)
+    icps_differ = operating_stations.get("icps_differ", None)
+    #work_finish = operating_stations.get("work_finish", None)
 
-
-    # insert_truck_content(req_time,
-    #                     truck_id,  
-    #                     truck_load,
-    #                     load_current,
-    #                     truck_weight_in,
-    #                     truck_weight_out,
-    #                     goods_type,
-    #                     store_id,
-    #                     loader_id
-    # ) #数据存储到数据库中
-
+    # FIXME: 
+    work_weight_reality = 0
+    height_load = 0
+    allow_plc_work = 0
+    work_total = 0
+    work_weight_status = 0
+    flag_load = 0
+    allow_work_flag = 0
+    work_finish = 0
+    
 
     if data_type == 0:
         # TODO: 接收到客户端请求，计算并发送装车策略
+
 
         work_total = 1
         work_weight_list = [10,10]
@@ -108,14 +111,22 @@ def connect():
             load_time1=datetime.datetime.now(),
             load_time2=datetime.datetime.now()
         )
+        # TODO: 数据库 Triggers 只保留5万条数据
 
+        work_finish = 0 if (icps_differ is None) and (work_finish ==1) else work_finish# 如果引导策略反馈的 icps_differ 为空，且 work_finish=1，标识任务完成
+
+        user['icps_differ'] = icps_differ
         result = gen_return_data(
-            store_id=store_id, 
-            loader_id=loader_id,
+            time = req_time,
+            store_id = store_id, 
+            loader_id = loader_id,
             operating_stations={
-                "allow_work_flag": allow_work_flag,
-                "work_total": work_total,
-                "work_weight_list": work_weight_list,
+                # 'allow_work_flag' : allow_work_flag,
+                # "work_total": work_total,
+                # "work_weight_list": work_weight_list,
+                "truck_id" : truck_id,
+                "icps_differ" : icps_differ,
+
             })
         
 
@@ -124,7 +135,7 @@ def connect():
         # TODO: 请求允许作业
 
         # XXX: 中控确认标志，默认不弹窗
-        truck_id_confirm = session.get('center_popup_confirm', False)
+        truck_id_confirm = session.get('center_popup_confirm', True)
 
         if not truck_id_confirm:
             # 弹出物料确认窗口
@@ -138,8 +149,6 @@ def connect():
             # 中控确认，允许作业
             allow_work_flag = 1 if truck_id_confirm else 0 #车牌号正确，允许作业；否则不允许
             allow_plc_work = 1 if truck_id_confirm else 0 #车牌号正确，启动PLC；否则停止
-            work_weight_status = 0 # XXX: ?
-            flag_load = 0 # XXX: ?
             # 获取开始送料时的时间
             user['loadstarttime'] = datetime.datetime.now()
             result = gen_return_data(
@@ -158,7 +167,7 @@ def connect():
             allow_work_flag = 1 if truck_id_confirm else 0 #车牌号正确，允许作业；否则不允许
             allow_plc_work = 1 if truck_id_confirm else 0 #车牌号正确，启动PLC；否则停止
 
-        if allow_work_flag == 1:
+        # if allow_work_flag == 1:
             # 发送信号，控制系统开始送料、下料
             # TODO: 物位计数据读取和计算 以及判断任务是否完成
             # user = Traffic.query.filter_by(truckid = truck_id, loadcurrent = truck_load, goodstype = goods_type).first()
@@ -169,30 +178,59 @@ def connect():
             # time_consume = time2_obj - time1_obj
             #print(f"预计装料耗时{time_consume}秒")
 
-            # XXX:数据库中读取最新数据
+            # XXX:数据库中读取最相关的数据，估算当前重量（根据装料时间
             load_level = Sensor.query.order_by(Sensor.id.desc()).first()
             logging.debug(load_level)
             
             # XXX:基准问题（箱体+轮子
-            # 4400: 物位计的高度
-            # 1000：轮子高度
-            # 200： 裕度
-            load_level_limit = 4400 - 1000 - box_height*1000 + 200
-            # XXX:从数据库中查料高
-            load_level_height1 = 800
-            # XXX:确认limit和height1的大小关系
-            # XXX:确认是height1还是height2
-            if load_level.data > load_level_height1:
-                work_weight_status = 1
-                flag_load = 1
-            elif load_level_height1 > load_level.data > load_level_limit:
-                # 获取开始送料时的时间
+            # 4440: 物位计的高度
+            # 1300：轮子高度
+            load_level_limit = 4440 - 1300 - box_height*1000
+            # XXX:从数据库中查料高(三堆0，1，2)
+            load_level_height0 = 800
+            # XXX:确认limit和height0的大小关系
+            # XXX:确认装的是第几堆（根据装料点判断
+
+            # 0=1 
+            if user['icps_differ'] == distance_0:
+                # 看时间
+                duration = datetime.datetime.now() - user['loadstarttime'] 
+                logging.debug('duration: ', duration) # 确认是否为整形
+                if duration < 4 * 60: # 4分钟？
+                    # 继续装车，
+                    pass
+                else:
+                    pass
+                    # 根据料高判断（读取数据库中最近30个点，
+                    # 1. 保证数据走向平稳（后一个减前一个，29个abs(差值）小于100
+                    # 2. 往下走，最后一个数-第一个数大于150
+                    # XXX:测试一下  
+                    # 判断数据能用？
+                    # 根据料高判断   
+                    # esle 最多装7分钟       
+                    # 完成后判断变哪一种
+                    # 保险：错误数据的最大存储时间上限
+            elif user['icps_differ'] == distance_1 and distance_0 != distance_1:
+                # 三堆中的第二堆料
+                pass
+            elif user['icps_differ'] == distance_2 and distance_0 != distance_2:
+                # 两堆料或三堆
+                pass
+
+                
+
+
+            if load_level.data > load_level_height0:
+                work_weight_status = 1 # 正在执行 # 作业执行情况：0 未开始 1 正在执行 2 已完成 3 检测溢出被动完成
+                flag_load = 1 # 1  # 装料机状态：0 未装车 1 装车中 2 故障
+            elif load_level_height0 > load_level.data > load_level_limit:
+                # 结束送料时的时间
                 user['loadendtime'] = datetime.datetime.now()
                 # XXX:更新数据库
                 work_weight_status = 2 #0  #作业执行情况：0 未开始 1 正在执行 2 已完成 3 检测溢出被动完成
                 flag_load = 1 #0  # 装料机状态：0 未装车 1 装车中 2 故障
             else:
-                # 获取开始送料时的时间
+                # 结束送料时的时间
                 user['loadendtime'] = datetime.datetime.now()
                 # 第三种情况，大于limit
                 work_weight_status = 3 #0  #作业执行情况：0 未开始 1 正在执行 2 已完成 3 检测溢出被动完成
@@ -203,21 +241,32 @@ def connect():
                 flag_load = 0
                 allow_plc_work = 0
                 allow_work_flag = 0
+                work_finish = 0 # 任务未完成
                 session['center_popup_confirm'] = False
+                user = dict()
 
-                data_stop_time = datetime.datetime.now() # 获取停止送料时的时间
+                # data_stop_time = datetime.datetime.now() # 获取停止送料时的时间
+
+             # XXX:从数据库中查料高
+            load_level_height0 = 800
 
             result = gen_return_data(
-                store_id=store_id, 
-                loader_id=loader_id,
+                time = req_time,
+                store_id = store_id, 
+                loader_id = loader_id,
                 operating_stations={
-                    "work_total": 1,
-                    "work_weight_list": [10,10],
-                    "allow_work_flag": allow_work_flag,
-                    "allow_plc_work": allow_plc_work,
-                    "work_weight_status": work_weight_status,
-                    "flag_load": flag_load,
-            })
+                    "truck_id" : truck_id,
+                    "work_weight_status" : work_weight_status,
+                    "work-weight_reality" : work_weight_reality,
+                    #"work_total": 1,
+                    #"work_weight_list": [10,10],
+                    #"allow_work_flag": allow_work_flag,
+                    "flag_load" : flag_load,
+                    "height_load" : load_level_height0,
+                    "allow_plc_work" : allow_plc_work,
+                    "work_finish" : work_finish, # 定义不明确
+                }    
+            )
             # FIXME:数据存储到数据库中
             # insert_truck_content(
             #     req_time=req_time,
@@ -238,26 +287,44 @@ def connect():
             #     load_time2=user['loadendtime'], # FIXME: 第二次装车用时
             #     work_total=work_total
             # )
-        else :
-            # TODO: 中控拒绝，不允许作业
+        # else :
+        #     # TODO: 中控拒绝，不允许作业
 
-            result = gen_return_data(
-                store_id=store_id, 
-                loader_id=loader_id,
-                operating_stations={
-                    "allow_work_flag": allow_work_flag,
-                    "allow_plc_work": allow_plc_work,
-                })
+        #     result = gen_return_data(
+        #         store_id=store_id, 
+        #         loader_id=loader_id,
+        #         operating_stations={
+        #             "allow_work_flag": allow_work_flag,
+        #             "allow_plc_work": allow_plc_work,
+        #         })
+        # result = gen_return_data(
+        #     time = req_time,
+        #     store_id= store_id,
+        #     loader_id= loader_id,
+        #     operating_stations={
+        #         "truck_id" : truck_id,
+        #         "work_weight_status" : work_weight_status,
+        #         "work_weight_reality" : work_weight_reality,
+        #         "flag_load" : flg_load,
+        #         "height_load" : height_load,
+        #         "allow_plc_work" : allow_plc_work,
+        #         "work_finish" : work_finish
+
+        #     }
+        # )
 
     elif data_type == 2:
         # TODO: 计算出闸量,修正数据库记录（车牌最近一条数据
 
-        work_weight_reality = 8.9
+        #work_weight_reality = 8.9
+
         result = gen_return_data(
+            time = req_time,
             store_id=store_id,
             loader_id=loader_id,
             operating_stations={
-                "work_weight_reality": work_weight_reality,
+                "truck_id" : truck_id,
+                "work_total" : work_total,
             })
 
     elif data_type == 3:
@@ -267,18 +334,20 @@ def connect():
         # allow_plc_work = 1 if session['center_popup_confirm'] else 0
 
         result = gen_return_data(
+            time = req_time,
             store_id=store_id, 
             loader_id=loader_id,
             operating_stations={
                 "truck_id": truck_id,
                 # "work_total": work_total,
                 # "work_weight_list": work_weight_list,
-                # "work_weight_status": work_weight_status,
-                # "work_weight_reality": work_weight_reality,
-                # "flag_load": flag_load,
-                # "height_load": height_load,
-                "allow_work_flag": allow_work_flag,
+                "work_weight_status": work_weight_status,
+                "work_weight_reality": work_weight_reality,
+                "flag_load": flag_load,
+                "height_load": height_load,
+                #"allow_work_flag": allow_work_flag,
                 "allow_plc_work": allow_plc_work,
+                "work_finish" : work_finish,
             })
 
     elif data_type == 4:
@@ -294,10 +363,12 @@ def connect():
             truck_id_confirm = session['truck_id_popup_confirm']
 
         result = gen_return_data(
+            time = req_time,
             store_id=store_id, 
             loader_id=loader_id,
             operating_stations={
-                'truck_id': truck_id,
+                "truck_id" : truck_id,
+                "allow_work_flag" : allow_work_flag,
             })
 
 
