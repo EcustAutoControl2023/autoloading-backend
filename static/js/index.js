@@ -30,7 +30,7 @@ class Queue {
     isEmpty() {
       return this.items.length === 0;
     }
-  }
+}
   
   function echart_3() {
       // 基于准备好的dom，初始化echarts实例
@@ -103,23 +103,24 @@ class Queue {
   
   var sensor_socket = io('http://localhost:5000');
   
-  const show_num = 60;
-  var data_queue = new Queue(show_num);
+  const sensor_show_num = 60;
+  var data_queue = new Queue(sensor_show_num);
   
   sensor_socket.on('sensor_data', (data)=>{
       data_queue.push(data.value);
-      console.log(data_queue.toArray())
+    //   console.log(data_queue.toArray())
       echart_3();
   });
   
   
   $(function () {
     echart_3();
+    let number = 6;
     // sensor_socket.emit('sensor_data_request', {data: 1});
-  
-      //点击跳转
-      // $('.t_btn7').click(function(){
-      //     window.location.href = "./page/index.html?id=7";
-      // });
+    sensor_socket.emit('traffic_data_request', {data: number});
+    //点击跳转
+    // $('.t_btn7').click(function(){
+    //     window.location.href = "./page/index.html?id=7";
+    // });
   });
   
