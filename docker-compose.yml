@@ -1,0 +1,29 @@
+version: "3.3"
+services:
+  nginx: 
+    build: ./nginx
+    image: masarity/autoloading-nginx:latest
+    restart: always
+    ports:
+      - "8000:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - host-networks
+    depends_on:
+      - flask
+  flask:
+    build: ./autoloading-backend
+    image: masarity/autoloading-backend:latest
+    restart: always
+    ports:
+      - 5000:5000
+    networks:
+      - host-networks
+    volumes:
+      - ./autoloading-backend:/usr/src/app/
+
+networks:
+  host-networks:
+    driver: bridge
