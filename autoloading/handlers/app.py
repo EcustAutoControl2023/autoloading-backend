@@ -83,7 +83,6 @@ def connect():
     flag_load = 0
     allow_work_flag = 0
     work_finish = 0
-    
 
     if data_type == 0:
         # TODO: 接收到客户端请求，计算并发送装车策略

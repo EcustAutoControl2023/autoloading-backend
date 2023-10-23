@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from autoloading.models import db
 from autoloading.models.sensor import Traffic
 import datetime
+import logging
+
 
 
 

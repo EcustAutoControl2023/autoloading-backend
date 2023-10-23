@@ -20,5 +20,4 @@ traffic_socket.on('traffic_data', function(data) {
     row.append($('<td  style ="color: white" align="center">').text(data.storeid));
     row.append($('<td  style ="color: white" align="center">').text(data.loaderid));
     $('#car-data').append(row);
-    
 });

@@ -97,5 +97,3 @@ def traffic_data(data):
 
 #         # 等待5秒
 #         time.sleep(5)
-
-

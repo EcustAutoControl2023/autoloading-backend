@@ -1,6 +1,7 @@
 import datetime
 import logging
 import socket,time
+import numpy as np
 
 from flask import jsonify
 from autoloading.models import db
@@ -104,3 +105,26 @@ def stop():
 #     }
 #     #return jsonify(ret)
 
+
+def check_level(car_edge_z, level_z, level_z_queue):
+    # 200: 裕度
+    level_z_limit = car_edge_z - 200
+    level_z_new = level_z_filter(level_z_queue, level_z, level_z_limit)
+
+def level_z_filter(level_z_queue, level_z, level_z_limit):
+    # 滤波器
+    level_z_queue.push(level_z)
+    level_z_array = np.array(level_z_queue)
+    # 车高小于2.8米
+    level_z_array_new = level_z_array[level_z_array[:] > 2800]
+    if len(level_z_array_new) > 5:
+        level_z_mean = np.mean(level_z_array_new)
+        if level_z_mean - 500 < level_z_array[-1] < level_z_mean + 500:
+            level_z_real = level_z_array[-1]
+        else:
+            level_z_real = level_z_mean
+    else:
+        stone_z_real = 0
+    if stone_z_real < level_z_limit:
+        stone_z_real = 0
+    return level_z_real
