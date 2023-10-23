@@ -45,6 +45,7 @@ def gen_return_data(
 #@app.route('/connect',methods=['POST'])
 def connect():
     global TRUCK_CONFIRM
+    global user
     data = request.get_json()
     data_type = data.get('data_type', None)
     req_time = data.get('time', None)
@@ -68,8 +69,8 @@ def connect():
     #flag_operate = operating_stations.get('flag_operate', None )
     #allow_work_flag = operating_stations.get('allow_work_flag', None )
     #allow_plc_work = operating_stations.get('allow_plc_work', None)
-    picture_url_plate = operating_stations.get('picture_url_plate', 'https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png', None)
-    picture_url_request = operating_stations.get('picture_url_request','https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png', None)
+    picture_url_plate = operating_stations.get('picture_url_plate', 'https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
+    picture_url_request = operating_stations.get('picture_url_request','https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
     breakdowncode = operating_stations.get('breakdowncode', None)
     icps_differ = operating_stations.get("icps_differ", None)
     #work_finish = operating_stations.get("work_finish", None)
