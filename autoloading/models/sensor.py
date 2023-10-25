@@ -1,3 +1,4 @@
+import logging
 from .base import db
 
 
@@ -32,6 +33,21 @@ class Traffic(db.Model):
     loadcurrent = db.Column(db.Float, nullable=False)
     worktotal = db.Column(db.Integer, nullable=False)
 
+    @staticmethod
+    def before_insert(target,value,initiator):
+        logging.debug('trigger before insert')
+        database_capacity = Traffic.query.order_by(Traffic.id.desc()).count()
+        logging.debug('database_capacity is %s',database_capacity) 
+        # 数据库容量大于10,000条时，删除最早的一条数据
+        if database_capacity >= 10000:
+            logging.debug('database is full')
+            # 删除最早的一条数据
+            traffic = Traffic.query.order_by(Traffic.id.asc()).first()
+            db.session.delete(traffic)
+            # db.session.commit()
+
+# 添加监听器
+# db.event.listen(Traffic, 'before_insert',Traffic.before_insert)
 
     
 
