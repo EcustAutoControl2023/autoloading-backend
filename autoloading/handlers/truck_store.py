@@ -68,10 +68,3 @@ def insert_truck_content(req_time,
         'loaderid': loader_id,
     })
   
-
-# def query_latest_data_from_database():
-#   # 查询数据库中最新的数据
-#   data = Traffic.query.all()
-#   # 将查询到的数据转换为字典列表
-#   data_dict = [{'id': car.id, 'name': car.name, 'price': car.price} for car in data]
-#   return data_dict
