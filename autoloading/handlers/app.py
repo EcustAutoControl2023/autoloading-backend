@@ -21,6 +21,7 @@ default_os:dict={
 
 user = dict()
 icps_differ = None
+time_record_flag = True
 
 
 # 生成返回值
@@ -55,7 +56,7 @@ def connect():
     req_time = data.get('time', None)
     operating_stations = data.get('operating_stations', None)
     job_id = operating_stations.get('job_id', None)
-    truck_id = operating_stations.get('truck_id', None)
+    user['truck_id'] = operating_stations.get('truck_id', None)
     box_length = operating_stations.get('box_length', None)
     box_width = operating_stations.get('box_width', None)
     box_height = operating_stations.get('box_height', None)
@@ -77,9 +78,9 @@ def connect():
     picture_url_request = operating_stations.get('picture_url_request','https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
     breakdowncode = operating_stations.get('breakdowncode', None)
 
-    work_weight_reality = None
-    height_load = None
-    allow_work_flag = None
+    user['work_weight_reality'] = None
+    user['height_load'] = None
+    user['allow_work_flag'] = None
     
 
     if data_type == 0:
@@ -87,31 +88,31 @@ def connect():
 
         # TODO: 接收到客户端请求，计算并发送装车策略
         if distance_0 != distance_1 != distance_2 :
-            work_total = 3
+            user['work_total'] = 3
             icps_differ = '0003' # 共装车三次，三个装车点各不相同
             user['icps_differ'] = distance_0
         elif distance_0 == distance_1 and distance_1 != distance_2 :
-            work_total = 2
+            user['work_total'] = 2
             icps_differ = '1102' # 共装车两次，前装车点和中装车点相同
             user['icps_differ'] = distance_0
         elif distance_1 == distance_2 and distance_1 != distance_0 :
-            work_total = 2
+            user['work_total'] = 2
             icps_differ = '0112' # 共装车两次，中装车点和后装车点相同
             user['icps_differ'] = distance_0
         elif distance_0 == distance_1 == distance_2 :
-            work_total = 1
+            user['work_total'] = 1
             icps_differ = '1111' # 共装车一次，三个装车点相同
             user['icps_differ'] = distance_0
         else:
-            work_total = 0
+            user['work_total'] = 0
             icps_differ = None # 无装车策略
-            work_finish = 1
+            user['work_finish'] = 1
         
         logging.debug(f'icps_differ: {icps_differ}')
 
         insert_truck_content(
             req_time=req_time,
-            truck_id=truck_id,
+            truck_id=user['truck_id'],
             truck_load=truck_load,
             box_length=box_length,
             box_width=box_width,
@@ -122,38 +123,36 @@ def connect():
             store_id=store_id,
             loader_id=loader_id,
             load_current=load_current,
-            work_total=work_total,
+            work_total=user['work_total'],
             load_level_height1=0,
             load_level_height2=0,
             load_time1=datetime.datetime.now(),
             load_time2=datetime.datetime.now()
         )
-        # TODO: 数据库 Triggers 只保留5万条数据
 
-        work_finish = 0 if (icps_differ is None) and (work_finish ==1) else work_finish# 如果引导策略反馈的 icps_differ 为空，且 work_finish=1，标识任务完成
+        # 如果引导策略反馈的 icps_differ 为空，且 work_finish=1，标识任务完成
+        user['work_finish'] = 0 if (icps_differ is None) and (user.get('work_finish', 1) ==1) else user.get('work_finish', 0)
 
-        user['icps_differ'] = icps_differ
+        # user['icps_differ'] = icps_differ
         result = gen_return_data(
             time = req_time,
             store_id = store_id, 
             loader_id = loader_id,
             operating_stations={
 
-                "truck_id" : truck_id,
+                "truck_id" : user['truck_id'],
                 "icps_differ" : icps_differ,
 
             })
-        
-
 
     elif data_type == 1:
+        global time_record_flag
 
-        # TODO: 请求允许作业
-
+        if time_record_flag:
+            user['loadstarttime'] = datetime.datetime.now()
+            time_record_flag = False
         # XXX: 中控确认标志，默认不弹窗
-
         # truck_id_confirm = session.get('center_popup_confirm', True)
-
         # if not truck_id_confirm:
         #     # 弹出物料确认窗口
         #     from .socket import center_popup
@@ -216,13 +215,13 @@ def connect():
         # XXX:确认limit和height0的大小关系
         # XXX:确认装的是第几堆（根据装料点判断
 
-            # 前装车点装料控制程序
+        # 前装车点装料控制程序
         def load_control0(): 
             logging.debug('control0')
             if user['icps_differ'] == distance_0 : 
                 duration = datetime.datetime.now() - user['loadstarttime']
-                logging.debug('duration:', duration)
-                if duration < 4*60:
+                logging.debug(f'duration:{duration}, duration.total_seconds(): {duration.total_seconds()}')
+                if duration.total_seconds() < 4*60:
                     user['allow_plc_work'] = 1
                     user['flag_load'] = 1
                     user['work_weight_status'] = 1
@@ -235,7 +234,7 @@ def connect():
                     # 如果当前料高未超过限制，且装料时间小于7分钟，继续装料
                     if load_height.value > load_level_limit:
                         load_duration = datetime.datetime.now() - user['loadstarttime']
-                        if load_duration < 7*60 :
+                        if load_duration.total_seconds() < 7*60 :
                             user['allow_plc_work'] = 1
                             user['flag_load'] = 1
                             user['work_weight_status'] = 1
@@ -274,8 +273,9 @@ def connect():
 
             # 后装车点装料控制程序
         def load_control2():
+            global time_record_flag
             logging.debug('control2')
-            if user['icps_differ'] == distance_2 : 
+            if user['icps_differ'] == distance_2 or user['icps_differ'] == distance_1: 
                 load_height = Sensor.query.order_by(Sensor.id.desc()).first()
                 if load_height.value > load_level_limit:
                     user['allow_plc_work'] = 1
@@ -287,10 +287,10 @@ def connect():
                     user['flag_load'] = 0
                     user['work_weight_status'] = 2
                     user['work_finish'] = 1                   
+                    time_record_flag = True
 
 
-
-
+        logging.debug(f'user[icps_differ]: {user["icps_differ"]}')
         if icps_differ == '0003': # 装料三次的控制程序
             if user['icps_differ'] == distance_0 :
                 load_control0()
@@ -314,23 +314,24 @@ def connect():
                 load_control2()
 
 
-
         elif icps_differ == '1111': # 装料一次的控制程序
             if user['icps_differ'] == distance_0 :
                 load_control0()
             if user['icps_differ'] == distance_1 :
-                work_finish = 1
+                user['work_finish'] = 1
+                time_record_flag = True
+
 
         result = gen_return_data(
             time = req_time,
             store_id = store_id, 
             loader_id = loader_id,
             operating_stations={
-                "truck_id" : truck_id,
+                "truck_id" : user['truck_id'],
                 "work_weight_status" : user['work_weight_status'],
-                "work-weight_reality" : work_weight_reality,     
+                "work-weight_reality" : user['work_weight_reality'],     
                 "flag_load" : user['flag_load'],
-                "height_load" : height_load,
+                "height_load" : user['height_load'],
                 "allow_plc_work" : user['allow_plc_work'],
                 "work_finish" : user['work_finish'], 
             }    
@@ -346,8 +347,8 @@ def connect():
             store_id=store_id,
             loader_id=loader_id,
             operating_stations={
-                "truck_id" : truck_id,
-                "work_total" : work_total,
+                "truck_id" : user['truck_id'],
+                "work_total" : user['work_total'],
             })
 
     elif data_type == 3:
@@ -361,11 +362,11 @@ def connect():
             store_id=store_id, 
             loader_id=loader_id,
             operating_stations={
-                "truck_id": truck_id,
+                "truck_id": user['truck_id'],
                 "work_weight_status": user['work_weight_status'],
-                "work_weight_reality": work_weight_reality,
+                "work_weight_reality": user['work_weight_reality'],
                 "flag_load": user['flag_load'],
-                "height_load": height_load,
+                "height_load": user['height_load'],
                 "allow_plc_work": user['allow_plc_work'],
                 "work_finish" : user['work_finish'],
             })
@@ -387,8 +388,8 @@ def connect():
             store_id=store_id, 
             loader_id=loader_id,
             operating_stations={
-                "truck_id" : truck_id,
-                "allow_work_flag" : allow_work_flag,
+                "truck_id" : user['truck_id'],
+                "allow_work_flag" : user['allow_work_flag'],
             })
 
 
