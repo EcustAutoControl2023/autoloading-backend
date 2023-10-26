@@ -32,13 +32,14 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import datetime
 
 def sensor():
-    from autoloading.handlers.sensor import read_per_second, start
+    from autoloading.handlers.sensor import read_per_second, read_per_second_simulation
     with app.app_context():
         logging.debug('Scheduler is alive!')
-        read_per_second()
+        # read_per_second()
+        read_per_second_simulation()
 
 # 只启动一次
-scheduler = BackgroundScheduler()
-# 添加只执行一次的任务，设置 run_date 为当前时间
-scheduler.add_job(sensor, 'date', run_date=datetime.datetime.now())
-scheduler.start()
+# scheduler = BackgroundScheduler()
+# # 添加只执行一次的任务，设置 run_date 为当前时间
+# scheduler.add_job(sensor, 'date', run_date=datetime.datetime.now())
+# scheduler.start()

@@ -12,13 +12,47 @@ byte_data = bytes.fromhex(hex_data)
 # s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)# TCP
 # s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)# UDP
 running = True
-int_distance = 0
 timer = None
+
+# 测试
+import pandas as pd
+# 从csv文件中读取数据
+sdata = pd.read_csv('sensor1020.csv')
+sdata_step = 0
+sdata_len = len(sdata) - 1
+
+
+def simulation_data():
+    global sdata
+    global sdata_len
+    global sdata_step
+    time_str = sdata.iloc[sdata_step]['time']
+    time_obj = datetime.datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S.%f')
+    int_distance = sdata.iloc[sdata_step]['data']
+    sdata_step += 1
+    return int_distance,time_obj
+
+def read_per_second_simulation():#每秒读取一次物位计数据
+        global running
+        from .socket import sensor_data
+    
+        while running:  
+            int_distance,current_time = simulation_data()
+            # logging.debug('current_time: %s',current_time)
+            # logging.debug('int_distance: %s',int_distance)
+            latest_data = Sensor.query.order_by(Sensor.id.desc()).first()
+            if (latest_data is None) or ((current_time - latest_data.time).total_seconds() > 1):
+                insert_data(int_distance,current_time)
+            
+            # 发送物位计数据到前端
+            sensor_data({
+                'value': int(int_distance)
+            })
+            time.sleep(1)
 
 
 def read_per_second():#每秒读取一次物位计数据
 
-    global int_distance
     global current_time
     global s
     global running
@@ -40,10 +74,10 @@ def read_per_second():#每秒读取一次物位计数据
             insert_data(int_distance,current_time)
         
         # 发送物位计数据到前端
-            sensor_data({
-                'value': int_distance
-            })
-            time.sleep(1)
+        sensor_data({
+            'value': int_distance
+        })
+        time.sleep(1)
         s.close()
 
 # 将测量值和时间存储在数据库中
@@ -59,15 +93,22 @@ def insert_data(int_distance,current_time):
 
 # 开启请求物位计数据
 def start():
-    read_per_second()
+    read_per_second_simulation()
     return '测量开始'
+
+def restart():
+    global running
+    global sdata_step
+    sdata_step = 0
+    running = False
+    running = True
+    read_per_second_simulation()
+    return '测量重新开始'
 
 # 停止请求物位计数据
 def stop():
     global running
-    global s
     running = False
-    s.close()
     return '测量停止'
 
 

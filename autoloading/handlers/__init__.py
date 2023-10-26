@@ -15,6 +15,7 @@ from .app import(
 )
 from .sensor import(
     start,
+    restart,
     stop,
 )
 from .socket import(
@@ -37,5 +38,6 @@ def init_app(app:Flask):
     app.add_url_rule('/connect', endpoint='connect',view_func=connect, methods=['POST'])
     app.add_url_rule('/clear_session', view_func=clear_session,endpoint='clear_session', methods=['GET'])
     app.add_url_rule('/start', endpoint='start', view_func=start)
+    app.add_url_rule('/restart', endpoint='restart', view_func=restart)
     app.add_url_rule('/stop', endpoint='stop', view_func=stop)
     app.add_url_rule('/store', endpoint='truck_content', view_func=insert_truck_content,methods=['POST'])
