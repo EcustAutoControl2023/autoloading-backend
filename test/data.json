@@ -1,0 +1,24 @@
+{
+    "data_type": 1,
+    "time": "2023/4/10 2:26:16",
+    "operating_stations": {
+        "icps_differ": "0003",
+        "truck_id": "闽qweq",
+        "box_length": 10.2,
+        "box_width": 5.6,
+        "box_height": 2.8,
+        "distance_0": 1.1,
+        "distance_1": 1.1,
+        "distance_2": 2.3,
+        "truck_load": 40.2,
+        "load_current": 20.6,
+        "truck_weight_in": 20,
+        "truck_weight_out": {},
+        "goods_type": "木片",
+        "store_id": 1,
+        "loader_id": 20,
+        "flag_operate": 1,
+        "picture_url_plate": "https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png",
+        "picture_url_request": "https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png"
+    }
+}

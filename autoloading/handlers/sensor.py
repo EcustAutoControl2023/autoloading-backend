@@ -17,7 +17,8 @@ timer = None
 # 测试
 import pandas as pd
 # 从csv文件中读取数据
-sdata = pd.read_csv('sensor1020.csv')
+# sdata = pd.read_csv('sensor1020nod.csv')
+sdata = pd.read_csv('1020_1032.csv')
 sdata_step = 0
 sdata_len = len(sdata) - 1
 
@@ -30,7 +31,9 @@ def simulation_data():
     time_obj = datetime.datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S.%f')
     int_distance = sdata.iloc[sdata_step]['data']
     sdata_step += 1
-    return int_distance,time_obj
+    if sdata_step > sdata_len:
+        sdata_step = 0
+    return int(int_distance),time_obj
 
 def read_per_second_simulation():#每秒读取一次物位计数据
         global running
@@ -40,8 +43,11 @@ def read_per_second_simulation():#每秒读取一次物位计数据
             int_distance,current_time = simulation_data()
             # logging.debug('current_time: %s',current_time)
             # logging.debug('int_distance: %s',int_distance)
-            latest_data = Sensor.query.order_by(Sensor.id.desc()).first()
-            if (latest_data is None) or ((current_time - latest_data.time).total_seconds() > 1):
+            lastest_data = Sensor.query.order_by(Sensor.id.desc()).first()
+            if lastest_data is not None:
+                logging.debug(f'current_time: {current_time}')
+                logging.debug(f'lastest_data_time: {lastest_data.time}')
+            if (lastest_data is None) or ((current_time - lastest_data.time).total_seconds() > 1):
                 insert_data(int_distance,current_time)
             
             # 发送物位计数据到前端
@@ -61,16 +67,19 @@ def read_per_second():#每秒读取一次物位计数据
 
     while running:  
         # 发送modbus指令，接受数据
-        s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)# UDP
-        s.connect(server_ip)
-        s.sendto(byte_data)
+        # s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)# UDP
+        # s.setblocking(0)
+        # s.connect(server_ip)
+        # s.sendto(byte_data)
         received_data = s.recvfrom()
         hex_received_data = received_data.hex()  
         current_time = datetime.datetime.now()
         hex_distance = hex_received_data[6:10]
         int_distance = int(hex_distance,16)
-        latest_data = Sensor.query.order_by(Sensor.id.desc()).first()
-        if (latest_data is None) or ((current_time - latest_data.date).total_seconds > 1):
+        lastest_data = Sensor.query.order_by(Sensor.id.desc()).first()
+        logging.debug(f'current_time: {current_time}')
+        logging.debug(f'lastest_data_time: {lastest_data.time}')
+        if (lastest_data is None) or ((current_time - lastest_data.time).total_seconds() > 1):
             insert_data(int_distance,current_time)
         
         # 发送物位计数据到前端
@@ -78,11 +87,11 @@ def read_per_second():#每秒读取一次物位计数据
             'value': int_distance
         })
         time.sleep(1)
-        s.close()
+        # s.close()
 
 # 将测量值和时间存储在数据库中
 def insert_data(int_distance,current_time):
-    # logging.debug('insert data')
+    logging.debug('insert data')
     # XXX:滤波，至少5个数据（线性变化，
     if int_distance < 3500: # 确保存入有效数据
         sensor = Sensor(data=int_distance,time=current_time)
@@ -93,6 +102,8 @@ def insert_data(int_distance,current_time):
 
 # 开启请求物位计数据
 def start():
+    global running
+    running = True
     read_per_second_simulation()
     return '测量开始'
 
@@ -108,6 +119,8 @@ def restart():
 # 停止请求物位计数据
 def stop():
     global running
+    global sdata_step
+    sdata_step = 0
     running = False
     return '测量停止'
 

@@ -7,7 +7,7 @@ import requests
 
 truck1_type0 = {
     "data_type": 0,
-    "time": "2023/4/10 2:26:16",
+    "time": "2023/10/20 9:26:16",
     "operating_stations": {
         "job_id": "123456",
         "truck_id": "闽D123456",
@@ -151,7 +151,8 @@ truck3_type1 = {
 
 # 将策略写入文件
 
-with open('./test.txt', 'w', encoding='utf-8') as f:
+
+with open('./test_1020_1032.txt', 'w', encoding='utf-8') as f:
     url = 'http://127.0.0.1:8000/connect'
     r1 = requests.post(url, json=truck3_type0).json() # 获取装车策略
     f.write(str(r1))
@@ -160,7 +161,7 @@ with open('./test.txt', 'w', encoding='utf-8') as f:
 
     if r1 is not None:
         r2 = requests.post(url, json=truck3_type1).json() # 获取控制策略
-        f.write('\n 第一堆料装料！\n')
+        f.write('==============\n\n 第一堆料装料！\n\n=========')
         while r2['operating_stations']['allow_plc_work'] == 1: # 持续装料，等待第一堆料装料完毕
             r2 = requests.post(url, json=truck3_type1).json() 
             f.write(str(r2))
@@ -169,7 +170,7 @@ with open('./test.txt', 'w', encoding='utf-8') as f:
         f.write(str(r2))
         time.sleep(90) # 货车移动时间
         if r2['operating_stations']['work_finish'] == 0: # 如果装完一堆料以后还需要装料，则获取第二堆料的控制策略
-            f.write('\n 第二堆料装料！\n')
+            f.write('==============\n\n 第二堆料装料！\n\n=========')
             r3 = requests.post(url, json=truck3_type1).json()
             f.write(str(r3))
             while r3['operating_stations']['allow_plc_work'] == 1: # 等待第二堆料装料完毕
