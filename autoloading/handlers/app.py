@@ -31,10 +31,13 @@ def gen_return_data(
         loader_id: int=20,
         operating_stations: dict={},
     ):
+    # global default_os
     # 服务器返回时间
     # res_time = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
     # osi中缺失的值使用默认值填充
+    # res_os = default_os.copy()
     res_os = dict()
+    res_os.update(operating_stations)
     # 返回json格式
     return {
         "time": time,
@@ -51,16 +54,17 @@ def connect():
 
     data = request.get_json()
     data_type = data.get('data_type', None)
-    req_time = data.get('time', None)
+    # req_time = data.get('time', None)
+    req_time = datetime.datetime.now()
     operating_stations = data.get('operating_stations', None)
     job_id = operating_stations.get('job_id', None)
     user['truck_id'] = operating_stations.get('truck_id', None)
     box_length = operating_stations.get('box_length', None)
     box_width = operating_stations.get('box_width', None)
     box_height = operating_stations.get('box_height', None)
-    distance_0 = operating_stations.get('distance_0', None)
-    distance_1 = operating_stations.get('distance_1', None)
-    distance_2 = operating_stations.get('distance_2', None)
+    distance_0 = float(operating_stations.get('distance_0', None))
+    distance_1 = float(operating_stations.get('distance_1', None))
+    distance_2 = float(operating_stations.get('distance_2', None))
     truck_load = operating_stations.get('truck_load', None)
     load_current = operating_stations.get('load_current', None)
     truck_weight_in = operating_stations.get('truck_weight_in', None)
@@ -83,7 +87,9 @@ def connect():
 
     if data_type == 0:
 
-        if distance_0 != distance_1 != distance_2 :
+
+        # TODO: 接收到客户端请求，计算并发送装车策略
+        if (distance_0 != distance_1) and (distance_0 != distance_2) and (distance_1 != distance_2):
             user['work_total'] = 3
             icps_differ = '0003' # 共装车三次，三个装车点各不相同
             user['icps_differ'] = distance_0
@@ -147,50 +153,8 @@ def connect():
         if time_record_flag:
             user['loadstarttime'] = datetime.datetime.now()
             time_record_flag = False
-        # XXX: 中控确认标志，默认不弹窗
-        # truck_id_confirm = session.get('center_popup_confirm', True)
-        # if not truck_id_confirm:
-        #     # 弹出物料确认窗口
-        #     from .socket import center_popup
-        #     center_popup({'img_url': picture_url_request})
-        #     logging.info("等待确认弹窗")
-        #     session['center_popup_confirm'] = TRUCK_CONFIRM.get()
-        #     logging.info('完成确认')
-        #     truck_id_confirm = session['center_popup_confirm']
-        #     # XXX:补充（去数据库查找类似批次数据
-        #     # 中控确认，允许作业
-        #     allow_work_flag = 1 if truck_id_confirm else 0 #车牌号正确，允许作业；否则不允许
-        #     allow_plc_work = 1 if truck_id_confirm else 0 #车牌号正确，启动PLC；否则停止
-        #     # 获取开始送料时的时间
-        #     user['loadstarttime'] = datetime.datetime.now()
-        #     result = gen_return_data(
-        #         store_id=store_id, 
-        #         loader_id=loader_id,
-        #         operating_stations={
-        #             "work_total": 1,
-        #             "work_weight_list": [10,10],
-        #             "allow_work_flag": allow_work_flag,
-        #             "allow_plc_work": allow_plc_work,
-        #             "work_weight_status": work_weight_status,
-        #             "flag_load": flag_load,
-        #         })
-        #     return jsonify(result)
-        # else:
-        #     allow_work_flag = 1 if truck_id_confirm else 0 #车牌号正确，允许作业；否则不允许
-        #     allow_plc_work = 1 if truck_id_confirm else 0 #车牌号正确，启动PLC；否则停止
 
         logging.debug(f'icps_differ: {icps_differ}')
-
-        #if allow_work_flag == 1:
-            # 发送信号，控制系统开始送料、下料
-            # TODO: 物位计数据读取和计算 以及判断任务是否完成
-            # user = Traffic.query.filter_by(truckid = truck_id, loadcurrent = truck_load, goodstype = goods_type).first()
-            # time1 = user.loadstarttime
-            # time2 = user.loadstoptime
-            # time1_obj = datetime.strptime(user[],'%Y-%m-%d %H:%M:%S')
-            # time2_obj = datetime.strptime(time2,'%Y-%m-%d %H:%M:%S')
-            # time_consume = time2_obj - time1_obj
-            #print(f"预计装料耗时{time_consume}秒")
 
         # XXX:数据库中读取最相关的数据，估算当前重量（根据装料时间
         load_level = Sensor.query.order_by(Sensor.id.desc()).first()
@@ -214,6 +178,7 @@ def connect():
         # 前装车点装料控制程序
         def load_control0(): 
             logging.debug('control0')
+            logging.debug(f'control0 -> user[icps_differ]: {user["icps_differ"]}')
             if user['icps_differ'] == distance_0 : 
                 duration = datetime.datetime.now() - user['loadstarttime']
                 logging.debug(f'duration:{duration}, duration.total_seconds(): {duration.total_seconds()}')
@@ -237,7 +202,7 @@ def connect():
                         user['work_finish'] = 0
                         user['icps_differ'] = distance_1 if distance_0 != distance_1 else distance_2
                     # 如果当前料高未超过限制，且装料时间小于7分钟，继续装料
-                    elif load_height.data > load_level_limit:
+                    elif float(int(load_height.data)) > load_level_limit:
                         load_duration = datetime.datetime.now() - user['loadstarttime']
                         if load_duration.total_seconds() < 7*60 :
                             user['allow_plc_work'] = 1
@@ -249,18 +214,19 @@ def connect():
                             user['flag_load'] = 0
                             user['work_weight_status'] = 1
                             user['work_finish'] = 0
-                            user['icps_differ']  = distance_1 if distance_0 != distance_1 else distance_2
+                            user['icps_differ'] = distance_1 if distance_0 != distance_1 else distance_2
                     else:
                         user['allow_plc_work'] = 0
                         user['flag_load'] = 0
                         user['work_weight_status'] = 1
                         user['work_finish'] = 0
-                        user['icps_differ']  = distance_1 if distance_0 != distance_1 else distance_2
+                        user['icps_differ'] = distance_1 if distance_0 != distance_1 else distance_2
 
 
         # 中装车点装料控制程序
         def load_control1():
             logging.debug('control1')
+            logging.debug(f'control1 -> user[icps_differ]: {user["icps_differ"]}')
             if user['icps_differ'] == distance_1 :   
                 load_height = Sensor.query.order_by(Sensor.id.desc()).first()
                 if load_height.data > load_level_limit:
@@ -280,6 +246,7 @@ def connect():
         def load_control2():
             global time_record_flag
             logging.debug('control2')
+            logging.debug(f'control2 -> user[icps_differ]: {user["icps_differ"]}')
             if user['icps_differ'] == distance_2 or user['icps_differ'] == distance_1: 
                 load_height = Sensor.query.order_by(Sensor.id.desc()).first()
                 if load_height.data > load_level_limit:
@@ -308,7 +275,8 @@ def connect():
         elif icps_differ == '1102': # 装料两次的控制程序
             if user['icps_differ'] == distance_0 :
                 load_control0()
-            if user['icps_differ'] == distance_1 :
+            # if user['icps_differ'] == distance_1 :
+            if user['icps_differ'] == distance_2 :
                 load_control2()
 
 
@@ -327,8 +295,7 @@ def connect():
                 user['work_finish'] = 1
                 time_record_flag = True
         
-        # TODO: 更新数据库
-
+        # TODO:  更新数据库
 
         result = gen_return_data(
             time = req_time,
@@ -412,7 +379,6 @@ def clear_session(opt=['truck_id_popup_confirm', 'center_popup_confirm']):
     for key in opt:
         del session[key]
     return 'clear session success'
-
 
 def smooth(): # 判断数据趋势是否平滑
     # 再做一次滤波（四个数据）
