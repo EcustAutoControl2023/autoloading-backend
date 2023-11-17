@@ -91,11 +91,11 @@ def connect():
         # TODO: 接收到客户端请求，计算并发送装车策略
         if (distance_0 != distance_1) and (distance_0 != distance_2) and (distance_1 != distance_2):
             user['work_total'] = 3
-            icps_differ = '0003' # 共装车三次，三个装车点各不相同
+            icps_differ = '0123' # 共装车三次，三个装车点各不相同
             user['icps_differ'] = distance_0
         elif distance_0 == distance_1 and distance_1 != distance_2 :
             user['work_total'] = 2
-            icps_differ = '1102' # 共装车两次，前装车点和中装车点相同
+            icps_differ = '0012' # 共装车两次，前装车点和中装车点相同
             user['icps_differ'] = distance_0
         elif distance_1 == distance_2 and distance_1 != distance_0 :
             user['work_total'] = 2
@@ -103,7 +103,7 @@ def connect():
             user['icps_differ'] = distance_0
         elif distance_0 == distance_1 == distance_2 :
             user['work_total'] = 1
-            icps_differ = '1111' # 共装车一次，三个装车点相同
+            icps_differ = '0001' # 共装车一次，三个装车点相同
             user['icps_differ'] = distance_0
         else:
             user['work_total'] = 0
@@ -263,7 +263,7 @@ def connect():
 
 
         logging.debug(f'user[icps_differ]: {user["icps_differ"]}')
-        if icps_differ == '0003': # 装料三次的控制程序
+        if icps_differ == '0123': # 装料三次的控制程序
             if user['icps_differ'] == distance_0 :
                 load_control0()
             elif user['icps_differ'] == distance_1 :
@@ -272,7 +272,7 @@ def connect():
                 load_control2()
 
 
-        elif icps_differ == '1102': # 装料两次的控制程序
+        elif icps_differ == '0012': # 装料两次的控制程序
             if user['icps_differ'] == distance_0 :
                 load_control0()
             # if user['icps_differ'] == distance_1 :
@@ -287,7 +287,7 @@ def connect():
                 load_control2()
 
 
-        elif icps_differ == '1111': # 装料一次的控制程序
+        elif icps_differ == '0001': # 装料一次的控制程序
             if user['icps_differ'] == distance_0 :
                 load_control0()
             # if user['icps_differ'] == distance_1 :

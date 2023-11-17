@@ -39,7 +39,7 @@ class Traffic(db.Model):
         database_capacity = Traffic.query.order_by(Traffic.id.desc()).count()
         logging.debug('database_capacity is %s',database_capacity) 
         # 数据库容量大于10,000条时，删除最早的一条数据
-        if database_capacity >= 10000:
+        if database_capacity >= 100000:
             logging.debug('database is full')
             # 删除最早的一条数据
             traffic = Traffic.query.order_by(Traffic.id.asc()).first()

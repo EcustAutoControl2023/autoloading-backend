@@ -9,7 +9,7 @@ from autoloading.models.sensor import Sensor
 server_ip=('192.168.100.8',8234)#相机的ip地址、端口号
 hex_data='010320010001DE0A'#发送给物位计的命令
 byte_data = bytes.fromhex(hex_data)
-# s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)# TCP
+#s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)# TCP
 s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)# UDP
 s.setblocking(False)
 running = True
@@ -75,29 +75,3 @@ def stop():
     s.close()
     return '测量停止'
 
-
-# #存数据测试
-# def test_save_data():
-#     for i in range(1,100):
-#         current_time = datetime.datetime.now()
-#         int_distance = int('157c',16)
-#         insert_data(int_distance,current_time)
-#         from .socket import sensor_data
-#         sensor_data({
-#             'value': int_distance
-#         })
-
-#     return "success"
-
-# # 读数据测试
-# def test_read_data():
-#     # 拿到最近的一条数据
-#     sensor = Sensor.query.order_by(Sensor.id.desc()).first()
-#     ret = {
-#         'data': {
-#             'id': sensor.id,
-#             'distance': sensor.data,
-#             'time': sensor.time
-#         }
-#     }
-#     #return jsonify(ret)
