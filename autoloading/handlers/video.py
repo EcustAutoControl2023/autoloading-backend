@@ -1,3 +1,4 @@
+import logging
 from flask import Response
 import cv2
 
@@ -36,7 +37,7 @@ def generate_frames(i):
     try:
         capture = cv2.VideoCapture(video)
     except:
-        print('无法连接摄像头')
+        logging.debug('无法连接摄像头')
         capture = None
 
     if capture is None:

@@ -12,11 +12,11 @@ TRUCK_CONFIRM = Queue()
 MEASURE_START = False
 
 def setup_logging():
-    handler = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter("[%(asctime)s][PID:%(process)d][%(levelname)s][%(name)s] %(message)s")
-    handler.setFormatter(formatter)
+    # handler = logging.StreamHandler(sys.stdout)
+    # formatter = logging.Formatter("[%(asctime)s][PID:%(process)d][%(levelname)s][%(name)s] %(message)s")
+    # handler.setFormatter(formatter)
 
-    logging.getLogger().addHandler(handler)
+    # logging.getLogger().addHandler(handler)
     logging.getLogger().setLevel(logging.DEBUG)
     logging.getLogger('apscheduler.executors.default').setLevel(logging.WARNING)
     logging.getLogger('apscheduler.scheduler').setLevel(logging.WARNING)
