@@ -179,7 +179,7 @@ class LoadPoint:
             # XXX:确认装的是第几堆（根据装料点判断
 
             logging.debug(f'icps_differ: {self.icps_differ}')
-            if self.icps_differ_num == '1113': # 装料三次的控制程序
+            if self.icps_differ_num == '0123': # 装料三次的控制程序
                 if self.icps_differ == self.distance_0 :
                     self.load_control0()
                 elif self.icps_differ == self.distance_1 :
@@ -194,7 +194,7 @@ class LoadPoint:
                 if self.icps_differ == self.distance_2 :
                     self.load_control2()
 
-            elif self.icps_differ_num == '1002': # 装料两次的控制程序
+            elif self.icps_differ_num == '0112': # 装料两次的控制程序
                 if self.icps_differ == self.distance_0 :
                     self.load_control0()
                 elif self.icps_differ == self.distance_1 :    
