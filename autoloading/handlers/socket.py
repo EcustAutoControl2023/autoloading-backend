@@ -5,6 +5,7 @@ from ..config import TRUCK_CONFIRM, MEASURE_START
 from .sensor import start
 from autoloading.models.sensor import Traffic
 from flask import Flask, jsonify
+from autoloading.config import SHOW_TAB, LOADER
 
 
 
@@ -76,11 +77,32 @@ def traffic_data_history(data):
 # 接受前端发送的车辆数据请求，会有数量参数data['data']
 @socketio.on('traffic_data_request')
 def traffic_data_request(data):
-    traffics = Traffic.query.order_by(Traffic.id.desc()).limit(data['data']).all()
-    logging.debug(traffics)
+    global LOADER
+    logging.debug(f'#####traffic_data_request->data: { data }')
+    traffics = Traffic.query.filter_by(loaderid=LOADER.queue[0]).order_by(Traffic.id.desc()).limit(data['number']).all()
+    logging.debug(f'#####traffic_data_request->traffics: { traffics }')
     traffic_data_history(list(reversed(traffics)))
 
 # 向前端发送数据库最新数据
 def traffic_data(data):
     global socketio
-    socketio.emit('traffic_data', data)
+    global LOADER
+    if data['loaderid'] == LOADER.queue[0]:
+        socketio.emit('traffic_data', data)
+
+# 切换当前的tab
+@socketio.on('tab_switch')
+def tab_switch(data):
+    logging.debug(f'####tab_switch: { data }')
+
+    global SHOW_TAB
+    global LOADER
+    # 清空队列
+    while not SHOW_TAB.empty():
+        SHOW_TAB.get()
+    
+    while not LOADER.empty():
+        LOADER.get()
+
+    SHOW_TAB.put(data['sensor'])
+    LOADER.put(data['loader'])

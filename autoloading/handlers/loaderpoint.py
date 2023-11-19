@@ -1,25 +1,12 @@
 import datetime
 import logging
+import socket
 from autoloading.config import TRUCK_CONFIRM
 from flask import jsonify, session
 from autoloading.handlers.truck_store import insert_truck_content, update_truck_content
 from autoloading.models.sensor import Traffic, loader_num
 for i in range(loader_num):
     exec(f'from autoloading.models.sensor import Sensor{i+1}')
-
-# 返回默认值
-default_os:dict={
-    "truck_id": "闽D123456",     # 车牌号
-    "work_total": 2,             # 作业总次数
-    "work_weight_list": 0,       # 每次作业装料重量
-    "work_weight_status": [1,0],     # 作业执行情况 0 未开始 1 正在执行 2 已完成 3 检测溢出被动完成
-    "work_weight_reality": [8.9,0],    # 作业装料重量情况
-    "flag_load": 1,              # 装料机状态 0 未装车 1 装车中 2 故障
-    "height_load": 2,            # 料高（目前装料点）
-    "allow_work_flag": 1,        # 允许作业标志 1允许 0不允许
-    "allow_plc_work": 1,          # PLC启停控制 1启动 0停止
-    "time":"2023/4/10 2:26:16",
-}
 
 
 # 生成返回值
@@ -51,8 +38,14 @@ class LoadPoint:
     SensorList = list()
     for i in range(loader_num):
         exec(f'SensorList.append(Sensor{i+1})')
+    ServerList = [('192.168.100.8',8234) for i in range(loader_num)] #相机的ip地址、端口号
     def __init__(self, loader_id:int):
         self.Sensor = LoadPoint.SensorList[LoadPoint.loader_index_dict[loader_id]]
+        self.serverip = LoadPoint.ServerList[LoadPoint.loader_index_dict[loader_id]]
+        self.hex_data='010320010001DE0A'#发送给物位计的命令
+        self.byte_data = bytes.fromhex(self.hex_data)
+        self.s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)# UDP
+        self.s.setblocking(False)
         self.req_time = datetime.datetime.now()
         self.truck_id = ''
         self.truck_load = 0
@@ -401,3 +394,19 @@ class LoadPoint:
                 self.work_finish = 1                   
                 self.time_record_flag = True
 
+
+# 将每个装料点定义成一个类的实例
+load_point_dict = dict()
+
+def create_loader_points():
+    global load_point_dict
+    logging.debug(LoadPoint.loader_id_list)
+    load_point_list = [LoadPoint(i) for i in range(len(LoadPoint.loader_id_list))]
+    logging.debug(load_point_list)
+
+    # 生成字典
+    load_point_dict = dict(zip(LoadPoint.loader_id_list, load_point_list))
+    # logging.debug(load_point_dict)
+
+if len(load_point_dict) == 0:
+    create_loader_points()

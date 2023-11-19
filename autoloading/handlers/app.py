@@ -2,20 +2,7 @@ from flask import request,jsonify, session
 import datetime
 import logging
 from ..config import TRUCK_CONFIRM
-from .loaderpoint import LoadPoint
-
-# 将每个装料点定义成一个类的实例
-load_point_dict = dict()
-
-def create_loader_points():
-    global load_point_dict
-    logging.debug(LoadPoint.loader_id_list)
-    load_point_list = [LoadPoint(i) for i in range(len(LoadPoint.loader_id_list))]
-    logging.debug(load_point_list)
-
-    # 生成字典
-    load_point_dict = dict(zip(LoadPoint.loader_id_list, load_point_list))
-    # logging.debug(load_point_dict)
+from .loaderpoint import LoadPoint, load_point_dict
 
 
 #@app.route('/connect',methods=['POST'])
@@ -50,8 +37,6 @@ def connect():
     picture_url_request = operating_stations.get('picture_url_request','https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
     breakdowncode = operating_stations.get('breakdowncode', None)
 
-    if len(load_point_dict) == 0:
-        create_loader_points()
 
     return_data = load_point_dict.get(loader_id).load_control(
         req_time=req_time, data_type=data_type,

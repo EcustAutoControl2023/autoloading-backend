@@ -22,8 +22,11 @@ class SensorBase(db.Model):
         if database_capacity >= 10:
             # logging.debug('database is full')
             # 删除最早的一条数据
-            sensor = type(initiator).query.order_by(type(initiator).id.asc()).first()
-            db.session.delete(sensor)
+            ids_to_delete = type(initiator).query.order_by(type(initiator).id.desc()).offset(10).all()
+            for id in ids_to_delete:
+                # logging.debug(f'id is {id}')
+                # id.delete(synchronize_session=False)
+                db.session.delete(id)
             # db.session.commit()
 
 # 使用SensorBase创建20个数据表Sensor类（Sensor1~Sensor20)，并且可以用db.create_all()创建20个数据表

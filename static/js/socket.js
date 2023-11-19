@@ -32,6 +32,12 @@ function show_traffic_data() {
 traffic_socket.on('traffic_data_queue', function(data) {
     // console.log(data);
     // 遍历数据，添加到表格中
+    // 如果数据为空，则不添加
+    // console.log(data.length)
+
+    if (data.length == 0) {
+        return;
+    }
     for (let i = 0; i < data.length; i++) {
         // 将数据添加到队列中
         traffic_data_queue.push(data[i]);
