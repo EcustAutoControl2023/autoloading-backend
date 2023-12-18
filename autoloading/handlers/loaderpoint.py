@@ -42,7 +42,7 @@ class LoadPoint:
     def __init__(self, loader_id:int):
         self.Sensor = LoadPoint.SensorList[LoadPoint.loader_index_dict[loader_id]]
         self.serverip = LoadPoint.ServerList[LoadPoint.loader_index_dict[loader_id]]
-        self.hex_data='010320010001DE0A'#发送给物位计的命令
+        self.hex_data='01040A1100022216'#发送给物位计的命令
         self.byte_data = bytes.fromhex(self.hex_data)
         self.s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)# UDP
         self.s.setblocking(False)
@@ -157,7 +157,7 @@ class LoadPoint:
             load_level_data = None
             if load_level is None:
                 # FIXME: 第一个数据读取不到
-                load_level_data = 4440
+                load_level_data = 4040
             else:
                 load_level_data = load_level.data
             logging.debug(load_level_data)
@@ -165,7 +165,7 @@ class LoadPoint:
             # XXX:基准问题（箱体+轮子
             # 4440: 物位计的高度
             # 1300：轮子高度
-            load_level_limit = 4440 - 1300 - box_height*1000 + 60
+            load_level_limit = 4040 # 4440 - 1300 - box_height*1000 + 60
             # XXX:从数据库中查料高(三堆0，1，2)
             load_level_height0 = 800
             # XXX:确认limit和height0的大小关系
@@ -337,7 +337,7 @@ class LoadPoint:
                     self.work_finish = 0
                     self.icps_differ = self.distance_1 if self.distance_0 != self.distance_1 else self.distance_2
                 # 如果当前料高未超过限制，且装料时间小于7分钟，继续装料
-                elif float(int(load_height.data)) > self.load_level_limit:
+                elif float(int(load_height.data)) < self.load_level_limit:
                     load_duration = datetime.datetime.now() - self.load_start_time
                     if load_duration.total_seconds() < 7*60 :
                         self.allow_plc_work = 1
@@ -364,7 +364,7 @@ class LoadPoint:
         logging.debug(f'control1 -> icps_differ: {self.icps_differ}')
         if self.icps_differ == self.distance_1 :   
             load_height = self.Sensor.query.order_by(self.Sensor.id.desc()).first()
-            if load_height.data > self.load_level_limit:
+            if load_height.data < self.load_level_limit:
                 self.allow_plc_work = 1
                 self.flag_load = 1
                 self.work_weight_status = 1
@@ -382,7 +382,7 @@ class LoadPoint:
         logging.debug(f'control2 -> icps_differ: {self.icps_differ}')
         if self.icps_differ == self.distance_2 or self.icps_differ == self.distance_1: 
             load_height = self.Sensor.query.order_by(self.Sensor.id.desc()).first()
-            if load_height.data > self.load_level_limit:
+            if load_height.data < self.load_level_limit:
                 self.allow_plc_work = 1
                 self.flag_load = 1
                 self.work_weight_status = 1

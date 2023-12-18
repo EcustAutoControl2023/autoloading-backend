@@ -1,7 +1,7 @@
 import logging
 from .base import db
 
-loader_num = 3
+loader_num = 20
 # 初始化数据表及属性
 class SensorBase(db.Model):
     __abstract__ = True

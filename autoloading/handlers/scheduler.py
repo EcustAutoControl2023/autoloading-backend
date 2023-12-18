@@ -5,12 +5,12 @@ from flask import Flask
 from autoloading.handlers.loaderpoint import LoadPoint, load_point_dict
 
 def sensor(app, loadpoint:LoadPoint):
-    from autoloading.handlers.sensor import read_per_second, sread_per_second
+    from autoloading.handlers.sensor import read_per_second 
     with app.app_context():
         # logging.debug(f'开始接收装料点{loader_id}的传感器数据！')
         # read_per_second()
         # logging.debug(f'Sensor is {Sensor}')
-        sread_per_second(loadpoint)
+        read_per_second(loadpoint)
 
 def schedulers_start(app:Flask):
     # 只启动一次，并且是后台任务
