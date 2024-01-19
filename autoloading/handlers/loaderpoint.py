@@ -38,7 +38,11 @@ class LoadPoint:
     SensorList = list()
     for i in range(loader_num):
         exec(f'SensorList.append(Sensor{i+1})')
-    ServerList = [('192.168.100.8',8234) for i in range(loader_num)] #相机的ip地址、端口号
+    ServerList = [('172.16.175.59',8234),('172.16.175.65',8234),('172.16.175.71',8234),('172.16.175.77',8234),
+                  ('172.16.175.83',8234),('172.16.175.89',8234),('172.16.175.95',8234),('172.16.175.101',8234),
+                  ('172.16.175.107',8234),('172.16.175.113',8234),('172.16.175.119',8234),('172.16.175.125',8234),
+                  ('172.16.175.131',8234),('172.16.175.137',8234),('172.16.175.143',8234),('172.16.175.149',8234),
+                  ('172.16.175.155',8234),('172.16.175.161',8234),('172.16.175.167',8234),('172.16.175.173',8234)] #物位计的ip地址、端口号
     def __init__(self, loader_id:int):
         self.Sensor = LoadPoint.SensorList[LoadPoint.loader_index_dict[loader_id]]
         self.serverip = LoadPoint.ServerList[LoadPoint.loader_index_dict[loader_id]]
