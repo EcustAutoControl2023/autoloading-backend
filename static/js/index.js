@@ -116,6 +116,22 @@ class Queue {
   $(function () {
     echart_3();
     sensor_socket.emit('traffic_data_request', {number: traffic_show_number});
+    let url_name = window.location.pathname.split('/')[1];
+    //console.log(url_name);
+
+    let loader_id_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+
+    let sensor_tablename_list = ['sensor1', 'sensor2', 'sensor3', 'sendor4', 'sensor5', 'sensor6', 'sensor7', 'sensor8', 'sensor9', 'sensor10', 'sensor11', 'sensor12', 'sensor13', 'sensor14', 'sensor15', 'sensor16', 'sensor17', 'sensor18', 'sensor19', 'sensor20'];
+
+    // index 对应 sensor1, index1 对应 sensor2, 以此类推
+    let index_table = {
+    'index': 0, 'index1': 1, 'index2': 2, 'index3': 3, 'index4': 4,
+    'index5': 5, 'index6': 6, 'index7': 7, 'index8': 8, 'index9': 9,
+    'index10': 10, 'index11': 11, 'index12': 12, 'index13': 13, 'index14': 14,
+    'index15': 15, 'index16': 16, 'index17': 17, 'index18': 18, 'index19': 19
+    };
+    let index = index_table[url_name];
+    socket.emit('tab_switch', {'loader': loader_id_list[index], 'sensor': sensor_tablename_list[index]});    
     //点击跳转
     // $('.t_btn7').click(function(){
     //     window.location.href = "./page/index.html?id=7";
