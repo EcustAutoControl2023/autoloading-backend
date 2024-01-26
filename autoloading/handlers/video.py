@@ -81,6 +81,7 @@ def generate_frames(i):
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            
 
 def video_feed():
     return Response(generate_frames(0), mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -141,3 +142,112 @@ def video_feed18():
 
 def video_feed19():
     return Response(generate_frames(19), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+def generate_license_frames(i):
+
+    video_url = [
+        "rtsp://admin:1234567a@172.16.175.61:554/h265/ch1/sub/av_stream",#url_1 401南车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.67:554/h265/ch1/sub/av_stream",#url_2 402南车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.73:554/h265/ch1/sub/av_stream",#url_3 403南车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.79:554/h265/ch1/sub/av_stream",#url_4 401北车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.85:554/h265/ch1/sub/av_stream",#url_5 402北车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.91:554/h265/ch1/sub/av_stream",#url_6 403北车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.97:554/h265/ch1/sub/av_stream",#url_7 501南车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.103:554/h265/ch1/sub/av_stream",#url_8 502南车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.109:554/h265/ch1/sub/av_stream",#url_9 503南车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.115:554/h265/ch1/sub/av_stream",#url_10 501北车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.121:554/h265/ch1/sub/av_stream",#url_11 502北车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.127:554/h265/ch1/sub/av_stream",#url_12 503北车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.133:554/h265/ch1/sub/av_stream",#url_13 601南车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.139:554/h265/ch1/sub/av_stream",#url_14 602南车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.145:554/h265/ch1/sub/av_stream",#url_15 603南车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.151:554/h265/ch1/sub/av_stream",#url_16 604南车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.157:554/h265/ch1/sub/av_stream",#url_17 601北车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.163:554/h265/ch1/sub/av_stream",#url_18 602北车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.169:554/h265/ch1/sub/av_stream",#url_19 603北车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.175:554/h265/ch1/sub/av_stream",#url_20 604北车牌识别相机    
+    ]
+
+    video = video_url[i]
+
+    try:
+        capture = cv2.VideoCapture(video)
+    except:
+        logging.debug('无法连接摄像头')
+        capture = None
+
+    if capture is None:
+        while True:
+            yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    else:
+        while True:
+            success, img = capture.read()
+            if not success:
+                break
+            ret, buffer = cv2.imencode('.jpg', img)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+
+def license_video_feed():
+    return Response(generate_license_frames(0), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed1():
+    return Response(generate_license_frames(1), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed2():
+    return Response(generate_license_frames(2), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed3():
+    return Response(generate_license_frames(3), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed4():
+    return Response(generate_license_frames(4), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed5():
+    return Response(generate_license_frames(5), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed6():
+    return Response(generate_license_frames(6), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed7():
+    return Response(generate_license_frames(7), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed8():
+    return Response(generate_license_frames(8), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed9():
+    return Response(generate_license_frames(9), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed10():
+    return Response(generate_license_frames(10), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed11():
+    return Response(generate_license_frames(11), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed12():
+    return Response(generate_license_frames(12), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed13():
+    return Response(generate_license_frames(13), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed14():
+    return Response(generate_license_frames(14), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed15():
+    return Response(generate_license_frames(15), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed16():
+    return Response(generate_license_frames(16), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed17():
+    return Response(generate_license_frames(17), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed18():
+    return Response(generate_license_frames(18), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def license_video_feed19():
+    return Response(generate_license_frames(19), mimetype='multipart/x-mixed-replace; boundary=frame')

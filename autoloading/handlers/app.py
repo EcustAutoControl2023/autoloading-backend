@@ -1,7 +1,8 @@
-from flask import request, session
+from flask import request
 import datetime
 import logging
 from .loaderpoint import load_point_dict
+
 
 
 #@app.route('/connect',methods=['POST'])

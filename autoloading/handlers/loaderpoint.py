@@ -312,7 +312,7 @@ class LoadPoint:
         return is_smooth
 
     # 预估重量
-    def weight_estimate(time_difference): 
+    def weight_estimate(self, time_difference): 
 
         start_load_time = Traffic.query.filter_by(Traffic.truckid).first()
         stop_load_time = Traffic.query.filter_by(Traffic.truckid).first()
