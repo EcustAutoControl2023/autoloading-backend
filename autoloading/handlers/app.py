@@ -1,7 +1,8 @@
 from flask import request,jsonify, session
 import datetime
 import logging
-from .loaderpoint import load_point_dict
+from .loaderpoint import load_point_dict, create_loader_points
+
 
 #@app.route('/connect',methods=['POST'])
 def connect():
@@ -24,7 +25,7 @@ def connect():
     load_current = operating_stations.get('load_current', None)
     truck_weight_in = operating_stations.get('truck_weight_in', None)
     truck_weight_out = operating_stations.get('truck_weight_out', None)
-    truck_weight_out = 0 if (truck_weight_out is None) or (len(truck_weight_out) == 0) else truck_weight_out
+    truck_weight_out = 0 if (truck_weight_out is None) else truck_weight_out
     goods_type = operating_stations.get('goods_type', None)
     store_id = operating_stations.get('store_id', None)
     loader_id = operating_stations.get('loader_id', None)

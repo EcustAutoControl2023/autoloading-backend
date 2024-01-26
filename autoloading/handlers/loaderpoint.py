@@ -5,6 +5,7 @@ from autoloading.config import TRUCK_CONFIRM
 from flask import jsonify, session
 from autoloading.handlers.truck_store import insert_truck_content, update_truck_content
 from autoloading.models.sensor import Traffic, loader_num
+
 for i in range(loader_num):
     exec(f'from autoloading.models.sensor import Sensor{i+1}')
 
@@ -29,7 +30,7 @@ def gen_return_data(
 
 class LoadPoint:
     # XXX:定义装料点的id列表
-    loader_id_list = [i for i in range(loader_num)]
+    loader_id_list = [i+1 for i in range(loader_num)]
     # 定义装料点的index列表
     loader_index_list = [i for i in range(loader_num)]
     loader_index_dict = dict(zip(loader_id_list, loader_index_list))
@@ -45,7 +46,7 @@ class LoadPoint:
                   ('172.16.175.155',8234),('172.16.175.161',8234),('172.16.175.167',8234),('172.16.175.173',8234)] #物位计的ip地址、端口号
     def __init__(self, loader_id:int):
         self.Sensor = LoadPoint.SensorList[LoadPoint.loader_index_dict[loader_id]]
-        self.serverip = LoadPoint.ServerList[LoadPoint.loader_index_dict[loader_id]]
+        self.server_ip = LoadPoint.ServerList[LoadPoint.loader_index_dict[loader_id]]
         self.hex_data='01040A1100022216'#发送给物位计的命令
         self.byte_data = bytes.fromhex(self.hex_data)
         self.s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)# UDP
@@ -85,9 +86,9 @@ class LoadPoint:
         self.truck_load = truck_load
         self.store_id = store_id
         self.loader_id = loader_id
-        self.distance0 = distance0
-        self.distance1 = distance1
-        self.distance2 = distance2
+        self.distance_0 = distance0
+        self.distance_1 = distance1
+        self.distance_2 = distance2
 
         if self.data_type == 0:
 
@@ -96,15 +97,15 @@ class LoadPoint:
                 self.work_total = 3
                 self.icps_differ_num = '0123' # 共装车三次，三个装车点各不相同
                 self.icps_differ = self.distance_0
-            elif self.distance_0 == self.distance_1 and self.distance_1 != self.distance_2 :
+            elif (self.distance_0 == self.distance_1) and (self.distance_1 != self.distance_2) :
                 self.work_total = 2
                 self.icps_differ_num = '0012' # 共装车两次，前装车点和中装车点相同
                 self.icps_differ = self.distance_0
-            elif self.distance_1 == self.distance_2 and self.distance_1 != self.distance_0 :
+            elif (self.distance_1 == self.distance_2) and (self.distance_1 != self.distance_0) :
                 self.work_total = 2
                 self.icps_differ_num = '0112' # 共装车两次，中装车点和后装车点相同
                 self.icps_differ = self.distance_0
-            elif self.distance_0 == self.distance_1 == self.distance_2 :
+            elif (self.distance_0 == self.distance_1) and (self.distance_1== self.distance_2) :
                 self.work_total = 1
                 self.icps_differ_num = '0001' # 共装车一次，三个装车点相同
                 self.icps_differ = self.distance_0
@@ -303,17 +304,6 @@ class LoadPoint:
             logging.debug('数据存在波动,无法使用')
         return is_smooth
 
-    # 预估重量
-    def weight_estimate(time_difference): 
-
-        start_load_time = Traffic.query.filter_by(Traffic.truckid).first()
-        stop_load_time = Traffic.query.filter_by(Traffic.truckid).first()
-        all_weight = Traffic.query.filter_by(Traffic.truckid).first()
-        load_time = (start_load_time.loadtime1 - stop_load_time.loadtime2).total_seconds()
-        logging.debug(load_time)
-        per_second_weight = float(all_weight.loadcurrent) / load_time
-        current_load_weight = per_second_weight * time_difference
-        return current_load_weight
 
     def load_control0(self): 
 
@@ -405,12 +395,13 @@ load_point_dict = dict()
 def create_loader_points():
     global load_point_dict
     logging.debug(LoadPoint.loader_id_list)
-    load_point_list = [LoadPoint(i) for i in range(len(LoadPoint.loader_id_list))]
+    load_point_list = [LoadPoint(i) for i in LoadPoint.loader_id_list]
     logging.debug(load_point_list)
 
     # 生成字典
     load_point_dict = dict(zip(LoadPoint.loader_id_list, load_point_list))
-    # logging.debug(load_point_dict)
+    logging.debug(load_point_dict)
 
 if len(load_point_dict) == 0:
+    logging.debug("=======================")
     create_loader_points()

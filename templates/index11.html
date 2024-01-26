@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8">
@@ -91,7 +91,7 @@
  
         }
         .sxt img{
-            width: 80%;
+            width: 59%;
             height: 90%;
             z-index: 999;
         }
@@ -155,9 +155,6 @@
                 <div class="t">
                     <p id="loading status">装车状态：未装车/正在装车</p><br/>
                 </div>
-                <div class="t">
-                  <!--  <p id="loading progress">装车进度：</p><progress value="20" max="100" class="myprogress"></progress> -->
-                </div><br>
                 <div class="t">
                     <p id="control status">控制器状态：未启动/已启动</p>
                 </div>
@@ -310,7 +307,7 @@
                 </div>
                 <div class="video">
                     <video controls>
-                        <source src="{{url_for('static',filename='video/2023-08-16 10-47-19.mp4')}}" type="video/mp4">
+                        <img src="{{ url_for('license_video_feed11') }}">
                     </video>
                 </div>
             </div>
