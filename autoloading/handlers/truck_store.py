@@ -1,14 +1,42 @@
+import logging
+from flask import jsonify, request
+from sqlalchemy import false
 from autoloading.models import db
 from autoloading.models.sensor import Traffic
 import datetime
 
 
 # TODO: 实现功能：车辆信息更新
-def update_truck_content(truck_id, update_data):  
-    traffic = Traffic.query.filter_by(truck_id=truck_id).last()
-    traffic.truck_weight_out = update_data['truck_weight_out']
+def update_truck_content(truck_id, update_data:dict):
+    traffic = Traffic.query.filter_by(truckid=truck_id).order_by(Traffic.id.desc()).first()
+    # FIXME: 打印车辆数据
+    # logging.debug(traffic)
+    for key, value in update_data.items():
+        if 'truck_weight_out' == key:
+            traffic.truckweightout = value
+        elif 'load_level_height1' == key:
+            traffic.loadlevelheight1 = value
+        elif 'load_level_height2' == key:
+            traffic.loadlevelheight2 = value
+        elif 'load_time1' == key:
+            traffic.loadtime1 = value
+        elif 'load_time2' == key:
+            traffic.loadtime2 = value
+
     db.session.commit()
-  
+    from .socket import traffic_data
+    traffic_data({
+        'truckid': traffic.truckid,
+        'truckweightin': traffic.truckweightin,
+        'truckweightout': traffic.truckweightout,
+        'goodstype': traffic.goodstype,
+        'truckload': traffic.truckload,
+        'loadcurrent': traffic.loadcurrent,
+        'storeid': traffic.storeid,
+        'loaderid': traffic.loaderid,
+        'modified': True
+    })
+
 #@app.route('/store', methods=['POST'])  
 def insert_truck_content(req_time,
                          truck_id,  
@@ -18,14 +46,14 @@ def insert_truck_content(req_time,
                          box_width,
                          box_height,
                          truck_weight_in,
-                         truck_weight_out,
+                         truck_weight_out, # 需要更新
                          goods_type,
                          store_id,
                          loader_id,
-                         load_level_height1,
-                         load_level_height2,
-                         load_time1,
-                         load_time2,
+                         load_level_height1, # 需要更新
+                         load_level_height2, # 需要更新
+                         load_time1, # 需要更新
+                         load_time2, # 需要更新
                          work_total
                          ):  
     # load_level_height1: 物位计第一次装车高度
@@ -62,5 +90,15 @@ def insert_truck_content(req_time,
         'loadcurrent': load_current,
         'storeid': store_id,
         'loaderid': loader_id,
+        'modified': False
     })
-  
+
+#更新车辆数据函数测试
+#@app.route('/update', methods=['POST'])  
+def update():
+    data = request.get_json()
+
+    update_truck_content(data.get('truck_id'), data.get('update_data'))
+    
+    return jsonify("{'code': 'ok'}")
+

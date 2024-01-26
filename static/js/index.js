@@ -25,6 +25,13 @@ class Queue {
       }
       return this.items.shift();
     }
+
+    popRight() {
+      if (this.isEmpty()) {
+        return "Queue is empty";
+      }
+      return this.items.pop();
+    }
   
     // 判断队列是否为空
     isEmpty() {

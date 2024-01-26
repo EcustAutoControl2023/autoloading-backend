@@ -47,6 +47,10 @@ traffic_socket.on('traffic_data_queue', function(data) {
 
 
 traffic_socket.on('traffic_data', function(data) {
+    if (data.modified)
+    {
+        traffic_data_queue.popRight();
+    }
     // 将新的数据添加到队列中
     traffic_data_queue.push(data);
     // console.log(traffic_data_queue);

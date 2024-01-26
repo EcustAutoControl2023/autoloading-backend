@@ -58,11 +58,9 @@ from .socket import(
     socketio
 )
 
-from .truck_store import(
-    insert_truck_content
+from .truck_store import( 
+    update
 )
-
-
 
 
 # 集成路由
@@ -111,4 +109,4 @@ def init_app(app:Flask):
     app.add_url_rule('/index18', endpoint='index18', view_func=index18)
     app.add_url_rule('/index19', endpoint='index19', view_func=index19)
     app.add_url_rule('/connect', endpoint='connect',view_func=connect, methods=['POST'])
-    app.add_url_rule('/store', endpoint='truck_content', view_func=insert_truck_content,methods=['POST'])
+    app.add_url_rule('/update', endpoint='update',view_func=update, methods=['POST'])

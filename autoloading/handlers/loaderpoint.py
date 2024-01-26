@@ -50,15 +50,19 @@ class LoadPoint:
         self.byte_data = bytes.fromhex(self.hex_data)
         self.s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)# UDP
         self.s.setblocking(False)
-        self.req_time = datetime.datetime.now()
-        self.truck_id = ''
+        self.req_time   = datetime.datetime.now()
+        self.truck_id   = ''
         self.truck_load = 0
-        self.data_type = -1
-        self.store_id = 0
-        self.loader_id = 0
+        self.data_type  = -1
+        self.store_id   = 0
+        self.loader_id  = 0
+        self.box_length = 0
+        self.box_width  = 0
+        self.box_height = 0
         self.distance_0 = 0
         self.distance_1 = 0
         self.distance_2 = 0
+        self.load_current = 0
         self.icps_differ_num = None
         self.icps_differ = ''
         self.load_start_time = datetime.datetime.now()
@@ -79,15 +83,19 @@ class LoadPoint:
                      load_current, 
                      distance0, distance1, distance2,
                      picture_url_plate, picture_url_request):
-        self.req_time = req_time
-        self.data_type = data_type
-        self.truck_id = truck_id
-        self.truck_load = truck_load
-        self.store_id = store_id
-        self.loader_id = loader_id
-        self.distance_0 = distance0
-        self.distance_1 = distance1
-        self.distance_2 = distance2
+        self.req_time       = req_time
+        self.data_type      = data_type
+        self.truck_id       = truck_id
+        self.truck_load     = truck_load
+        self.store_id       = store_id
+        self.loader_id      = loader_id
+        self.box_length     = box_length
+        self.box_width      = box_width
+        self.box_height     = box_height
+        self.distance_0     = distance0
+        self.distance_1     = distance1
+        self.distance_2     = distance2
+        self.load_current   = load_current
 
         if self.data_type == 0:
 
@@ -119,15 +127,15 @@ class LoadPoint:
                 req_time=self.req_time,
                 truck_id=self.truck_id,
                 truck_load=self.truck_load,
-                box_length=box_length,
-                box_width=box_width,
-                box_height=box_height,
+                box_length=self.box_length,
+                box_width=self.box_width,
+                box_height=self.box_height,
                 truck_weight_in=truck_weight_in,
                 truck_weight_out=truck_weight_out,
                 goods_type=goods_type,
                 store_id=store_id,
                 loader_id=self.loader_id,
-                load_current=load_current,
+                load_current=self.load_current,
                 work_total=self.work_total,
                 load_level_height1=0,
                 load_level_height2=0,
