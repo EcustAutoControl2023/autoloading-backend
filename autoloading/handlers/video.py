@@ -170,17 +170,24 @@ def generate_license_frames(i):
     ]
 
     video = video_url[i]
+    capture = None
 
-    try:
-        capture = cv2.VideoCapture(video)
-    except:
-        logging.debug('无法连接摄像头')
-        capture = None
+    time_out = CAP_TIME_OUT
+    start = time.time()
+    cap_thread = videocapture_Thread(video)
+    cap_thread.daemon = True
+    cap_thread.start()
+    cap_thread.join(timeout=time_out)
+    logging.debug(f'车牌摄像头链接超时时间:{time.time() - start}')
+    capture = cap_thread.result
 
     if capture is None:
-        while True:
-            yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        logging.debug(f'装料点({LOADER}): 无法连接车牌摄像头')
+
+    if capture is None:
+        # while True:
+        yield (b'--frame\r\n'
+            b'Content-Type: image/jpeg\r\n\r\n'+ b'\r\n')
     else:
         while True:
             success, img = capture.read()

@@ -70,6 +70,7 @@ class Traffic(db.Model):
     loadtime1 = db.Column(db.DateTime, nullable=True)
     loadtime2 = db.Column(db.DateTime, nullable=True)
     loadcurrent = db.Column(db.Float, nullable=False)
+    loadestimate = db.Column(db.Float, nullable=True)
     worktotal = db.Column(db.Integer, nullable=False)
 
     @staticmethod
