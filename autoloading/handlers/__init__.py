@@ -22,9 +22,11 @@ from .index import (
     index18,
     index19,
 )
+
 from .dl import (
     dl
 )
+
 from .video import (
     video_feed,
     video_feed1,
@@ -47,17 +49,15 @@ from .video import (
     video_feed18,
     video_feed19,
 )
+
 from .app import(
     connect,
-    clear_session
 )
-from .sensor import(
-    start,
-    stop,
-)
+
 from .socket import(
     socketio
 )
+
 from .truck_store import(
     insert_truck_content
 )
@@ -111,7 +111,4 @@ def init_app(app:Flask):
     app.add_url_rule('/index18', endpoint='index18', view_func=index18)
     app.add_url_rule('/index19', endpoint='index19', view_func=index19)
     app.add_url_rule('/connect', endpoint='connect',view_func=connect, methods=['POST'])
-    app.add_url_rule('/clear_session', view_func=clear_session,endpoint='clear_session', methods=['GET'])
-    app.add_url_rule('/start', endpoint='start', view_func=start)
-    app.add_url_rule('/stop', endpoint='stop', view_func=stop)
     app.add_url_rule('/store', endpoint='truck_content', view_func=insert_truck_content,methods=['POST'])

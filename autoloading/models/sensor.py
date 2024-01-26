@@ -1,9 +1,14 @@
 import logging
 from .base import db
 
+# 装料口数量
 loader_num = 20
+
 # 初始化数据表及属性
 class SensorBase(db.Model):
+    '''
+    SensorDB
+    '''
     __abstract__ = True
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.Integer)
@@ -12,39 +17,41 @@ class SensorBase(db.Model):
 
     @staticmethod
     def before_insert(target,value,initiator):
+        # FIXME: 检查数据库trigger函数
         # logging.debug('trigger before insert')
         # logging.debug(f'target is {target}')
         # logging.debug(f'value is {value}')
         # logging.debug(f'initiator is {initiator}')
         database_capacity = type(initiator).query.order_by(type(initiator).id.desc()).count()
         # logging.debug('database_capacity is %s',database_capacity) 
+
         # 数据库容量大于10,000条时，删除最早的一条数据
         if database_capacity >= 100000:
+            # FIXME: 检查trigger函数是否触发
             # logging.debug('database is full')
             # 删除最早的一条数据
             ids_to_delete = type(initiator).query.order_by(type(initiator).id.desc()).offset(10).all()
             for id in ids_to_delete:
-                # logging.debug(f'id is {id}')
-                # id.delete(synchronize_session=False)
                 db.session.delete(id)
             # db.session.commit()
 
-# 使用SensorBase创建20个数据表Sensor类（Sensor1~Sensor20)，并且可以用db.create_all()创建20个数据表
+# 使用SensorBase创建20个数据表Sensor类（Sensor1~Sensor20)，用db.create_all()创建20个数据表
 def create_sensor_table_class():
     for i in range(1, loader_num+1):
         class_name = 'Sensor' + str(i)
         sensor_class = type(class_name, (SensorBase,), {
-            # 重写before_insert方法
             '__tablename__': 'sensor' + str(i)
             })
         globals()[sensor_class.__name__] = sensor_class
-        # 添加监听器
+        # 添加trigger
         exec(f'db.event.listen({sensor_class.__name__}, "before_insert",{sensor_class.__name__}.before_insert)')
-
 
 create_sensor_table_class()
 
 class Traffic(db.Model):
+    '''
+    TrafficDB
+    '''
     
     id = db.Column(db.Integer, primary_key=True)
     time = db.Column(db.String(20), nullable=False)
@@ -80,9 +87,4 @@ class Traffic(db.Model):
 
 # 添加监听器
 # db.event.listen(Traffic, 'before_insert',Traffic.before_insert)
-
-    
-
-
-
 

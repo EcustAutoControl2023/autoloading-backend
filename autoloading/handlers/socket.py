@@ -1,16 +1,12 @@
 import logging
 from flask import session
-from flask_socketio import SocketIO,emit
+from flask_socketio import SocketIO
 from ..config import TRUCK_CONFIRM, MEASURE_START
-from .sensor import start
 from autoloading.models.sensor import Traffic
-from flask import Flask, jsonify
 from autoloading.config import SHOW_TAB, LOADER
 
 
-
 socketio = SocketIO()
-
 
 @socketio.on('connect')
 def test_connect():
@@ -24,7 +20,6 @@ def test_disconnect():
 def truck_id_popup(data):
     global socketio
     socketio.emit('truck_id_popup', data)
-
 @socketio.on('truck_id_popup_confirm')
 def truck_id_popup_confirm(confirm):
     global TRUCK_CONFIRM
@@ -35,7 +30,6 @@ def truck_id_popup_confirm(confirm):
 def center_popup(data):
     global socketio
     socketio.emit('center_popup', data)
-
 @socketio.on('center_popup_confirm')
 def center_popup_confirm(confirm):
     global TRUCK_CONFIRM
@@ -46,15 +40,6 @@ def center_popup_confirm(confirm):
 def sensor_data(data):
     global socketio
     socketio.emit('sensor_data', data)
-
-# 接受前端发送的传感器测量请求
-@socketio.on('sensor_data_request')
-def sensor_data_request(data):
-    global MEASURE_START
-    if not MEASURE_START:
-        start()
-        MEASURE_START = True
-
 
 # 向前端发送最近n条车辆数据
 def traffic_data_history(data):
@@ -71,15 +56,19 @@ def traffic_data_history(data):
             'storeid': traffic_data.storeid,
             'loaderid': traffic_data.loaderid,
         })
+        # FIXME: 打印车辆数据列表
         # logging.debug(ret)
     socketio.emit('traffic_data_queue', ret)
 
-# 接受前端发送的车辆数据请求，会有数量参数data['data']
+# 接受前端发送的车辆数据请求
+# @data: data['data']取值为前端请求数据数量
 @socketio.on('traffic_data_request')
 def traffic_data_request(data):
     global LOADER
+    # FIXME: 打印前端发送的请求数据
     logging.debug(f'#####traffic_data_request->data: { data }')
     traffics = Traffic.query.filter_by(loaderid=LOADER.queue[0]).order_by(Traffic.id.desc()).limit(data['number']).all()
+    # FIXME: 打印后端返回的车辆数据
     logging.debug(f'#####traffic_data_request->traffics: { traffics }')
     traffic_data_history(list(reversed(traffics)))
 
@@ -93,10 +82,12 @@ def traffic_data(data):
 # 切换当前的tab
 @socketio.on('tab_switch')
 def tab_switch(data):
-    logging.debug(f'####tab_switch: { data }')
-
     global SHOW_TAB
     global LOADER
+
+    # FIXME: 打印当前选择的页面的数据表名
+    logging.debug(f'####tab_switch: { data }')
+
     # 清空队列
     while not SHOW_TAB.empty():
         SHOW_TAB.get()

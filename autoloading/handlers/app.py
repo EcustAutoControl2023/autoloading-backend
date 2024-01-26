@@ -1,7 +1,7 @@
-from flask import request,jsonify, session
+from flask import request, session
 import datetime
 import logging
-from .loaderpoint import load_point_dict, create_loader_points
+from .loaderpoint import load_point_dict
 
 
 #@app.route('/connect',methods=['POST'])
@@ -50,9 +50,3 @@ def connect():
 
     return return_data
 
-
-# 清除session，测试用
-def clear_session(opt=['truck_id_popup_confirm', 'center_popup_confirm']):
-    for key in opt:
-        del session[key]
-    return 'clear session success'

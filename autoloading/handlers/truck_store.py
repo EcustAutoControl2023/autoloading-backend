@@ -1,17 +1,13 @@
-from flask import Flask, request,jsonify  
-from flask_sqlalchemy import SQLAlchemy  
 from autoloading.models import db
 from autoloading.models.sensor import Traffic
 import datetime
 
 
-
+# TODO: 实现功能：车辆信息更新
 def update_truck_content(truck_id, update_data):  
     traffic = Traffic.query.filter_by(truck_id=truck_id).last()
     traffic.truck_weight_out = update_data['truck_weight_out']
     db.session.commit()
-  
-
   
 #@app.route('/store', methods=['POST'])  
 def insert_truck_content(req_time,

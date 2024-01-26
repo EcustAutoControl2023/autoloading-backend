@@ -2,6 +2,27 @@ import logging
 from flask import Response
 import cv2
 
+import threading, time
+from autoloading.config import LOADER, CAP_TIME_OUT
+
+
+# 减少摄像头连接不上超时等待问题
+class videocapture_Thread(threading.Thread):
+    def __init__(self, rtsp):
+        super(videocapture_Thread, self).__init__()
+        self.result = None
+        self.rtsp = rtsp
+
+    def run(self):
+        self.result = self.open_videocapture()
+
+    def open_videocapture(self):
+        cap = cv2.VideoCapture(self.rtsp)
+        if cap.isOpened():
+            return cap
+        else:
+            cap.release()
+            return None
 
 def generate_frames(i):
     # 主码流
@@ -33,16 +54,24 @@ def generate_frames(i):
 
     video = video_url[i]
 
-    try:
-        capture = cv2.VideoCapture(video)
-    except:
-        logging.debug('无法连接摄像头')
-        capture = None
+    capture = None
+
+    time_out = CAP_TIME_OUT
+    start = time.time()
+    cap_thread = videocapture_Thread(video)
+    cap_thread.daemon = True
+    cap_thread.start()
+    cap_thread.join(timeout=time_out)
+    logging.debug(f'摄像头链接超时时间:{time.time() - start}')
+    capture = cap_thread.result
 
     if capture is None:
-        while True:
-            yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        logging.debug(f'装料点({LOADER}): 无法连接摄像头')
+
+    if capture is None:
+        # while True:
+        yield (b'--frame\r\n'
+            b'Content-Type: image/jpeg\r\n\r\n'+ b'\r\n')
     else:
         while True:
             success, img = capture.read()

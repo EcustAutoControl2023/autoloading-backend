@@ -32,7 +32,7 @@ with app.app_context():
 # 启动后台定时任务(读传感器)
 schedulers_start(app=app)
 
-from autoloading.handlers.loaderpoint import load_point_dict, create_loader_points
+# FIXME: 检测装料点对象是否正确
+from autoloading.handlers.loaderpoint import load_point_dict
 logging.debug("=======================")
-
 logging.debug(load_point_dict)
