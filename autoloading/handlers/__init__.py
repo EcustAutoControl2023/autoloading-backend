@@ -109,7 +109,7 @@ def init_app(app:Flask):
     app.add_url_rule('/video_feed17', endpoint='video_feed17', view_func=video_feed17)
     app.add_url_rule('/video_feed18', endpoint='video_feed18', view_func=video_feed18)
     app.add_url_rule('/video_feed19', endpoint='video_feed19', view_func=video_feed19)
-    app.add_url_rule('/license_video_feed', endpoint='licensse_video_feed', view_func=license_video_feed)
+    app.add_url_rule('/license_video_feed', endpoint='license_video_feed', view_func=license_video_feed)
     app.add_url_rule('/license_video_feed1', endpoint='license_video_feed1', view_func=license_video_feed1)
     app.add_url_rule('/license_video_feed2', endpoint='license_video_feed2', view_func=license_video_feed2)
     app.add_url_rule('/license_video_feed3', endpoint='license_video_feed3', view_func=license_video_feed3)

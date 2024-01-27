@@ -103,6 +103,17 @@
             text-align: center;
             font-size: 1.3em;
         }
+        .license {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+ 
+        }
+        .license img{
+            width: 40%;
+            height: 100%;
+            z-index: 999;
+        }
     </style>
 </head>
 <body>
@@ -305,10 +316,8 @@
                 <div class="main_title">
                     视频画面1(车头画面)
                 </div>
-                <div class="video">
-                    <video controls>
+                <div class="license">
                         <img src="{{ url_for('license_video_feed') }}">
-                    </video>
                 </div>
             </div>
            <div class="right_2">
