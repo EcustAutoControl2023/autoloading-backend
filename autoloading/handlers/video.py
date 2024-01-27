@@ -182,7 +182,7 @@ def generate_license_frames(i):
     capture = cap_thread.result
 
     if capture is None:
-        logging.debug(f'装料点({LOADER}): 无法连接车牌摄像头')
+        logging.debug(f'装料点({LOADER.queue[0]}): 无法连接车牌摄像头')
 
     if capture is None:
         # while True:

@@ -6,7 +6,7 @@ class Queue {
   
     // 将队列内容转换为数组
     toArray() {
-      return this.items;
+      return this.items.copyWithin(0, this.len + 1);
     }
   
     // 入队

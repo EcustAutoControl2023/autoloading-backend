@@ -11,9 +11,14 @@ function show_traffic_data() {
     // 清空表格
     $('#car-data').empty();
     // 遍历数据，添加到表格中
-    traffic_data_array = traffic_data_queue.toArray()
+    let traffic_data_array = Array();
+    for (item of traffic_data_queue.toArray())
+    {
+        // console.log(item)
+        traffic_data_array.push(item);
+    }
     // 反转数据
-    traffic_data_array.reverse()
+    traffic_data_array.reverse();
     for (let i = 0; i < traffic_data_queue.len; i++) {
         var row = $('<tr>');
         row.append($('<td  style ="color: white" align="center">').text(traffic_data_array[i].truckid));
@@ -26,7 +31,6 @@ function show_traffic_data() {
         row.append($('<td  style ="color: white" align="center">').text(traffic_data_array[i].loaderid));
         $('#car-data').append(row);
     }
-    traffic_data_array.reverse()
 }
 
 traffic_socket.on('traffic_data_queue', function(data) {

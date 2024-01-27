@@ -1,4 +1,5 @@
 from autoloading.models.sensor import Traffic
+from sqlalchemy.sql.expression import and_
 import logging
 from datetime import datetime
 

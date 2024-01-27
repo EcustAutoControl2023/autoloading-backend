@@ -1,14 +1,13 @@
 import logging
 from flask import jsonify, request
-from sqlalchemy import false
 from autoloading.models import db
 from autoloading.models.sensor import Traffic
 import datetime
 
 
 # TODO: 实现功能：车辆信息更新
-def update_truck_content(truck_id, update_data:dict):
-    traffic = Traffic.query.filter_by(truckid=truck_id).order_by(Traffic.id.desc()).first()
+def update_truck_content(truckid, loaderid, update_data:dict):
+    traffic = Traffic.query.filter_by(truckid=truckid, loaderid=loaderid).order_by(Traffic.id.desc()).first()
     # FIXME: 打印车辆数据
     # logging.debug(traffic)
     for key, value in update_data.items():
@@ -22,6 +21,8 @@ def update_truck_content(truck_id, update_data:dict):
             traffic.loadtime1 = value
         elif 'load_time2' == key:
             traffic.loadtime2 = value
+        elif 'loadestimate' == key:
+            traffic.loadestimate = value
 
     db.session.commit()
     from .socket import traffic_data
@@ -98,7 +99,7 @@ def insert_truck_content(req_time,
 def update():
     data = request.get_json()
 
-    update_truck_content(data.get('truck_id'), data.get('update_data'))
+    update_truck_content(data.get('truckid'), data.get('loaderid'), data.get('update_data'))
     
     return jsonify("{'code': 'ok'}")
 
