@@ -40,7 +40,7 @@ def update_truck_content(truckid, loaderid, update_data:dict):
 
 #@app.route('/store', methods=['POST'])  
 def insert_truck_content(req_time,
-                         truck_id,  
+                         truck_id,
                          truck_load,
                          load_current,
                          box_length,
@@ -56,12 +56,12 @@ def insert_truck_content(req_time,
                          load_time1, # 需要更新
                          load_time2, # 需要更新
                          work_total
-                         ):  
+                         ):
     # load_level_height1: 物位计第一次装车高度
     # load_level_height2: 物位计第二次装车高度
     # load_time1: 第一次装车用时
     # load_time2：第二次装车用时
-    traffic = Traffic(time = req_time, 
+    traffic = Traffic(time = req_time,
                       truckid=truck_id,
                       truckload = truck_load,
                       boxlength = box_length,
@@ -100,6 +100,6 @@ def update():
     data = request.get_json()
 
     update_truck_content(data.get('truckid'), data.get('loaderid'), data.get('update_data'))
-    
+
     return jsonify("{'code': 'ok'}")
 

@@ -110,7 +110,7 @@
  
         }
         .license img{
-            width: 40%;
+            width: 100%;
             height: 100%;
             z-index: 999;
         }
@@ -226,7 +226,7 @@
                 </div>
                 <br>
                     <div class="sxt">
-                        <img src="{{ url_for('video_feed16') }}">
+                        <img src="{{ url_for('video_feed16') }}" alt="視頻加載失敗"  style="color:red;font-size:18px">
                     </div>
             </div>
             <div class="center_text1">
@@ -317,7 +317,7 @@
                     视频画面1(车头画面)
                 </div>
                 <div class="license">
-                        <img src="{{ url_for('license_video_feed16') }}">
+                        <img src="{{ url_for('license_video_feed16') }}" alt="視頻加載失敗"  style="color:red;font-size:18px">
                 </div>
             </div>
            <div class="right_2">

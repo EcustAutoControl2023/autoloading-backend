@@ -73,6 +73,7 @@ def generate_frames(i):
         yield (b'--frame\r\n'
             b'Content-Type: image/jpeg\r\n\r\n'+ b'\r\n')
     else:
+        logging.debug("连接成功！")
         while True:
             success, img = capture.read()
             if not success:
@@ -81,7 +82,7 @@ def generate_frames(i):
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            
+
 
 def video_feed():
     return Response(generate_frames(0), mimetype='multipart/x-mixed-replace; boundary=frame')

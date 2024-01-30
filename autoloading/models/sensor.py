@@ -14,6 +14,7 @@ class SensorBase(db.Model):
     data = db.Column(db.Integer)
     # 时间戳
     time = db.Column(db.DateTime)
+    tablename = db.Column(db.String(10), nullable=True)
 
     @staticmethod
     def before_insert(target,value,initiator):

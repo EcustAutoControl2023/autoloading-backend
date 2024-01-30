@@ -5,7 +5,7 @@ from flask import Flask
 from autoloading.handlers.loaderpoint import LoadPoint, load_point_dict
 
 def sensor(app, loadpoint:LoadPoint):
-    from autoloading.handlers.sensor import read_per_second 
+    from autoloading.handlers.sensor import read_per_second
     with app.app_context():
         read_per_second(loadpoint)
 

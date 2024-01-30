@@ -3,7 +3,7 @@ from flask import session
 from flask_socketio import SocketIO
 from ..config import TRUCK_CONFIRM, MEASURE_START
 from autoloading.models.sensor import Traffic
-from autoloading.config import SHOW_TAB, LOADER
+from autoloading.config import LOADER
 
 
 socketio = SocketIO()
@@ -24,7 +24,7 @@ def truck_id_popup(data):
 def truck_id_popup_confirm(confirm):
     global TRUCK_CONFIRM
     session['truck_id_popup_confirm'] = confirm['data']
-    TRUCK_CONFIRM.put(confirm['data']) 
+    TRUCK_CONFIRM.put(confirm['data'])
 
 # 中控弹窗
 def center_popup(data):
@@ -34,7 +34,7 @@ def center_popup(data):
 def center_popup_confirm(confirm):
     global TRUCK_CONFIRM
     session['center_popup_confirm'] = confirm['data']
-    TRUCK_CONFIRM.put(confirm['data']) 
+    TRUCK_CONFIRM.put(confirm['data'])
 
 # 向前端发送传感器数据
 def sensor_data(data):
@@ -79,21 +79,16 @@ def traffic_data(data):
     if data['loaderid'] == LOADER.queue[0]:
         socketio.emit('traffic_data', data)
 
-# 切换当前的tab
+# 切换当前的，获取loaderid
 @socketio.on('tab_switch')
 def tab_switch(data):
-    global SHOW_TAB
     global LOADER
 
     # FIXME: 打印当前选择的页面的数据表名
     logging.debug(f'####tab_switch: { data }')
 
     # 清空队列
-    while not SHOW_TAB.empty():
-        SHOW_TAB.get()
-    
     while not LOADER.empty():
         LOADER.get()
 
-    SHOW_TAB.put(data['sensor'])
     LOADER.put(data['loader'])

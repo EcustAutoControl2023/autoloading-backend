@@ -33,30 +33,56 @@ function show_traffic_data() {
     }
 }
 
+
+let url_name = window.location.pathname.split('/')[1];
+// index 对应 sensor1, index1 对应 sensor2, 以此类推
+let index_table = {
+'index': 0, 'index1': 1, 'index2': 2, 'index3': 3, 'index4': 4,
+'index5': 5, 'index6': 6, 'index7': 7, 'index8': 8, 'index9': 9,
+'index10': 10, 'index11': 11, 'index12': 12, 'index13': 13, 'index14': 14,
+'index15': 15, 'index16': 16, 'index17': 17, 'index18': 18, 'index19': 19
+};
+let index = index_table[url_name];
+current_loaderid = loader_id_list[index];
+
 traffic_socket.on('traffic_data_queue', function(data) {
-    // console.log(data);
     // 遍历数据，添加到表格中
     // 如果数据为空，则不添加
-    // console.log(data.length)
-
+    // console.log(data[0]["loaderid"]);
+    // console.log("current_loaderid: "+current_loaderid);
     if (data.length == 0) {
         return;
     }
-    for (let i = 0; i < data.length; i++) {
-        // 将数据添加到队列中
-        traffic_data_queue.push(data[i]);
+    if (data[0]["loaderid"] === current_loaderid)
+    {
+
+        if (!traffic_data_queue.isEmpty())
+        {
+            traffic_data_queue.clear();
+        }
+        for (let i = 0; i < data.length; i++) {
+            // 将数据添加到队列中
+            traffic_data_queue.push(data[i]);
+        }
+        show_traffic_data();
+
     }
-    show_traffic_data();
+
 })
 
 
 traffic_socket.on('traffic_data', function(data) {
-    if (data.modified)
+    // console.log(data.loaderid);
+    // console.log("current_loaderid: "+current_loaderid);
+    if (data.loaderid === current_loaderid)
     {
-        traffic_data_queue.popRight();
+        if (data.modified)
+        {
+            traffic_data_queue.popRight();
+        }
+        // 将新的数据添加到队列中
+        traffic_data_queue.push(data);
+        // console.log(traffic_data_queue);
+        show_traffic_data();
     }
-    // 将新的数据添加到队列中
-    traffic_data_queue.push(data);
-    // console.log(traffic_data_queue);
-    show_traffic_data();
 });
