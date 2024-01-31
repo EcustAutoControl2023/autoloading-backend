@@ -11,7 +11,7 @@ def connect():
 
     data = request.get_json()
     data_type = data.get('data_type', None)
-    # req_time = data.get('time', None)
+    task_time = data.get('time', None)
     req_time = datetime.datetime.now()
     operating_stations = data.get('operating_stations', None)
     job_id = operating_stations.get('job_id', None)
@@ -39,6 +39,7 @@ def connect():
 
 
     return_data = load_point_dict.get(loader_id).load_control(
+        task_time=task_time,
         req_time=req_time, data_type=data_type,
         truck_id=truck_id, truck_load=truck_load,
         box_length=box_length, box_width=box_width, box_height=box_height,
