@@ -53,7 +53,7 @@ class Traffic(db.Model):
     '''
     TrafficDB
     '''
-    
+
     id = db.Column(db.Integer, primary_key=True)
     time = db.Column(db.String(20), nullable=False)
     truckid = db.Column(db.String(20), nullable=False)
@@ -68,8 +68,11 @@ class Traffic(db.Model):
     loaderid = db.Column(db.Integer, nullable=False)
     loadlevelheight1 = db.Column(db.Integer, nullable=True)
     loadlevelheight2 = db.Column(db.Integer, nullable=True)
+    loadlevelheight3 = db.Column(db.Integer, nullable=True)
+    loadstarttime = db.Column(db.DateTime, nullable=True)
     loadtime1 = db.Column(db.DateTime, nullable=True)
     loadtime2 = db.Column(db.DateTime, nullable=True)
+    loadtime3 = db.Column(db.DateTime, nullable=True)
     loadcurrent = db.Column(db.Float, nullable=False)
     loadestimate = db.Column(db.Float, nullable=True)
     worktotal = db.Column(db.Integer, nullable=False)

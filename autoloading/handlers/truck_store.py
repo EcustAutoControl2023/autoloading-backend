@@ -6,21 +6,27 @@ import datetime
 
 
 # TODO: 实现功能：车辆信息更新
-def update_truck_content(truckid, loaderid, update_data:dict):
+def update_truck_content(truckid:str, loaderid, update_data:dict):
     traffic = Traffic.query.filter_by(truckid=truckid, loaderid=loaderid).order_by(Traffic.id.desc()).first()
     # FIXME: 打印车辆数据
     # logging.debug(traffic)
     for key, value in update_data.items():
         if 'truck_weight_out' == key:
             traffic.truckweightout = value
+        elif 'load_start_time' == key:
+            traffic.loadstarttime = value
         elif 'load_level_height1' == key:
             traffic.loadlevelheight1 = value
         elif 'load_level_height2' == key:
             traffic.loadlevelheight2 = value
+        elif 'load_level_height3' == key:
+            traffic.loadlevelheight3 = value
         elif 'load_time1' == key:
             traffic.loadtime1 = value
         elif 'load_time2' == key:
             traffic.loadtime2 = value
+        elif 'load_time3' == key:
+            traffic.loadtime3 = value
         elif 'loadestimate' == key:
             traffic.loadestimate = value
 
@@ -53,14 +59,20 @@ def insert_truck_content(req_time,
                          loader_id,
                          load_level_height1, # 需要更新
                          load_level_height2, # 需要更新
+                         load_level_height3, # 需要更新
+                         load_start_time, # 需要更新
                          load_time1, # 需要更新
                          load_time2, # 需要更新
-                         work_total
+                         load_time3, # 需要更新
+                         work_total,
+                         load_estimate # 需要更新
                          ):
     # load_level_height1: 物位计第一次装车高度
     # load_level_height2: 物位计第二次装车高度
-    # load_time1: 第一次装车用时
-    # load_time2：第二次装车用时
+    # load_level_height3: 物位计第三次装车高度
+    # load_time1: 第一次装车结束时间
+    # load_time2：第二次装车结束时间
+    # load_time3：第三次装车结束时间
     traffic = Traffic(time = req_time,
                       truckid=truck_id,
                       truckload = truck_load,
@@ -74,10 +86,14 @@ def insert_truck_content(req_time,
                       loaderid = loader_id,
                       loadlevelheight1 = load_level_height1,
                       loadlevelheight2 = load_level_height2,
+                      loadlevelheight3 = load_level_height3,
+                      loadstarttime = load_start_time,
                       loadtime1 = load_time1,
                       loadtime2 = load_time2,
+                      loadtime3 = load_time3,
                       loadcurrent = load_current,
-                      worktotal = work_total
+                      worktotal = work_total,
+                      loadestimate = load_estimate
 )
     db.session.add(traffic)
     db.session.commit()

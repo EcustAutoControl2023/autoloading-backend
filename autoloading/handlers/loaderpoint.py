@@ -4,6 +4,7 @@ from operator import and_
 import socket
 
 from sqlalchemy import false
+from sqlalchemy.engine import ObjectKind
 from autoloading.config import TRUCK_CONFIRM
 from flask import jsonify, session
 from autoloading.handlers.truck_store import insert_truck_content, update_truck_content
@@ -47,6 +48,7 @@ class LoadPoint:
                   ('172.16.175.107',8234),('172.16.175.113',8234),('172.16.175.119',8234),('172.16.175.125',8234),
                   ('172.16.175.131',8234),('172.16.175.137',8234),('172.16.175.143',8234),('172.16.175.149',8234),
                   ('172.16.175.155',8234),('172.16.175.161',8234),('172.16.175.167',8234),('172.16.175.173',8234)] #物位计的ip地址、端口号
+
     def __init__(self, loader_id:int):
         self.Sensor = LoadPoint.SensorList[LoadPoint.loader_index_dict[loader_id]]
         self.server_ip = LoadPoint.ServerList[LoadPoint.loader_index_dict[loader_id]]
@@ -79,8 +81,22 @@ class LoadPoint:
         self.work_finish = 1
         self.time_record_flag = True
         self.height_load = None
+
         # XXX: 定义装料高度上限
-        self.load_level_limit = 0
+        self.load_level_limit1 = 0
+        self.load_level_limit2 = 0
+        self.load_level_limit3 = 0
+        self.load_height = 0
+
+        self.load_height1 = None
+        self.load_height2 = None
+        self.load_height3 = None
+
+        self.load_time1 = None
+        self.load_time2 = None
+        self.load_time3 = None
+
+        self.loadestimate = None
 
         self.five_seconds_ago = datetime.timedelta(seconds=5)
 
@@ -150,14 +166,17 @@ class LoadPoint:
                 work_total=self.work_total,
                 load_level_height1=0,
                 load_level_height2=0,
+                load_level_height3=0,
+                load_start_time=datetime.datetime.now(),
                 load_time1=datetime.datetime.now(),
-                load_time2=datetime.datetime.now()
+                load_time2=datetime.datetime.now(),
+                load_time3=datetime.datetime.now(),
+                load_estimate=0
             )
 
             # 如果引导策略反馈的 icps_differ 为空，且 work_finish=1，标识任务完成
             self.work_finish = 0 if (self.icps_differ_num is None) and (self.work_finish == 1) else self.work_finish
 
-            # user['icps_differ'] = icps_differ
             result = gen_return_data(
                 time = self.req_time,
                 store_id = self.store_id,
@@ -176,19 +195,19 @@ class LoadPoint:
             logging.debug(f'icps_differ: {self.icps_differ_num}')
 
             # XXX:数据库中读取最相关的数据，估算当前重量（根据装料时间
-            load_level = self.Sensor.query.order_by(self.Sensor.id.desc()).first()
-            load_level_data = None
-            if load_level is None:
-                # FIXME: 第一个数据读取不到
-                load_level_data = 4040
-            else:
-                load_level_data = load_level.data
-            logging.debug(load_level_data)
+            # load_level = self.Sensor.query.order_by(self.Sensor.id.desc()).first()
+            # load_level_data = None
+            # if load_level is None:
+            #     # FIXME: 第一个数据读取不到
+            #     load_level_data = 4040
+            # else:
+            #     load_level_data = load_level.data
+            # logging.debug(load_level_data)
 
             # XXX:基准问题（箱体+轮子
             # 4440: 物位计的高度
             # 1300：轮子高度
-            self.load_level_limit = 4040 # 4440 - 1300 - box_height*1000 + 60
+            # self.load_level_limit = 4040 # 4440 - 1300 - box_height*1000 + 60
             # XXX:从数据库中查料高(三堆0，1，2)
             load_level_height0 = 800
             # XXX:确认limit和height0的大小关系
@@ -198,47 +217,91 @@ class LoadPoint:
             if self.icps_differ_num == '0123': # 装料三次的控制程序
                 if self.icps_differ == self.distance_0 :
                     self.load_control0()
+                    # 记录第一个装车点料高和时间
+                    if self.icps_differ == self.distance_1:
+                        self.load_height1 = self.load_height
+                        self.load_time1 = datetime.datetime.now()
                 elif self.icps_differ == self.distance_1 :
                     self.load_control1()
+                    # 记录第二个装车点料高和时间
+                    if self.icps_differ == self.distance_2:
+                        self.load_height2 = self.load_height
+                        self.load_time2 = datetime.datetime.now()
                 elif self.icps_differ == self.distance_2 :
                     self.load_control2()
+                    # 记录第三个装车点料高和时间
+                    if self.work_finish:
+                        self.load_height3 = self.load_height
+                        self.load_time3 = datetime.datetime.now()
 
             elif self.icps_differ_num == '0012': # 装料两次的控制程序
                 if self.icps_differ == self.distance_0 :
                     self.load_control0()
-                # if user['icps_differ'] == distance_1 :
+                    # 记录第一个装车点料高和时间
+                    if self.icps_differ == self.distance_2:
+                        self.load_height1 = self.load_height
+                        self.load_time1 = datetime.datetime.now()
                 if self.icps_differ == self.distance_2 :
                     self.load_control2()
+                    # 记录第二个装车点料高和时间
+                    if self.work_finish:
+                        self.load_height2 = self.load_height
+                        self.load_time2 = datetime.datetime.now()
 
             elif self.icps_differ_num == '0112': # 装料两次的控制程序
                 if self.icps_differ == self.distance_0 :
                     self.load_control0()
+                    # 记录第一个装车点料高和时间
+                    if self.icps_differ == self.distance_1:
+                        self.load_height1 = self.load_height
+                        self.load_time1 = datetime.datetime.now()
                 elif self.icps_differ == self.distance_1 :
                     self.load_control2()
+                    # 记录第二个装车点料高和时间
+                    if self.work_finish:
+                        self.load_height2 = self.load_height
+                        self.load_time2 = datetime.datetime.now()
 
             elif self.icps_differ_num == '0001': # 装料一次的控制程序
                 if self.icps_differ == self.distance_0 :
                     self.load_control0()
-                # if user['icps_differ'] == distance_1 :
                 if self.allow_plc_work == 0:
                     self.work_finish = 1
                     self.load_end_time = datetime.datetime.now()
                     self.time_record_flag = True
+                    # 记录第一个装车点料高和时间
+                    self.load_height1 = self.load_height
+                    self.load_time1 = datetime.datetime.now()
 
-            # TODO:  更新数据库
+            # 更新数据库
+            update_truck_content(
+                truckid=self.truck_id,
+                loaderid=self.loader_id,
+                update_data={
+                    "load_start_time": self.load_start_time,
+                    "load_level_height1": self.load_height1,
+                    "load_level_height2": self.load_height2,
+                    "load_level_height3": self.load_height3,
+                    "load_time1": self.load_time1,
+                    "load_time2": self.load_time2,
+                    "load_time3": self.load_time3,
+                    "loadestimate": self.loadestimate,
+                }
+            )
+
             result = gen_return_data(
                 time = self.req_time,
-                store_id = self.store_id, 
+                store_id = self.store_id,
                 loader_id = self.loader_id,
                 operating_stations={
                     "truck_id" : self.truck_id,
                     "work_weight_status" : self.work_weight_status,
-                    "work-weight_reality" : self.work_weight_reality,     
+                    "work-weight_reality" : self.work_weight_reality,
                     "flag_load" : self.flag_load,
                     "height_load" : self.height_load,
                     "allow_plc_work" : self.allow_plc_work,
-                    "work_finish" : self.work_finish, 
-                }    
+                    "work_finish" : self.work_finish,
+                }
             )
 
         elif data_type == 2:
@@ -258,12 +321,9 @@ class LoadPoint:
         elif data_type == 3:
             # TODO: 返回实时数据
 
-            # allow_work_flag = 1 if session['center_popup_confirm'] else 0
-            # allow_plc_work = 1 if session['center_popup_confirm'] else 0
-
             result = gen_return_data(
                 time = self.req_time,
-                store_id = self.store_id, 
+                store_id = self.store_id,
                 loader_id = self.loader_id,
                 operating_stations={
                     "truck_id": self.truck_id,
@@ -289,7 +349,7 @@ class LoadPoint:
 
             result = gen_return_data(
                 time = self.req_time,
-                store_id = self.store_id, 
+                store_id = self.store_id,
                 loader_id = self.loader_id,
                 operating_stations={
                     "truck_id" : self.truck_id,
@@ -308,20 +368,19 @@ class LoadPoint:
         is_smooth = False
         a = 0
         current_time = datetime.datetime.now()
-        latest_data = self.Sensor.query.filter(self.Sensor.time >= current_time - self.timedelta).order_by(self.Sensor.id.desc()).limit(30).all()
+        latest_data = self.Sensor.query.filter(self.Sensor.time >= current_time - self.five_seconds_ago).order_by(self.Sensor.id.desc()).limit(30).all()
         if len(latest_data) < 30:
-            logging.debug('数据不足30条!!')
+            logging.debug('smooth: 数据不足30条!!')
             return True
-        for i in range(len(latest_data) - 2,-1,-1):
-            data_differ = latest_data[i].data - latest_data[i+1].data
-            # data_differ = (latest_data[i+4].data - latest_data[i].data)/4
+        for i in range(len(latest_data) - 1):
+            data_differ = latest_data[i+1].data - latest_data[i].data
             if abs(data_differ) < 1:
                 a += 1
         if a == 29:
-            logging.debug('30s前到此刻数据平滑下降')
+            logging.debug('smooth: 30s前到此刻数据平滑上升')
             is_smooth = True
         else:
-            logging.debug('数据存在波动,无法使用')
+            logging.debug('smooth: 数据存在波动,无法使用')
         return is_smooth
 
     # 预估重量
@@ -354,14 +413,15 @@ class LoadPoint:
                 logging.debug(f'is_smooth: {is_smooth}')
 
                 current_time = datetime.datetime.now()
-                load_height = self.Sensor.query.filter(self.Sensor.time >= current_time - self.five_seconds_ago).order_by(self.Sensor.id.desc()).first()
+                self.load_height = self.Sensor.query.filter(self.Sensor.time >= current_time - self.five_seconds_ago).order_by(self.Sensor.id.desc()).first()
                 # FIXME:打印最近的料高
-                # logging.debug(load_height)
-                if self.sensor_status_ok(load_height=load_height) is not True:
+                # logging.debug(self.load_height)
+                if self.sensor_status_ok(load_height=self.load_height) is not True:
                     return
+                self.load_height1 = self.load_height.data
 
 
-                logging.debug(load_height.data)
+                logging.debug(self.load_height.data)
                 if is_smooth == False:
                     self.allow_plc_work = 0
                     self.flag_load = 0
@@ -369,14 +429,16 @@ class LoadPoint:
                     self.work_finish = 0
                     self.icps_differ = self.distance_1 if self.distance_0 != self.distance_1 else self.distance_2
                 # 如果当前料高未超过限制，且装料时间小于7分钟，继续装料
-                elif float(int(load_height.data)) < self.load_level_limit:
+                elif float(int(self.load_height.data)) < self.load_level_limit1:
                     load_duration = datetime.datetime.now() - self.load_start_time
                     current_time = datetime.datetime.now()
-                    load_height = self.Sensor.query.filter(self.Sensor.time >= current_time - self.five_seconds_ago).order_by(self.Sensor.id.desc()).first()
+                    self.load_height = self.Sensor.query.filter(self.Sensor.time >= current_time - self.five_seconds_ago).order_by(self.Sensor.id.desc()).first()
                     # FIXME:打印最近的料高
-                    # logging.debug(load_height)
-                    if self.sensor_status_ok(load_height=load_height) is not True:
+                    # logging.debug(self.load_height)
+                    if self.sensor_status_ok(load_height=self.load_height) is not True:
                         return
+
+                    self.load_height1 = self.load_height.data
                     if load_duration.total_seconds() < 7*60 :
                         self.allow_plc_work = 1
                         self.flag_load = 1
@@ -402,10 +464,14 @@ class LoadPoint:
         logging.debug(f'control1 -> icps_differ: {self.icps_differ}')
         if self.icps_differ == self.distance_1 :
             current_time = datetime.datetime.now()
-            load_height = self.Sensor.query.filter(self.Sensor.time >= current_time - self.five_seconds_ago).order_by(self.Sensor.id.desc()).first()
+            self.load_height = self.Sensor.query.filter(self.Sensor.time >= current_time - self.five_seconds_ago).order_by(self.Sensor.id.desc()).first()
             # FIXME:打印最近的料高
-            # logging.debug(load_height)
-            if load_height.data < self.load_level_limit:
+            # logging.debug(self.load_height)
+            if self.sensor_status_ok(load_height=self.load_height) is not True:
+                return
+
+            self.load_height2 = self.load_height.data
+            if self.load_height.data < self.load_level_limit2:
                 self.allow_plc_work = 1
                 self.flag_load = 1
                 self.work_weight_status = 1
@@ -423,12 +489,14 @@ class LoadPoint:
         logging.debug(f'control2 -> icps_differ: {self.icps_differ}')
         if self.icps_differ == self.distance_2 or self.icps_differ == self.distance_1:
             current_time = datetime.datetime.now()
-            load_height = self.Sensor.query.filter(self.Sensor.time >= current_time - self.five_seconds_ago).order_by(self.Sensor.id.desc()).first()
+            self.load_height = self.Sensor.query.filter(self.Sensor.time >= current_time - self.five_seconds_ago).order_by(self.Sensor.id.desc()).first()
             # FIXME:打印最近的料高
-            # logging.debug(load_height)
-            if self.sensor_status_ok(load_height) is not True:
+            # logging.debug(self.load_height)
+            if self.sensor_status_ok(load_height=self.load_height) is not True:
                 return
-            if load_height.data < self.load_level_limit:
+
+            self.load_height3 = self.load_height.data
+            if self.load_height.data < self.load_level_limit3:
                 self.allow_plc_work = 1
                 self.flag_load = 1
                 self.work_weight_status = 1
