@@ -43,7 +43,7 @@ def connect():
         box_length=box_length, box_width=box_width, box_height=box_height,
         truck_weight_in=truck_weight_in, truck_weight_out=truck_weight_out,
         goods_type=goods_type, store_id=store_id, loader_id=loader_id,
-        load_current=load_current, 
+        load_current=load_current,
         distance0=distance_0, distance1=distance_1, distance2=distance_2,
         picture_url_plate=picture_url_plate, picture_url_request=picture_url_request
     )

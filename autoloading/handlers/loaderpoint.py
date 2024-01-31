@@ -3,8 +3,6 @@ import logging
 from operator import and_
 import socket
 
-from sqlalchemy import false
-from sqlalchemy.engine import ObjectKind
 from autoloading.config import TRUCK_CONFIRM
 from flask import jsonify, session
 from autoloading.handlers.truck_store import insert_truck_content, update_truck_content
@@ -102,7 +100,6 @@ class LoadPoint:
         self.five_seconds_ago = datetime.timedelta(seconds=5)      # 物位计滞后时差
 
     def load_control(self,
-                     task_time,
                      req_time, data_type,
                      truck_id, truck_load, box_length, box_width, box_height,
                      truck_weight_in, truck_weight_out,
@@ -148,7 +145,7 @@ class LoadPoint:
                 self.work_finish = 0
                 self.icps_differ_num = '0001' # 共装车一次，三个装车点相同
                 self.icps_differ = self.distance_0
-            else:    
+            else:
                 #反馈的icps_differ为空，且work_finish=1，标识任务完成
                 self.work_total = 0
                 self.icps_differ_num = None # 无装车策略
@@ -199,7 +196,7 @@ class LoadPoint:
 
             # 记录开始装料时间
             if self.time_record_flag:
-                self.load_start_time = datetime.datetime.now() 
+                self.load_start_time = datetime.datetime.now()
                 self.time_record_flag = False
 
 
@@ -224,7 +221,7 @@ class LoadPoint:
             # XXX:确认装的是第几堆（根据装料点判断
             logging.debug(f'icps_differ_num: {self.icps_differ_num}')
             logging.debug(f'icps_differ: {self.icps_differ}')
-            
+
             if self.icps_differ_num == '0123': # 装料三次的控制程序
                 if self.icps_differ == self.distance_0 : # 判断车辆引导位置，执行相应装料点控制程序
                     self.load_control0() # 执行前装料点控制程序
@@ -233,7 +230,6 @@ class LoadPoint:
                     if self.icps_differ == self.distance_1:
                         self.load_height1 = self.load_height
                         self.load_time1 = datetime.datetime.now()
-                        self.load_control1()
                 elif self.icps_differ == self.distance_1 : # 判断车辆引导位置，执行相应装料点控制程序
                     self.load_control1()
                     self.height_load = self.load_height
@@ -241,7 +237,6 @@ class LoadPoint:
                     if self.icps_differ == self.distance_2:
                         self.load_height2 = self.load_height
                         self.load_time2 = datetime.datetime.now()
-                        self.load_control2()
                 elif self.icps_differ == self.distance_2 : # 判断车辆引导位置，执行相应装料点控制程序
                     self.load_control2()
                     self.height_load = self.load_height
@@ -258,7 +253,6 @@ class LoadPoint:
                     if self.icps_differ == self.distance_2:
                         self.load_height1 = self.load_height
                         self.load_time1 = datetime.datetime.now()
-                        self.load_control2()
                 if self.icps_differ == self.distance_2 : # 判断车辆引导位置，执行相应装料点控制程序
                     self.load_control2()
                     self.height_load = self.load_height
@@ -275,7 +269,6 @@ class LoadPoint:
                     if self.icps_differ == self.distance_1:
                         self.load_height1 = self.load_height
                         self.load_time1 = datetime.datetime.now()
-                        self.load_control2()
                 elif self.icps_differ == self.distance_1 : # 判断车辆引导位置，执行相应装料点控制程序
                     self.load_control2()
                     self.height_load = self.load_height
@@ -568,34 +561,34 @@ class LoadPoint:
         
 
     # 预估重量
-    def weight_estimate(goods_type,loader_id,time_difference): 
+    def weight_estimate(self, goods_type,loader_id,time_difference): 
         current_load_weight = 0.0
         per_second_weight = 0
         #筛选数据
         filtered_traffic = Traffic.query.filter(and_(Traffic.loaderid==loader_id,Traffic.goodstype==goods_type)).all()
-        
+
         filtered_data_length = len(filtered_traffic)
         #logging.debug(f'filtered_data_length{filtered_data_length}')
-        
+
         #提取筛选后数据的某一属性
-        start_load_times = [datetime.strptime(traffic.loadtime1, '%Y-%m-%d %H:%M:%S') for traffic in filtered_traffic]  
-        stop_load_times = [datetime.strptime(traffic.loadtime2, '%Y-%m-%d %H:%M:%S') for traffic in filtered_traffic]  
+        start_load_times = [datetime.datetime.strptime(traffic.loadtime1, '%Y-%m-%d %H:%M:%S') for traffic in filtered_traffic]
+        stop_load_times = [datetime.datetime.strptime(traffic.loadtime2, '%Y-%m-%d %H:%M:%S') for traffic in filtered_traffic]
 
         loader_task = [traffic.loadcurrent for traffic in filtered_traffic]
 
         #计算装载时间
         load_time = [(stop - start).total_seconds() for start, stop in zip(start_load_times, stop_load_times)]
 
-        for i in range(filtered_data_length): 
+        for i in range(filtered_data_length):
             try:
                 per_second_weight += loader_task[i] / load_time[i] * 1.0
             except ZeroDivisionError:
                 print('error')
                 return None
-        
+
         per_second_weight /= filtered_data_length
         current_load_weight = per_second_weight * time_difference
-        
+
         return current_load_weight
 
 
