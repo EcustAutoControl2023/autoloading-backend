@@ -18,7 +18,6 @@
     <script src="{{url_for('static',filename='js/echarts.min.js')}}"></script>
     <script src="{{url_for('static',filename='js/dataTool.js')}}"></script>
     <script src="{{url_for('static',filename='js/index.js')}}"></script>
-    <script src="{{url_for('static',filename='js/control status.js')}}"></script>
     <script src="{{url_for('static',filename='js/jQuery.js')}}"></script>
     <script src="{{url_for('static',filename='js/socket.js')}}"></script>
     <style>
@@ -164,10 +163,10 @@
                      <p id="loading progress">402南</p>
                   </div><br>
                 <div class="t">
-                    <p id="loading status">装车状态：未装车/正在装车</p><br/>
+                    <p id="loading status">装车状态：未装车</p><br/>
                 </div>
                 <div class="t">
-                    <p id="control status">控制器状态：未启动/已启动</p>
+                    <p id="control status">控制器状态：未运行</p>
                 </div>
                 <div id="chart_1" class="chart" style="width:100%;height: 280px;"></div>
             </div>
@@ -355,6 +354,7 @@
         </div>
     </div>
 </div>
+<script src="{{url_for('static',filename='js/control status.js')}}"></script>
 </body>
 
 </html>

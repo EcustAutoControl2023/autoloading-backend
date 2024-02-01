@@ -92,3 +92,13 @@ def tab_switch(data):
         LOADER.get()
 
     LOADER.put(data['loader'])
+
+
+
+def coontrol_status_socket(val):  #发送控制器状态
+    global socketio
+    socketio.emit('control_status', val)
+
+def loader_status_socket(val):  #发送装车状态
+    global socketio
+    socketio.emit('loading_status', val)

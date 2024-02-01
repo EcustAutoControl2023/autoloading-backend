@@ -86,3 +86,5 @@ traffic_socket.on('traffic_data', function(data) {
         show_traffic_data();
     }
 });
+
+
