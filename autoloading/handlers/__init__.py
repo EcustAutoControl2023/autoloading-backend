@@ -1,8 +1,7 @@
 from flask import Flask
 from .index import (
-    index,
-    login,
     index1,
+    login,
     index2,
     index3,
     index4,
@@ -21,6 +20,7 @@ from .index import (
     index17,
     index18,
     index19,
+    index20,
 )
 
 from .dl import (
@@ -129,7 +129,6 @@ def init_app(app:Flask):
     app.add_url_rule('/license_video_feed17', endpoint='license_video_feed17', view_func=license_video_feed17)
     app.add_url_rule('/license_video_feed18', endpoint='license_video_feed18', view_func=license_video_feed18)
     app.add_url_rule('/license_video_feed19', endpoint='license_video_feed19', view_func=license_video_feed19)
-    app.add_url_rule('/index', endpoint='index', view_func=index)
     app.add_url_rule('/index1', endpoint='index1', view_func=index1)
     app.add_url_rule('/index2', endpoint='index2', view_func=index2)
     app.add_url_rule('/index3', endpoint='index3', view_func=index3)
@@ -149,5 +148,6 @@ def init_app(app:Flask):
     app.add_url_rule('/index17', endpoint='index17', view_func=index17)
     app.add_url_rule('/index18', endpoint='index18', view_func=index18)
     app.add_url_rule('/index19', endpoint='index19', view_func=index19)
+    app.add_url_rule('/index20', endpoint='index20', view_func=index20)
     app.add_url_rule('/connect', endpoint='connect',view_func=connect, methods=['POST'])
     app.add_url_rule('/update', endpoint='update',view_func=update, methods=['POST'])

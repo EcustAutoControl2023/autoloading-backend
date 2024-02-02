@@ -3,14 +3,14 @@ from ..config import ENV
 from autoloading.models.sensor import Traffic
 
 
-def index():
+def index1():
     sp = session.get('show_popup', None)
     iu = session.get('img_url', None)
     if sp and iu is not None:
-        return render_template('index.html', show_popup=sp, img_url=iu)
+        return render_template('index1.html', show_popup=sp, img_url=iu)
     traffics1 = Traffic.query.all()
 
-    return render_template('index.html',traffics=traffics1)
+    return render_template('index1.html',traffics=traffics1)
 
 
 def login():
@@ -28,9 +28,6 @@ def login():
             return '无效密码或用户名'
     else:
         return render_template('dl.html')
-
-def index1():
-    return render_template('index1.html')
 
 def index2():
     return render_template('index2.html')
@@ -85,3 +82,6 @@ def index18():
 
 def index19():
     return render_template('index19.html')
+
+def index20():
+    return render_template('index20.html')
