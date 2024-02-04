@@ -507,7 +507,7 @@ class LoadPoint:
                 #     self.work_weight_status = 2
                 #     self.work_finish = 0
                 #     self.icps_differ = self.distance_1 if self.distance_0 != self.distance_1 else self.distance_2 # 进入下一个装料点
-                
+
                 # else: # 数据平稳继续装料
                 # load_duration = datetime.datetime.now() - self.load_start_time # 记录装料时间
                 #current_time = datetime.datetime.now()
@@ -522,15 +522,10 @@ class LoadPoint:
                 else:  # 如果料高超过限制，停止装料
                     self.allow_plc_work = 0
                     self.flag_load = 0
-                    self.work_weight_status = 1
-                    self.work_finish = 0
-                else:  # 如果料高超过限制，停止装料
-                    self.allow_plc_work = 0
-                    self.flag_load = 0
                     self.work_weight_status = 2
                     self.work_finish = 0
                     self.icps_differ = self.distance_1 if self.distance_0 != self.distance_1 else self.distance_2
-                
+
                 # # 如果当前料高未超过限制，且装料时间小于7分钟，继续装料
                 # elif self.load_height.data < self.load_level_limit1:
                 #     load_duration = datetime.datetime.now() - self.load_start_time # 记录装料时间
@@ -575,7 +570,7 @@ class LoadPoint:
             current_time = datetime.datetime.now()
             self.load_height = self.Sensor.query.order_by(self.Sensor.id.desc()).first()
             # self.logging.debug(self.load_height)
-            
+
             if self.sensor_status_ok(load_height=self.load_height) is not True: # 物位计异常，无数据，程序停止
                 return
 
@@ -605,7 +600,7 @@ class LoadPoint:
             current_time = datetime.datetime.now()
             self.load_height = self.Sensor.query.order_by(self.Sensor.id.desc()).first()
             # self.logging.debug(self.load_height)
-            
+
             if self.sensor_status_ok(load_height=self.load_height) is not True: # 物位计异常，无数据，程序停止
                 return
 
@@ -630,10 +625,10 @@ class LoadPoint:
             return False
         else:
             return True
-        
+
 
     # 预估重量
-    def weight_estimate(self, goods_type,loader_id,time_difference): 
+    def weight_estimate(self, goods_type,loader_id,time_difference):
         current_load_weight = 0.0
         per_second_weight = 0
         #筛选数据, 注意需要去除当前正在装车的数据
