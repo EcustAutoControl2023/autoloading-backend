@@ -7,7 +7,7 @@ from flask import jsonify, session
 from autoloading.handlers.truck_store import insert_truck_content, update_truck_content
 from autoloading.models import sensor
 from autoloading.models.sensor import Traffic, loader_num
-from .socket import coontrol_status_socket,loader_status_socket
+from .socket import control_status_socket,loader_status_socket
 from autoloading.config import create_logger
 
 for i in range(loader_num):
@@ -48,6 +48,22 @@ class LoadPoint:
                   ('172.16.175.107',8234),('172.16.175.113',8234),('172.16.175.119',8234),('172.16.175.125',8234),
                   ('172.16.175.131',8234),('172.16.175.137',8234),('172.16.175.143',8234),('172.16.175.149',8234),
                   ('172.16.175.155',8234),('172.16.175.161',8234),('172.16.175.167',8234),('172.16.175.173',8234)] #物位计的ip地址、端口号
+    LocationList = [
+        212, 212, 212,
+        212, 212, 212,
+        212, 212, 212,
+        212, 212, 212,
+        212, 212, 212, 212,
+        212, 212, 212, 212,
+    ]
+    StackposList = [
+        "401A", "402A", "403A",
+        "401B", "402B", "403B",
+        "501A", "502A", "503A",
+        "501B", "502B", "503B",
+        "601A", "602A", "603A", "604A",
+        "601B", "602B", "603B", "604B",
+    ]
 
     def __init__(self, loader_id:int):
         self.Sensor = LoadPoint.SensorList[LoadPoint.loader_index_dict[loader_id]]
@@ -103,6 +119,11 @@ class LoadPoint:
         self.five_seconds_ago = datetime.timedelta(seconds=5)      # 物位计滞后时差
         self.logging = create_logger(f'装料点-{loader_id}') # 装料点日志
 
+        self.jobid = 0
+        self.loadstatus = '未装料'
+        self.location = LoadPoint.LocationList[LoadPoint.loader_index_dict[loader_id]]
+        self.stackpos = LoadPoint.StackposList[LoadPoint.loader_index_dict[loader_id]]
+
     def load_control(self,
                      req_time, data_type,
                      truck_id, truck_load, box_length, box_width, box_height,
@@ -110,7 +131,7 @@ class LoadPoint:
                      goods_type, store_id, loader_id,
                      load_current,
                      distance0, distance1, distance2,
-                     picture_url_plate, picture_url_request):
+                     picture_url_plate, picture_url_request, jobid):
         self.req_time       = req_time
         self.data_type      = data_type
         self.truck_id       = truck_id
@@ -126,6 +147,7 @@ class LoadPoint:
         self.load_current   = load_current
         self.goods_type     = goods_type
         self.truck_weight_out = truck_weight_out
+        self.jobid          = jobid
 
         if self.data_type == 0:  # 接收任务信息并发送引导策略
 
@@ -181,7 +203,11 @@ class LoadPoint:
                 load_time1=datetime.datetime.now(),
                 load_time2=datetime.datetime.now(),
                 load_time3=datetime.datetime.now(),
-                load_estimate=0
+                load_estimate=0,
+                jobid=self.jobid,
+                loadstatus=self.loadstatus,
+                location=self.location,
+                stackpos=self.stackpos
             )
 
             # 如果引导策略反馈的 icps_differ 为空，且 work_finish=1，标识任务完成
@@ -239,7 +265,7 @@ class LoadPoint:
                 if self.icps_differ == self.distance_0 : # 判断车辆引导位置，执行相应装料点控制程序
                     self.load_control0() # 执行前装料点控制程序
                     self.height_load = self.load_height.data
-                    coontrol_status_socket(self.allow_plc_work)
+                    control_status_socket(self.allow_plc_work)
                     loader_status_socket(self.work_finish)
                     # 记录第一个装车点料高和时间
                     if self.icps_differ == self.distance_1:
@@ -248,7 +274,7 @@ class LoadPoint:
                 elif self.icps_differ == self.distance_1 : # 判断车辆引导位置，执行相应装料点控制程序
                     self.load_control1()
                     self.height_load = self.load_height.data
-                    coontrol_status_socket(self.allow_plc_work)
+                    control_status_socket(self.allow_plc_work)
                     loader_status_socket(self.work_finish)
                     # 记录第二个装车点料高和时间
                     if self.icps_differ == self.distance_2:
@@ -257,7 +283,7 @@ class LoadPoint:
                 elif self.icps_differ == self.distance_2 : # 判断车辆引导位置，执行相应装料点控制程序
                     self.load_control2()
                     self.height_load = self.load_height.data
-                    coontrol_status_socket(self.allow_plc_work)
+                    control_status_socket(self.allow_plc_work)
                     loader_status_socket(self.work_finish)
                     # 记录第三个装车点料高和时间
                     if self.work_finish:
@@ -268,7 +294,7 @@ class LoadPoint:
                 if self.icps_differ == self.distance_0 : # 判断车辆引导位置，执行相应装料点控制程序
                     self.load_control0()
                     self.height_load = self.load_height.data
-                    coontrol_status_socket(self.allow_plc_work)
+                    control_status_socket(self.allow_plc_work)
                     loader_status_socket(self.work_finish)
                     # 记录第一个装车点料高和时间
                     if self.icps_differ == self.distance_2:
@@ -277,7 +303,7 @@ class LoadPoint:
                 if self.icps_differ == self.distance_2 : # 判断车辆引导位置，执行相应装料点控制程序
                     self.load_control2()
                     self.height_load = self.load_height.data
-                    coontrol_status_socket(self.allow_plc_work)
+                    control_status_socket(self.allow_plc_work)
                     loader_status_socket(self.work_finish)
                     # 记录第二个装车点料高和时间
                     if self.work_finish:
@@ -288,7 +314,7 @@ class LoadPoint:
                 if self.icps_differ == self.distance_0 : # 判断车辆引导位置，执行相应装料点控制程序
                     self.load_control0()
                     self.height_load = self.load_height.data
-                    coontrol_status_socket(self.allow_plc_work)
+                    control_status_socket(self.allow_plc_work)
                     loader_status_socket(self.work_finish)
                     # 记录第一个装车点料高和时间
                     if self.icps_differ == self.distance_1:
@@ -298,7 +324,7 @@ class LoadPoint:
                 elif self.icps_differ == self.distance_1 : # 判断车辆引导位置，执行相应装料点控制程序
                     self.load_control2()
                     self.height_load = self.load_height.data
-                    coontrol_status_socket(self.allow_plc_work)
+                    control_status_socket(self.allow_plc_work)
                     loader_status_socket(self.work_finish)
                     # 记录第二个装车点料高和时间
                     if self.work_finish:
@@ -310,7 +336,7 @@ class LoadPoint:
                 if self.icps_differ == self.distance_0 : # 判断车辆引导位置，执行相应装料点控制程序
                     self.load_control0()
                     self.height_load = self.load_height.data
-                    coontrol_status_socket(self.allow_plc_work)
+                    control_status_socket(self.allow_plc_work)
                     loader_status_socket(self.work_finish)
                 if self.allow_plc_work == 0:
                     self.work_finish = 1
@@ -319,7 +345,7 @@ class LoadPoint:
                     # 记录第一个装车点料高和时间
                     self.load_height1 = self.load_height.data
                     self.load_time1 = datetime.datetime.now()
-                    coontrol_status_socket(self.allow_plc_work)
+                    control_status_socket(self.allow_plc_work)
                     loader_status_socket(self.work_finish)
 
             if self.work_finish:
@@ -336,6 +362,23 @@ class LoadPoint:
                         "load_time2": self.load_time2,
                         "load_time3": self.load_time3,
                         "loadestimate": self.loadestimate,
+                        "loadheight": self.load_height.data,
+                        "loadstatus": self.loadstatus,
+                        "boxwidth": self.box_width,
+                        "boxheight": self.box_height,
+                        "truckload": self.truck_load,
+                        "loadcurrent": self.load_current,
+                        "truckweightin": self.truck_weight_out,
+                        "goodstype": self.goods_type
+                    }
+                )
+            else:
+                update_truck_content(
+                    truckid=self.truck_id,
+                    loaderid=self.loader_id,
+                    update_data={
+                        "loadheight": self.load_height.data,
+                        "loadstatus": self.loadstatus
                     }
                 )
 

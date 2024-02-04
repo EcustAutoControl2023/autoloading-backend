@@ -143,10 +143,10 @@ $(function () {
 
     // index 对应 sensor1, index1 对应 sensor2, 以此类推
     let index_table = {
-        'index': 0, 'index1': 1, 'index2': 2, 'index3': 3, 'index4': 4,
-        'index5': 5, 'index6': 6, 'index7': 7, 'index8': 8, 'index9': 9,
-        'index10': 10, 'index11': 11, 'index12': 12, 'index13': 13, 'index14': 14,
-        'index15': 15, 'index16': 16, 'index17': 17, 'index18': 18, 'index19': 19
+        'index1': 0, 'index2': 1, 'index3': 2, 'index4': 3,
+        'index5': 4, 'index6': 5, 'index7': 6, 'index8': 7, 'index9': 8,
+        'index10': 9, 'index11': 10, 'index12': 11, 'index13': 12, 'index14': 13,
+        'index15': 14, 'index16': 15, 'index17': 16, 'index18': 17, 'index19': 18, 'index20': 19
     };
     let index = index_table[url_name];
     tablename = sensor_tablename_list[index];

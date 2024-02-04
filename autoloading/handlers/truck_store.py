@@ -29,9 +29,11 @@ def update_truck_content(truckid:str, loaderid, update_data:dict):
             traffic.loadtime3 = value
         elif 'loadestimate' == key:
             traffic.loadestimate = value
+        elif 'loadstatus' == key:
+            traffic.loadstatus = value
 
     db.session.commit()
-    from .socket import traffic_data
+    from .socket import traffic_data, overview_data_request
     traffic_data({
         'truckid': traffic.truckid,
         'truckweightin': traffic.truckweightin,
@@ -43,6 +45,7 @@ def update_truck_content(truckid:str, loaderid, update_data:dict):
         'loaderid': traffic.loaderid,
         'modified': True
     })
+    overview_data_request(1) # 更新总览
 
 #@app.route('/store', methods=['POST'])  
 def insert_truck_content(req_time,
@@ -65,7 +68,11 @@ def insert_truck_content(req_time,
                          load_time2, # 需要更新
                          load_time3, # 需要更新
                          work_total,
-                         load_estimate # 需要更新
+                         load_estimate, # 需要更新
+                         jobid,
+                         loadstatus, # 需要更新
+                         location,
+                         stackpos
                          ):
     # load_level_height1: 物位计第一次装车高度
     # load_level_height2: 物位计第二次装车高度
@@ -93,11 +100,15 @@ def insert_truck_content(req_time,
                       loadtime3 = load_time3,
                       loadcurrent = load_current,
                       worktotal = work_total,
-                      loadestimate = load_estimate
+                      loadestimate = load_estimate,
+                      jobid=jobid,
+                      loadstatus=loadstatus,
+                      location=location,
+                      stackpos=stackpos
 )
     db.session.add(traffic)
     db.session.commit()
-    from .socket import traffic_data
+    from .socket import traffic_data, overview_data_request
     traffic_data({
         'truckid': truck_id,
         'truckweightin': truck_weight_in,
@@ -109,6 +120,7 @@ def insert_truck_content(req_time,
         'loaderid': loader_id,
         'modified': False
     })
+    overview_data_request(1) # 更新总览
 
 #更新车辆数据函数测试
 #@app.route('/update', methods=['POST'])  

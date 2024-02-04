@@ -21,6 +21,7 @@ from .index import (
     index18,
     index19,
     index20,
+    overview
 )
 
 from .dl import (
@@ -149,5 +150,6 @@ def init_app(app:Flask):
     app.add_url_rule('/index18', endpoint='index18', view_func=index18)
     app.add_url_rule('/index19', endpoint='index19', view_func=index19)
     app.add_url_rule('/index20', endpoint='index20', view_func=index20)
+    app.add_url_rule('/overview', endpoint='overview', view_func=overview)
     app.add_url_rule('/connect', endpoint='connect',view_func=connect, methods=['POST'])
     app.add_url_rule('/update', endpoint='update',view_func=update, methods=['POST'])

@@ -1,4 +1,5 @@
 import logging
+import re
 from flask import session
 from flask_socketio import SocketIO
 from ..config import TRUCK_CONFIRM, MEASURE_START
@@ -93,12 +94,61 @@ def tab_switch(data):
 
     LOADER.put(data['loader'])
 
-
-
-def coontrol_status_socket(val):  #发送控制器状态
+def control_status_socket(val):  #发送控制器状态
     global socketio
     socketio.emit('control_status', val)
 
 def loader_status_socket(val):  #发送装车状态
     global socketio
     socketio.emit('loading_status', val)
+
+@socketio.on('overview_data_request')
+def overview_data_request(data):
+    # FIXME: 打印前端发送的请求数据
+    logging.debug(f'#####traffic_data_request->data: { data }')
+    traffics = list()
+    for loadid in range(1, 21):
+        traffic = Traffic.query.filter_by(loaderid=loadid).order_by(Traffic.id.desc()).first()
+        traffics.append(traffic)
+        if traffic is not None:
+            logging.debug(f'#####traffic_data_request->traffic: { traffic.loaderid}')
+        else:
+            logging.debug("None")
+    # FIXME: 打印后端返回的车辆数据
+    logging.debug(f'#####traffic_data_request->traffics: { traffics }')
+    overview_data_history(list(reversed(traffics)))
+
+def overview_data_history(data):
+    global socketio
+    def getdata(data, field):
+        if data is None:
+            return None
+        try:
+            ret = eval(f'data.{field}')
+        except Exception:
+            return None
+        if ret is None:
+            return None
+        return ret
+    ret = list()
+    for overview_data in data:
+        ret.append({
+            'stackpos': getdata(overview_data, 'stackpos'),
+            'location': getdata(overview_data, 'location'),
+            'loadstatus': getdata(overview_data, 'loadstatus'),
+            'loadheight': getdata(overview_data, 'loadheight'),
+            'jobid': getdata(overview_data, 'jobid'),
+            'truckid': getdata(overview_data, 'truckid'),
+            'boxwidth': getdata(overview_data, 'boxwidth'),
+            'boxheight': getdata(overview_data, 'boxheight'),
+            'loadpoint1': getdata(overview_data, 'loadpoint1'),
+            'loadpoint2': getdata(overview_data, 'loadpoint2'),
+            'loadpoint3': getdata(overview_data, 'loadpoint3'),
+            'truckload': getdata(overview_data, 'truckload'),
+            'loadcurrent': getdata(overview_data, 'loadcurrent'),
+            'truckweightin': getdata(overview_data, 'truckweightin'),
+            'goodstype': getdata(overview_data, 'goodstype'),
+        })
+        # FIXME: 打印车辆数据列表
+        logging.debug(len(ret))
+    socketio.emit('overview_data_queue', ret)

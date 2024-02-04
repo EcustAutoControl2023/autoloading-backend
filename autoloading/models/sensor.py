@@ -76,6 +76,10 @@ class Traffic(db.Model):
     loadcurrent = db.Column(db.Float, nullable=False)
     loadestimate = db.Column(db.Float, nullable=True)
     worktotal = db.Column(db.Integer, nullable=False)
+    jobid = db.Column(db.Integer, nullable=True)
+    loadstatus = db.Column(db.String(20), nullable=True)
+    location = db.Column(db.String(20), nullable=True)
+    stackpos = db.Column(db.String(20), nullable=True)
 
     @staticmethod
     def before_insert(target,value,initiator):

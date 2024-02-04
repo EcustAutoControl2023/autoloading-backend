@@ -16,14 +16,14 @@ def index1():
 def login():
     # 跳过登录界面
     if ENV != 'production':
-        return redirect('index')
+        return redirect('index1')
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
 
         if username =='admin' and password == 'password':
             session['logged_in'] = True
-            return redirect('index')
+            return redirect('index1')
         else:
             return '无效密码或用户名'
     else:
@@ -85,3 +85,6 @@ def index19():
 
 def index20():
     return render_template('index20.html')
+
+def overview():
+    return render_template('overview.html')
