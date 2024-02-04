@@ -1,0 +1,359 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>自动装车系统平台</title>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/bootstrap.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/bootstrap.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/base.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/index.css')}}">
+    <script src="{{url_for('static',filename='js/source.js')}}"></script>
+    <script src="{{url_for('static',filename='js/socket.io.js')}}"></script>
+    <script src="{{url_for('static',filename='js/socket.io.js')}}"></script>
+    <script src="{{url_for('static',filename='js/popup.js')}}"></script>
+    <script src="{{url_for('static',filename='js/button.js')}}"></script>
+    <script src="{{url_for('static',filename='js/common.js')}}"></script>
+    <script src="{{url_for('static',filename='js/echarts.min.js')}}"></script>
+    <script src="{{url_for('static',filename='js/dataTool.js')}}"></script>
+    <script src="{{url_for('static',filename='js/index.js')}}"></script>
+
+    <script src="{{url_for('static',filename='js/jQuery.js')}}"></script>
+    <script src="{{url_for('static',filename='js/socket.js')}}"></script>
+    <style>
+        table,th,tr{
+            border-collapse:collapse;
+            font-size: 12px;
+            height:30px;
+
+        }
+        *{
+            color:white
+        }
+        .t_title{
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            font-size: 2.5em;
+            line-height: 80px;
+            color: #fff;
+        }
+        .form-label{
+            color:white;
+        }
+        p {color:white}
+        tbody tr:nth-child(1){
+            background-color: #072951;
+            box-shadow: 10px 0px 15px #2C58A6 inset, -10px 0px 15px#2C58A6 inset;
+        }
+        tbody tr:nth-child(3){
+            background-color: #072951;
+            box-shadow: 10px 0px 15px #2C58A6 inset, -10px 0px 15px#2C58A6 inset;
+        }
+        tbody tr:nth-child(5){
+            background-color: #072951;
+            box-shadow: 10px 0px 15px #2C58A6 inset, -10px 0px 15px#2C58A6 inset;
+        }
+        tbody tr:nth-child(7){
+            background-color: #072951;
+            box-shadow: 10px 0px 15px #2C58A6 inset, -10px 0px 15px#2C58A6 inset;
+        }
+        .textarea{
+            width: 100px;
+            color: black;
+        }
+        .submit-btn{
+            color: black;
+            font-size: 20px;
+            padding: 5px 10px;
+            border: 1px solid black;
+        }
+        .select{
+            color: black;
+        }
+        .img{
+
+            height: 100%;
+            width: 100%;
+        }
+        .t{
+            font-size: 15px;
+            line-height: 1.2;
+        }
+        .myprogress{
+            height: 20px;
+        }
+        .sxt {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+ 
+        }
+        .sxt img{
+            width: 59%;
+            height: 90%;
+            z-index: 999;
+        }
+        .echart {
+            position: relative;
+            top: auto;
+        }
+        .zlk{
+            text-align: center;
+            font-size: 1.3em;
+        }
+        .license {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+ 
+        }
+        .license img{
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+<!--header-->
+<div class="header">
+    <div class="bg_header">
+        <div class="zlk">
+            <b>装料口:</b><a href="./index1" id="loader_1">401南</a> <a href="{{url_for('index2')}}" id="loader_2">402南</a> <a href="{{url_for('index3')}}" id="loader_3">403南</a> <a href="{{url_for('index4')}}" id="loader_4">401北</a> <a href="{{url_for('index5')}}" id="loader_5">402北</a>
+            <a href="{{url_for('index6')}}" id="loader_6">403北</a> <a href="{{url_for('index7')}}" id="loader_7">501南</a> <a href="{{url_for('index8')}}" id="loader_8">502南</a> <a href="{{url_for('index9')}}" id="loader_9">503南</a> <a href="{{url_for('index10')}}" id="loader_10">501北</a> 
+            <a href="{{url_for('index11')}}" id="loader_11">502北</a> <a href="{{url_for('index12')}}" id="loader_12">503北</a> <a href="{{url_for('index13')}}" id="loader_13">601南</a> <a href="{{url_for('index14')}}" id="loader_14">602南</a> <a href="{{url_for('index15')}}" id="loader_15">603南</a>
+            <a href="{{url_for('index16')}}" id="loader_16">604南</a> <a href="{{url_for('index17')}}" id="loader_17">601北</a> <a href="{{url_for('index18')}}" id="loader_18">602北</a> <a href="{{url_for('index19')}}" id="loader_19">603北</a> <a href="{{url_for('index20')}}" id="loader_20">604北</a>
+        </div>
+        <div class="header_nav fl t_title"> 
+            自动装车系统平台
+        </div> 
+    </div>
+</div>
+
+<!--main-->
+<div class="data_content">
+    <div class="data_main">
+        <div class="main_left fl">
+            <div class="left_1" style="cursor: pointer;">
+	<!--左上边框-->
+                <div class="t_line_box">
+                    <i class="t_l_line"></i> 
+                    <i class="l_t_line"></i> 
+                </div> 
+                <!--右上边框-->
+                <div class="t_line_box">
+                    <i class="t_r_line"></i> 
+                    <i class="r_t_line"></i> 
+                </div> 
+                <!--左下边框-->
+                <div class="t_line_box">
+                    <i class="l_b_line"></i> 
+                    <i class="b_l_line"></i> 
+                </div> 
+                    <!--右下边框-->
+                    <div class="t_line_box">
+                    <i class="r_b_line"></i> 
+                    <i class="b_r_line"></i> 
+                </div> 
+                <div class="main_title">
+                  装车信息
+                </div>
+                <div class="t">
+                    <p id="loading progress">库厂:212  垛位:503B</p>
+                 </div><br>
+                <div class="t">
+                    <p id="loading status">装车状态：未装车</p><br/>
+                </div>
+                <div class="t">
+                    <p id="control status">控制器状态：未运行</p>
+                </div>
+                <div id="chart_1" class="chart" style="width:100%;height: 280px;"></div>
+            </div>
+            <div class="left_2" style="cursor: pointer;">
+                <!--左上边框-->
+                <div class="t_line_box">
+                    <i class="t_l_line"></i> 
+                    <i class="l_t_line"></i> 
+                </div> 
+                <!--右上边框-->
+                <div class="t_line_box">
+                    <i class="t_r_line"></i> 
+                    <i class="r_t_line"></i> 
+                </div> 
+                <!--左下边框-->
+                <div class="t_line_box">
+                    <i class="l_b_line"></i> 
+                    <i class="b_l_line"></i> 
+                </div> 
+                    <!--右下边框-->
+                    <div class="t_line_box">
+                    <i class="r_b_line"></i> 
+                    <i class="b_r_line"></i> 
+                </div> 
+                <div class="main_title">
+                    物料高度实时信息
+                </div>
+                    <div id="chart_3" class="echart t_btn7" style="width:100%;height: 280px;">
+                </div>
+            </div>
+        </div>
+        <div class="main_center fl">
+            <div class="center_text">
+                <!--左上边框-->
+                <div class="t_line_box">
+                    <i class="t_l_line"></i> 
+                    <i class="l_t_line"></i> 
+                </div> 
+                <!--右上边框-->
+                <div class="t_line_box">
+                    <i class="t_r_line"></i> 
+                    <i class="r_t_line"></i> 
+                </div> 
+                <!--左下边框-->
+                <div class="t_line_box">
+                    <i class="l_b_line"></i> 
+                    <i class="b_l_line"></i> 
+                </div> 
+                 <!--右下边框-->
+                 <div class="t_line_box">
+                    <i class="r_b_line"></i> 
+                    <i class="b_r_line"></i> 
+                </div> 
+                <div class="main_title">
+                    车流视频
+                </div>
+                <br>
+                    <div class="sxt">
+                        <img src="{{ url_for('video_feed11') }}" alt="視頻加載失敗"  style="color:red;font-size:18px">
+                    </div>
+            </div>
+            <div class="center_text1">
+                                <!--左上边框-->
+                                <div class="t_line_box">
+                                    <i class="t_l_line"></i> 
+                                    <i class="l_t_line"></i> 
+                                </div> 
+                                <!--右上边框-->
+                                <div class="t_line_box">
+                                    <i class="t_r_line"></i> 
+                                    <i class="r_t_line"></i> 
+                                </div> 
+                                <!--左下边框-->
+                                <div class="t_line_box">
+                                    <i class="l_b_line"></i> 
+                                    <i class="b_l_line"></i> 
+                                </div> 
+                                 <!--右下边框-->
+                                 <div class="t_line_box">
+                                    <i class="r_b_line"></i> 
+                                    <i class="b_r_line"></i> 
+                                </div> 
+                <div class="main_title">
+                    车辆数据
+                </div>
+                <table  width = "100%" height = "45%">
+                    <thead>
+                    <tr>
+                        <th style ="color: white" align="center">车牌号</th>
+                        <th style ="color: white" align="center">进场车重(t)</th>
+                        <th style ="color: white" align="center">出场车重(t)</th>
+                        <th style ="color: white" align="center">货物类别</th>
+                        <th style ="color: white" align="center">最大载重(t)</th>
+                        <th style ="color: white" align="center">本次装载量(t)</th>
+                        <th style ="color: white" align="center">仓库编号</th>
+                        <th style ="color: white" align="center">装料机编号</th>
+                    </tr>
+                    </thead>
+                    <tbody id="car-data">
+                    </tbody>
+                </table>
+                <div>
+                    <div id="dialog" {% if show_popup %}style="display: block;"{% endif %}>
+                    {% if show_popup %}
+                        <div class="contents">
+                            <div class="aclose">
+                                <span>现场确认</span>
+                                <div class="close">
+                                    <a class="a" href="javascript:close_confirm();"></a>
+                                </div>
+                                <div class="img_container">
+                                    <img src={{img_url}}>
+                                </div>
+                            </div>
+                            <div class="btn_container">
+                                <button class="btn" onclick="confirm()">允许作业</button>
+                            </div>
+                        </div>
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="main_right fr">
+            <div class="right_1">
+                <!--左上边框-->
+                <div class="t_line_box">
+                    <i class="t_l_line"></i> 
+                    <i class="l_t_line"></i> 
+                </div> 
+                <!--右上边框-->
+                <div class="t_line_box">
+                    <i class="t_r_line"></i> 
+                    <i class="r_t_line"></i> 
+                </div> 
+                <!--左下边框-->
+                <div class="t_line_box">
+                    <i class="l_b_line"></i> 
+                    <i class="b_l_line"></i> 
+                </div> 
+                    <!--右下边框-->
+                    <div class="t_line_box">
+                    <i class="r_b_line"></i> 
+                    <i class="b_r_line"></i> 
+                </div> 
+                <div class="main_title">
+                    视频画面1(车头画面)
+                </div>
+                <div class="license">
+                        <img src="{{ url_for('license_video_feed11') }}" alt="視頻加載失敗"  style="color:red;font-size:18px">
+                </div>
+            </div>
+           <div class="right_2">
+                <!--左上边框-->
+                <div class="t_line_box">
+                    <i class="t_l_line"></i> 
+                    <i class="l_t_line"></i> 
+                </div> 
+                <!--右上边框-->
+                <div class="t_line_box">
+                    <i class="t_r_line"></i> 
+                    <i class="r_t_line"></i> 
+                </div> 
+                <!--左下边框-->
+                <div class="t_line_box">
+                    <i class="l_b_line"></i> 
+                    <i class="b_l_line"></i> 
+                </div> 
+                    <!--右下边框-->
+                    <div class="t_line_box">
+                    <i class="r_b_line"></i> 
+                    <i class="b_r_line"></i> 
+                </div> 
+                <div class="main_title">
+                    视频画面2(车尾画面)
+                </div>
+                <div class="video">
+                    <video controls>
+                        <source src="{{url_for('static',filename='video/2023-08-16 10-48-31.mp4')}}" type="video/mp4">
+                    </video>
+                </div>
+           </div>
+        </div>
+    </div>
+</div>
+<script src="{{url_for('static',filename='js/control status.js')}}"></script>
+</body>
+
+</html>

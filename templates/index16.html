@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8">
@@ -18,8 +18,7 @@
     <script src="{{url_for('static',filename='js/echarts.min.js')}}"></script>
     <script src="{{url_for('static',filename='js/dataTool.js')}}"></script>
     <script src="{{url_for('static',filename='js/index.js')}}"></script>
-    <script src="{{url_for('static',filename='js/control status.js')}}"></script>
-    <script src="{{url_for('static',filename='js/loading status.py')}}"></script>
+
     <script src="{{url_for('static',filename='js/jQuery.js')}}"></script>
     <script src="{{url_for('static',filename='js/socket.js')}}"></script>
     <style>
@@ -92,7 +91,7 @@
  
         }
         .sxt img{
-            width: 80%;
+            width: 59%;
             height: 90%;
             z-index: 999;
         }
@@ -100,14 +99,34 @@
             position: relative;
             top: auto;
         }
+        .zlk{
+            text-align: center;
+            font-size: 1.3em;
+        }
+        .license {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+ 
+        }
+        .license img{
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+        }
     </style>
 </head>
 <body>
-
 <!--header-->
 <div class="header">
     <div class="bg_header">
-        <div class="header_nav fl t_title">
+        <div class="zlk">
+            <b>装料口:</b><a href="./index1" id="loader_1">401南</a> <a href="{{url_for('index2')}}" id="loader_2">402南</a> <a href="{{url_for('index3')}}" id="loader_3">403南</a> <a href="{{url_for('index4')}}" id="loader_4">401北</a> <a href="{{url_for('index5')}}" id="loader_5">402北</a>
+            <a href="{{url_for('index6')}}" id="loader_6">403北</a> <a href="{{url_for('index7')}}" id="loader_7">501南</a> <a href="{{url_for('index8')}}" id="loader_8">502南</a> <a href="{{url_for('index9')}}" id="loader_9">503南</a> <a href="{{url_for('index10')}}" id="loader_10">501北</a> 
+            <a href="{{url_for('index11')}}" id="loader_11">502北</a> <a href="{{url_for('index12')}}" id="loader_12">503北</a> <a href="{{url_for('index13')}}" id="loader_13">601南</a> <a href="{{url_for('index14')}}" id="loader_14">602南</a> <a href="{{url_for('index15')}}" id="loader_15">603南</a>
+            <a href="{{url_for('index16')}}" id="loader_16">604南</a> <a href="{{url_for('index17')}}" id="loader_17">601北</a> <a href="{{url_for('index18')}}" id="loader_18">602北</a> <a href="{{url_for('index19')}}" id="loader_19">603北</a> <a href="{{url_for('index20')}}" id="loader_20">604北</a>
+        </div>
+        <div class="header_nav fl t_title"> 
             自动装车系统平台
         </div> 
     </div>
@@ -142,13 +161,13 @@
                   装车信息
                 </div>
                 <div class="t">
-                    <p id="loading status">装车状态：未装车/正在装车</p><br/>
+                    <p id="loading progress">库厂:212  垛位:604A</p>
+                 </div><br>
+                <div class="t">
+                    <p id="loading status">装车状态：未装车</p><br/>
                 </div>
                 <div class="t">
-                  <!--  <p id="loading progress">装车进度：</p><progress value="20" max="100" class="myprogress"></progress> -->
-                </div><br>
-                <div class="t">
-                    <p id="control status">控制器状态：未启动/已启动</p>
+                    <p id="control status">控制器状态：未运行</p>
                 </div>
                 <div id="chart_1" class="chart" style="width:100%;height: 280px;"></div>
             </div>
@@ -207,7 +226,7 @@
                 </div>
                 <br>
                     <div class="sxt">
-                        <img src="{{ url_for('video_feed') }}">
+                        <img src="{{ url_for('video_feed15') }}" alt="視頻加載失敗"  style="color:red;font-size:18px">
                     </div>
             </div>
             <div class="center_text1">
@@ -248,43 +267,8 @@
                     </tr>
                     </thead>
                     <tbody id="car-data">
-                    <!-- {% for traffic in traffics %} -->
-                    <!-- <tr> -->
-                        <!-- <td style ="color: white" align="center">{{traffic.truckid}}</td>
-                        <td style ="color: white" align="center">{{traffic.truckweightin}}</td>
-                        <td style ="color: white" align="center">{{traffic.truckweightout}}</td>
-                        <td style ="color: white" align="center">{{traffic.goodstype}}</td>
-                        <td style ="color: white" align="center">{{traffic.truckload}}</td>
-                        <td style ="color: white" align="center">{{traffic.loadcurrent}}</td>
-                        <td style ="color: white" align="center">{{traffic.storeid}}</td>
-                        <td style ="color: white" align="center">{{traffic.loaderid}}</td> -->
-                    <!-- </tr> -->
-                    <!-- {% endfor %} -->
                     </tbody>
                 </table>
-                <!-- <script>
-                    function updateCarTable() {
-                        $.ajax({
-                            url: '/get_cars',
-                            type: 'GET',
-                            dataType: 'json',
-                            success: function(data) {
-                                var carTable = $('#car-table tbody');
-                                carTable.empty();
-                                data.forEach(function(car) {
-                                    var row = '<tr><td>' + traffic.truckid + '</td><td>' + traffic.truckweightin + '</td><td>' + traffic.truckweightout + '</td><td>' + traffic.goodstype + '</td><td>' + traffic.truckload + '</td><td>' + traffic.loadcurrent + '</td><td>' + traffic.storeid + '</td><td>' + traffic.loaderid + '</td></tr>';
-                                    carTable.append(row);
-                                });
-                            }
-                        });
-                    }
-            
-                    // 初始化时调用一次更新函数
-                    updateCarTable();
-            
-                    // 每隔5秒调用一次更新函数
-                    setInterval(updateCarTable, 5000);
-                </script> -->
                 <div>
                     <div id="dialog" {% if show_popup %}style="display: block;"{% endif %}>
                     {% if show_popup %}
@@ -332,10 +316,8 @@
                 <div class="main_title">
                     视频画面1(车头画面)
                 </div>
-                <div class="video">
-                    <video controls>
-                        <source src="{{url_for('static',filename='video/2023-08-16 10-47-19.mp4')}}" type="video/mp4">
-                    </video>
+                <div class="license">
+                        <img src="{{ url_for('license_video_feed15') }}" alt="視頻加載失敗"  style="color:red;font-size:18px">
                 </div>
             </div>
            <div class="right_2">
@@ -371,6 +353,7 @@
         </div>
     </div>
 </div>
+<script src="{{url_for('static',filename='js/control status.js')}}"></script>
 </body>
 
 </html>

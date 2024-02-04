@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>自动装车系统平台</title>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/bootstrap.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/bootstrap.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/base.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/index.css')}}">
+    <script src="{{url_for('static',filename='js/source.js')}}"></script>
+    <script src="{{url_for('static',filename='js/socket.io.js')}}"></script>
+    <script src="{{url_for('static',filename='js/socket.io.js')}}"></script>
+    <script src="{{url_for('static',filename='js/popup.js')}}"></script>
+    <script src="{{url_for('static',filename='js/button.js')}}"></script>
+    <script src="{{url_for('static',filename='js/common.js')}}"></script>
+    <script src="{{url_for('static',filename='js/echarts.min.js')}}"></script>
+    <script src="{{url_for('static',filename='js/dataTool.js')}}"></script>
+    <script src="{{url_for('static',filename='js/queue.js')}}"></script>
+    <script src="{{url_for('static',filename='js/overview.js')}}"></script>
+
+    <script src="{{url_for('static',filename='js/jQuery.js')}}"></script>
+    <script src="{{url_for('static',filename='js/socket.js')}}"></script>
+    <script>function videoERR(){document.getElementById("license").innerHTML="加載失敗"}</script>
+    <style>
+        table,th,tr{
+            border-collapse:collapse;
+            font-size: 13px;
+            height:33px;
+
+        }
+        *{
+            color:white
+        }
+        .t_title{
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            font-size: 2.5em;
+            line-height: 80px;
+            color: #fff;
+        }
+        .form-label{
+            color:white;
+        }
+        p {color:white}
+        tbody tr:nth-child(odd){
+            background-color: #072951;
+            box-shadow: 10px 0px 15px #2C58A6 inset, -10px 0px 15px#2C58A6 inset;
+        }
+        /* tbody tr:nth-child(3){ */
+        /*     background-color: #072951; */
+        /*     box-shadow: 10px 0px 15px #2C58A6 inset, -10px 0px 15px#2C58A6 inset; */
+        /* } */
+        /* tbody tr:nth-child(5){ */
+        /*     background-color: #072951; */
+        /*     box-shadow: 10px 0px 15px #2C58A6 inset, -10px 0px 15px#2C58A6 inset; */
+        /* } */
+        /* tbody tr:nth-child(7){ */
+        /*     background-color: #072951; */
+        /*     box-shadow: 10px 0px 15px #2C58A6 inset, -10px 0px 15px#2C58A6 inset; */
+        }
+        .textarea{
+            width: 100px;
+            color: black;
+        }
+        .submit-btn{
+            color: black;
+            font-size: 20px;
+            padding: 5px 10px;
+            border: 1px solid black;
+        }
+        .select{
+            color: black;
+        }
+        .img{
+
+            height: 100%;
+            width: 100%;
+        }
+        .t{
+            font-size: 15px;
+            line-height: 1.2;
+        }
+        .myprogress{
+            height: 20px;
+        }
+        .sxt {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+ 
+        }
+        .sxt img{
+            width: 59%;
+            height: 100%;
+            z-index: 999;
+        }
+        .echart {
+            position: relative;
+            top: auto;
+        }
+        .zlk{
+            text-align: center;
+            font-size: 1.3em;
+        }
+        .license {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+ 
+        }
+        .license img{
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+<!--header-->
+<div class="header">
+    <div class="bg_header">
+        <div class="zlk">
+            <b>装料口:</b><a href="index1" id="loader_1">401南</a> <a href="{{url_for('index2')}}" id="loader_2">402南</a> <a href="{{url_for('index3')}}" id="loader_3">403南</a> <a href="{{url_for('index4')}}" id="loader_4">401北</a> <a href="{{url_for('index5')}}" id="loader_5">402北</a>
+            <a href="{{url_for('index6')}}" id="loader_6">403北</a> <a href="{{url_for('index7')}}" id="loader_7">501南</a> <a href="{{url_for('index8')}}" id="loader_8">502南</a> <a href="{{url_for('index9')}}" id="loader_9">503南</a> <a href="{{url_for('index10')}}" id="loader_10">501北</a> 
+            <a href="{{url_for('index11')}}" id="loader_11">502北</a> <a href="{{url_for('index12')}}" id="loader_12">503北</a> <a href="{{url_for('index13')}}" id="loader_13">601南</a> <a href="{{url_for('index14')}}" id="loader_14">602南</a> <a href="{{url_for('index15')}}" id="loader_15">603南</a>
+            <a href="{{url_for('index16')}}" id="loader_16">604南</a> <a href="{{url_for('index17')}}" id="loader_17">601北</a> <a href="{{url_for('index18')}}" id="loader_18">602北</a> <a href="{{url_for('index19')}}" id="loader_19">603北</a> <a href="{{url_for('index20')}}" id="loader_20">604北</a>
+        </div>
+        <div class="header_nav fl t_title"> 
+            自动装车系统平台
+        </div> 
+    </div>
+</div>
+
+<!--main-->
+<div class="data_content">
+    <div class="data_main" style="height: calc(100% - 180px); position: absolute;">
+        <div class="main_center fl" style="width: 100%; height: 100%;">
+            <div class="center_text1" style="height: 100%;">
+                <!--左上边框-->
+                <div class="t_line_box">
+                    <i class="t_l_line"></i> 
+                    <i class="l_t_line"></i> 
+                </div> 
+                <!--右上边框-->
+                <div class="t_line_box">
+                    <i class="t_r_line"></i> 
+                    <i class="r_t_line"></i> 
+                </div> 
+                <!--左下边框-->
+                <div class="t_line_box">
+                    <i class="l_b_line"></i> 
+                    <i class="b_l_line"></i> 
+                </div> 
+                 <!--右下边框-->
+                 <div class="t_line_box">
+                    <i class="r_b_line"></i> 
+                    <i class="b_r_line"></i> 
+                </div> 
+                <div class="main_title">
+                    数据总览
+                </div>
+                <div style="padding-left: 60px; padding-right: 60px;">
+                    <table  width = "100%" height = "100%">
+                        <thead>
+                            <tr>
+                                <th style ="color: white" align="center">垛&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;位</th>
+                                <th style ="color: white" align="center">区&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;域</th>
+                                <th style ="color: white" align="center">装车状态</th>
+                                <th style ="color: white" align="center">料高</th>
+                                <th style ="color: white" align="center">任务ID</th>
+                                <th style ="color: white" align="center">车牌</th>
+                                <th style ="color: white" align="center">箱体宽</th>
+                                <th style ="color: white" align="center">箱体高</th>
+                                <th style ="color: white" align="center">前装车点</th>
+                                <th style ="color: white" align="center">中装车点</th>
+                                <th style ="color: white" align="center">后装车点</th>
+                                <th style ="color: white" align="center">车辆最大载重</th>
+                                <th style ="color: white" align="center">本次装载量</th>
+                                <th style ="color: white" align="center">进场车辆重量</th>
+                                <th style ="color: white" align="center">装载粮食种类</th>
+                            </tr>
+                        </thead>
+                        <tbody id="overview-data">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{{url_for('static',filename='js/control status.js')}}"></script>
+</body>
+
+</html>
