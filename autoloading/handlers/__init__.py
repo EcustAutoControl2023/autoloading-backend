@@ -24,8 +24,8 @@ from .index import (
     overview
 )
 
-from .dl import (
-    dl
+from .login import (
+    login_1
 )
 
 from .video import (
@@ -89,7 +89,7 @@ from .truck_store import(
 def init_app(app:Flask):
     socketio.init_app(app=app, cors_allowed_origins='*')
     app.add_url_rule('/', endpoint='login', view_func=login, methods=['GET','POST'])
-    app.add_url_rule('/dl', endpoint='dl', view_func=dl)
+    app.add_url_rule('/login_1', endpoint='login_1', view_func=login_1)
     app.add_url_rule('/video_feed', endpoint='video_feed', view_func=video_feed)
     app.add_url_rule('/video_feed1', endpoint='video_feed1', view_func=video_feed1)
     app.add_url_rule('/video_feed2', endpoint='video_feed2', view_func=video_feed2)
