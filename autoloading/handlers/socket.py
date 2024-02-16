@@ -110,10 +110,6 @@ def overview_data_request(data):
     for loadid in range(1, 21):
         traffic = Traffic.query.filter_by(loaderid=loadid).order_by(Traffic.id.desc()).first()
         traffics.append(traffic)
-        if traffic is not None:
-            logging.debug(f'#####traffic_data_request->traffic: { traffic.loaderid}')
-        else:
-            logging.debug("None")
     # FIXME: 打印后端返回的车辆数据
     logging.debug(f'#####traffic_data_request->traffics: { traffics }')
     overview_data_history(list(reversed(traffics)))
@@ -149,6 +145,4 @@ def overview_data_history(data):
             'truckweightin': getdata(overview_data, 'truckweightin'),
             'goodstype': getdata(overview_data, 'goodstype'),
         })
-        # FIXME: 打印车辆数据列表
-        logging.debug(len(ret))
     socketio.emit('overview_data_queue', ret)

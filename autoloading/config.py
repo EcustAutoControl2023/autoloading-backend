@@ -1,11 +1,11 @@
 from queue import Queue
 import os
 import errno
-from re import sub
-import sys
 import logging
 
-from sqlalchemy.orm.base import NON_PERSISTENT_OK
+
+# apscheduler 任务启动状态
+RUNNING = True
 
 ENV = 'development'
 # ENV = 'production'

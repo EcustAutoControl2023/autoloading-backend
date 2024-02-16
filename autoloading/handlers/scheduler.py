@@ -1,8 +1,9 @@
 import logging
-from apscheduler.schedulers.background import BackgroundScheduler
-import datetime
+import datetime, time
 from flask import Flask
 from autoloading.handlers.loaderpoint import LoadPoint, load_point_dict
+from autoloading.config import RUNNING
+from apscheduler.schedulers.background import BackgroundScheduler
 
 def sensor(app, loadpoint:LoadPoint):
     from autoloading.handlers.sensor import read_per_second
@@ -10,15 +11,18 @@ def sensor(app, loadpoint:LoadPoint):
         read_per_second(loadpoint)
 
 def schedulers_start(app:Flask):
-    # 后台任务，只启动一次
+    global RUNNING
     scheduler = BackgroundScheduler()
-    # for key, value in LoadPoint.loader_index_dict.items():
-    #     logging.debug(f'SensorList[{value}] is {LoadPoint.SensorList[value]}')
-    #     scheduler.add_job(sensor, 'date', run_date=datetime.datetime.now() + datetime.timedelta(seconds=value), args=(app, LoadPoint.SensorList[value], key))
-    # 每隔一秒启动一次
-    for key, value in LoadPoint.loader_index_dict.items():
-        # FIXME: 检查定时任务是否启动
-        logging.debug(f'开始接收装料点{key}的传感器数据！')
-        scheduler.add_job(sensor, 'interval', seconds=1, args=(app, load_point_dict[key]))
 
-    scheduler.start()
+    # 每隔一秒启动一次，同一个进程中不重新添加job和重启
+    if RUNNING:
+        for key, value in LoadPoint.loader_index_dict.items():
+            # FIXME: 检查定时任务是否启动
+            logging.debug(f'开始接收装料点{key}的传感器数据！')
+            scheduler.add_job(sensor, 'interval', seconds=1, args=(app, load_point_dict[key]))
+
+    RUNNING = False
+    try:
+        scheduler.start()
+    except:
+        pass

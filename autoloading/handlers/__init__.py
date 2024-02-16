@@ -1,7 +1,6 @@
 from flask import Flask
 from .index import (
     index1,
-    login,
     index2,
     index3,
     index4,
@@ -25,7 +24,7 @@ from .index import (
 )
 
 from .login import (
-    login_1
+    login
 )
 
 from .video import (
@@ -80,7 +79,7 @@ from .socket import(
     socketio
 )
 
-from .truck_store import( 
+from .truck_store import(
     update
 )
 
@@ -89,7 +88,7 @@ from .truck_store import(
 def init_app(app:Flask):
     socketio.init_app(app=app, cors_allowed_origins='*')
     app.add_url_rule('/', endpoint='login', view_func=login, methods=['GET','POST'])
-    app.add_url_rule('/login_1', endpoint='login_1', view_func=login_1)
+    app.add_url_rule('/login', endpoint='login', view_func=login)
     app.add_url_rule('/video_feed', endpoint='video_feed', view_func=video_feed)
     app.add_url_rule('/video_feed1', endpoint='video_feed1', view_func=video_feed1)
     app.add_url_rule('/video_feed2', endpoint='video_feed2', view_func=video_feed2)

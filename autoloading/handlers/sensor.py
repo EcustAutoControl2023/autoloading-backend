@@ -6,33 +6,6 @@ import struct
 from autoloading.models import db
 
 
-def sread_per_second(loadpoint):  # 每秒读取一次物位计数据
-
-    int_distance = 0
-    current_time = datetime.datetime.now()
-    from .socket import sensor_data
-
-    received_data = -1
-
-    if loadpoint.Sensor.__tablename__ == 'sensor1':
-        received_data = 1
-    elif loadpoint.Sensor.__tablename__ == 'sensor2':
-        received_data = 2
-    elif loadpoint.Sensor.__tablename__ == 'sensor3':
-        received_data = 3
-
-    int_distance = int(received_data)
-    latest_data = loadpoint.Sensor.query.order_by(loadpoint.Sensor.id.desc()).first()
-    current_time = datetime.datetime.now()
-    if (latest_data is None) or ((current_time - latest_data.time).total_seconds() > 1):
-        insert_data(loadpoint.Sensor,int_distance, current_time)
-
-        # 发送物位计数据到前端
-        sensor_data({
-            'value': int_distance,
-            'tablename': loadpoint.Sensor.__tablename__
-        })
-
 def read_per_second(loadpoint):  # 每秒读取一次物位计数据
 
     int_distance = 0

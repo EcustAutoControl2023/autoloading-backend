@@ -1,5 +1,4 @@
-from flask import redirect, render_template, request, session
-from ..config import ENV
+from flask import render_template, session
 from autoloading.models.sensor import Traffic
 
 
@@ -11,23 +10,6 @@ def index1():
     traffics1 = Traffic.query.all()
 
     return render_template('index1.html',traffics=traffics1)
-
-
-def login():
-    # 跳过登录界面
-    if ENV != 'production':
-        return redirect('index1')
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        if username =='admin' and password == 'password':
-            session['logged_in'] = True
-            return redirect('index1')
-        else:
-            return '无效密码或用户名'
-    else:
-        return render_template('dl.html')
 
 def index2():
     return render_template('index2.html')
