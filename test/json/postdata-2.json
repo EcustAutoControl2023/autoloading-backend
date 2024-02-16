@@ -1,0 +1,21 @@
+{
+    "data_type": 0,
+    "time": "2023/10/20 9:26:16",
+    "operating_stations": {
+        "job_id": "123456",
+        "truck_id": "闽D123456",
+        "box_length": 10.2,
+        "box_width": 5.6,
+        "box_height": 2.8,
+        "distance_0": 1.1,
+        "distance_1": 1.1,
+        "distance_2": 2.3,
+        "truck_load": 40.2,
+        "load_current": 20.6,
+        "truck_weight_in": 20,
+        "goods_type": "木片",
+        "store_id": 1,
+        "loader_id": 2,
+        "picture_url_plate": "https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png"
+    }
+}
