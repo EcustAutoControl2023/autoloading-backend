@@ -16,13 +16,12 @@ def schedulers_start(app:Flask):
 
     # 每隔一秒启动一次，同一个进程中不重新添加job和重启
     if RUNNING:
+        RUNNING = False
         for key, value in LoadPoint.loader_index_dict.items():
             # FIXME: 检查定时任务是否启动
             logging.debug(f'开始接收装料点{key}的传感器数据！')
             scheduler.add_job(sensor, 'interval', seconds=1, args=(app, load_point_dict[key]))
-
-    RUNNING = False
     try:
         scheduler.start()
-    except:
-        pass
+    except Exception as e:
+        logging.info(e)

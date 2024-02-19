@@ -80,6 +80,10 @@ class Traffic(db.Model):
     loadstatus = db.Column(db.String(20), nullable=True)
     location = db.Column(db.String(20), nullable=True)
     stackpos = db.Column(db.String(20), nullable=True)
+    loadheight = db.Column(db.Float, nullable=True)
+    loadpoint1 = db.Column(db.Float, nullable=True)
+    loadpoint2 = db.Column(db.Float, nullable=True)
+    loadpoint3 = db.Column(db.Float, nullable=True)
 
     @staticmethod
     def before_insert(target,value,initiator):

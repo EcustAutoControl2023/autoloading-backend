@@ -98,9 +98,9 @@ function get_overview_data(data)
     {
         overview_data_queue.clear();
     }
-    for (let i = 0; i < data.length; i++) {
+    for (let i = data.length; i > 0; i--) {
         // 将数据添加到队列中
-        overview_data_queue.push(data[i]);
+        overview_data_queue.push(data[i-1]);
     }
     console.log(overview_data_queue.len);
     show_table_data('#overview-data', overview_data_queue);

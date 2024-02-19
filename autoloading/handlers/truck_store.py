@@ -2,7 +2,6 @@ import logging
 from flask import jsonify, request
 from autoloading.models import db
 from autoloading.models.sensor import Traffic
-import datetime
 
 
 # TODO: 实现功能：车辆信息更新
@@ -31,6 +30,15 @@ def update_truck_content(truckid:str, loaderid, update_data:dict):
             traffic.loadestimate = value
         elif 'loadstatus' == key:
             traffic.loadstatus = value
+        elif 'loadheight' == key:
+            traffic.loadheight = value
+        elif 'loadpoint1' == key:
+            traffic.loadpoint1 = value
+        elif 'loadpoint2' == key:
+            traffic.loadpoint2 = value
+        elif 'loadpoint3' == key:
+            traffic.loadpoint3 = value
+
 
     db.session.commit()
     from .socket import traffic_data, overview_data_request
@@ -45,7 +53,7 @@ def update_truck_content(truckid:str, loaderid, update_data:dict):
         'loaderid': traffic.loaderid,
         'modified': True
     })
-    overview_data_request(1) # 更新总览
+    overview_data_request("后端主动更新") # 更新总览
 
 #@app.route('/store', methods=['POST'])  
 def insert_truck_content(req_time,
@@ -72,7 +80,11 @@ def insert_truck_content(req_time,
                          jobid,
                          loadstatus, # 需要更新
                          location,
-                         stackpos
+                         stackpos, 
+                         load_height, # 需要更新
+                         loadpoint1,
+                         loadpoint2,
+                         loadpoint3
                          ):
     # load_level_height1: 物位计第一次装车高度
     # load_level_height2: 物位计第二次装车高度
@@ -104,8 +116,13 @@ def insert_truck_content(req_time,
                       jobid=jobid,
                       loadstatus=loadstatus,
                       location=location,
-                      stackpos=stackpos
-)
+                      stackpos=stackpos,
+                      loadheight=load_height,
+                      loadpoint1=loadpoint1,
+                      loadpoint2=loadpoint2,
+                      loadpoint3=loadpoint3
+                      )
+
     db.session.add(traffic)
     db.session.commit()
     from .socket import traffic_data, overview_data_request

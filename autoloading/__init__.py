@@ -33,10 +33,10 @@ def create_app(test_config=None):
 setup_logging()
 
 
-if __name__ == '__main__':
-
-    app = create_app()
-
-    # 打印所有路由
-    with app.app_context():
-        logging.info(app.url_map)
+# if __name__ == '__main__':
+#
+#     app = create_app()
+#
+#     # 打印所有路由
+#     with app.app_context():
+#         logging.info(app.url_map)

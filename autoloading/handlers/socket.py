@@ -1,8 +1,7 @@
 import logging
-import re
 from flask import session
 from flask_socketio import SocketIO
-from ..config import TRUCK_CONFIRM, MEASURE_START
+from ..config import TRUCK_CONFIRM
 from autoloading.models.sensor import Traffic
 from autoloading.config import LOADER
 
@@ -67,10 +66,10 @@ def traffic_data_history(data):
 def traffic_data_request(data):
     global LOADER
     # FIXME: 打印前端发送的请求数据
-    logging.debug(f'#####traffic_data_request->data: { data }')
+    # logging.debug(f'#####traffic_data_request->data: { data }')
     traffics = Traffic.query.filter_by(loaderid=LOADER.queue[0]).order_by(Traffic.id.desc()).limit(data['number']).all()
     # FIXME: 打印后端返回的车辆数据
-    logging.debug(f'#####traffic_data_request->traffics: { traffics }')
+    # logging.debug(f'#####traffic_data_request->traffics: { traffics }')
     traffic_data_history(list(reversed(traffics)))
 
 # 向前端发送数据库最新数据
@@ -86,7 +85,7 @@ def tab_switch(data):
     global LOADER
 
     # FIXME: 打印当前选择的页面的数据表名
-    logging.debug(f'####tab_switch: { data }')
+    # logging.debug(f'####tab_switch: { data }')
 
     # 清空队列
     while not LOADER.empty():
@@ -105,20 +104,42 @@ def loader_status_socket(val):  #发送装车状态
 @socketio.on('overview_data_request')
 def overview_data_request(data):
     # FIXME: 打印前端发送的请求数据
-    logging.debug(f'#####traffic_data_request->data: { data }')
+    # logging.debug(f'#####traffic_data_request->data: { data }')
     traffics = list()
     for loadid in range(1, 21):
         traffic = Traffic.query.filter_by(loaderid=loadid).order_by(Traffic.id.desc()).first()
         traffics.append(traffic)
     # FIXME: 打印后端返回的车辆数据
-    logging.debug(f'#####traffic_data_request->traffics: { traffics }')
-    overview_data_history(list(reversed(traffics)))
+    # logging.debug(f'#####traffic_data_request->traffics: { traffics }')
+    overview_data_history(list(traffics))
 
 def overview_data_history(data):
     global socketio
-    def getdata(data, field):
+    def getdata(data, field, i):
+        # 从LoaderPoint中生成默认的数据
+        default_data_list = list()
+        from autoloading.handlers.loaderpoint import LoadPoint
+        for stackpos, location in zip(LoadPoint.StackposList, LoadPoint.LocationList):
+            default_data = {
+                'stackpos': stackpos,
+                'location': location,
+                'loadstatus': '未装车',
+                'loadheight': None,
+                'jobid': None,
+                'truckid': None,
+                'boxwidth': None,
+                'boxheight': None,
+                'loadpoint1': None,
+                'loadpoint2': None,
+                'loadpoint3': None,
+                'truckload': None,
+                'loadcurrent': None,
+                'truckweightin': None,
+                'goodstype': None,
+            }
+            default_data_list.append(default_data)
         if data is None:
-            return None
+            return default_data_list[i][field]
         try:
             ret = eval(f'data.{field}')
         except Exception:
@@ -127,22 +148,26 @@ def overview_data_history(data):
             return None
         return ret
     ret = list()
+    # logging.debug(f'#####overview_data_history->data: { data }')
+
+    i = 0
     for overview_data in data:
         ret.append({
-            'stackpos': getdata(overview_data, 'stackpos'),
-            'location': getdata(overview_data, 'location'),
-            'loadstatus': getdata(overview_data, 'loadstatus'),
-            'loadheight': getdata(overview_data, 'loadheight'),
-            'jobid': getdata(overview_data, 'jobid'),
-            'truckid': getdata(overview_data, 'truckid'),
-            'boxwidth': getdata(overview_data, 'boxwidth'),
-            'boxheight': getdata(overview_data, 'boxheight'),
-            'loadpoint1': getdata(overview_data, 'loadpoint1'),
-            'loadpoint2': getdata(overview_data, 'loadpoint2'),
-            'loadpoint3': getdata(overview_data, 'loadpoint3'),
-            'truckload': getdata(overview_data, 'truckload'),
-            'loadcurrent': getdata(overview_data, 'loadcurrent'),
-            'truckweightin': getdata(overview_data, 'truckweightin'),
-            'goodstype': getdata(overview_data, 'goodstype'),
+            'stackpos': getdata(overview_data, 'stackpos', i),
+            'location': getdata(overview_data, 'location', i),
+            'loadstatus': getdata(overview_data, 'loadstatus', i),
+            'loadheight': getdata(overview_data, 'loadheight', i),
+            'jobid': getdata(overview_data, 'jobid', i),
+            'truckid': getdata(overview_data, 'truckid', i),
+            'boxwidth': getdata(overview_data, 'boxwidth', i),
+            'boxheight': getdata(overview_data, 'boxheight', i),
+            'loadpoint1': getdata(overview_data, 'loadpoint1', i),
+            'loadpoint2': getdata(overview_data, 'loadpoint2', i),
+            'loadpoint3': getdata(overview_data, 'loadpoint3', i),
+            'truckload': getdata(overview_data, 'truckload', i),
+            'loadcurrent': getdata(overview_data, 'loadcurrent', i),
+            'truckweightin': getdata(overview_data, 'truckweightin', i),
+            'goodstype': getdata(overview_data, 'goodstype', i),
         })
+        i+=1
     socketio.emit('overview_data_queue', ret)

@@ -38,7 +38,7 @@ class LoadPoint:
     # 定义装料点的index列表
     loader_index_list = [i for i in range(loader_num)]
     loader_index_dict = dict(zip(loader_id_list, loader_index_list))
-    logging.debug(f'loader_index_dict: {loader_index_dict}')
+    # logging.debug(f'loader_index_dict: {loader_index_dict}')
     # 定义类变量SensorList, 用于存储每个Sensor类
     SensorList = list()
     for i in range(loader_num):
@@ -120,7 +120,7 @@ class LoadPoint:
         self.logging = create_logger(f'装料点-{loader_id}') # 装料点日志
 
         self.jobid = 0
-        self.loadstatus = '未装料'
+        self.loadstatus = '未装车'
         self.location = LoadPoint.LocationList[LoadPoint.loader_index_dict[loader_id]]
         self.stackpos = LoadPoint.StackposList[LoadPoint.loader_index_dict[loader_id]]
 
@@ -207,7 +207,11 @@ class LoadPoint:
                 jobid=self.jobid,
                 loadstatus=self.loadstatus,
                 location=self.location,
-                stackpos=self.stackpos
+                stackpos=self.stackpos,
+                load_height=None,
+                loadpoint1=self.distance_0,
+                loadpoint2=self.distance_1,
+                loadpoint3=self.distance_2
             )
 
             # 如果引导策略反馈的 icps_differ 为空，且 work_finish=1，标识任务完成
@@ -234,6 +238,9 @@ class LoadPoint:
                     loaderid=self.loader_id,
                     update_data={
                         "load_start_time": self.load_start_time,
+                        "loadpoint1" : self.distance_0,
+                        "loadpoint2" : self.distance_1,
+                        "loadpoint3" : self.distance_2,
                     }
                 )
 
@@ -680,13 +687,10 @@ load_point_dict = dict()
 
 def create_loader_points():
     global load_point_dict
-    logging.debug(LoadPoint.loader_id_list)
     load_point_list = [LoadPoint(i) for i in LoadPoint.loader_id_list]
-    logging.debug(load_point_list)
 
     # 生成字典
     load_point_dict = dict(zip(LoadPoint.loader_id_list, load_point_list))
-    logging.debug(load_point_dict)
 
 if len(load_point_dict) == 0:
     logging.debug("=======================")
