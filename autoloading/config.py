@@ -1,11 +1,11 @@
 from queue import Queue
 import os
 import errno
-from re import sub
-import sys
 import logging
 
-from sqlalchemy.orm.base import NON_PERSISTENT_OK
+
+# apscheduler 任务启动状态
+RUNNING = True
 
 ENV = 'development'
 # ENV = 'production'
@@ -22,13 +22,6 @@ CAP_TIME_OUT = 60
 
 # 传感器数据请求任务标志位
 MEASURE_START = False
-
-# 队列: 存储网页切换页面的标签
-SHOW_TAB = Queue()
-
-# 队列: 存储装料点id
-LOADER = Queue()
-LOADER.put(1)
 
 # 日志配置
 LOGPATH = os.environ.get('LOGFOLDER','logs')

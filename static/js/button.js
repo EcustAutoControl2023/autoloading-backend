@@ -1,14 +1,14 @@
 var socket = io('http://localhost:5000');
 
-var loader_id_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-var current_loader_id = 1;
+let loader_id_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+let current_loader_id = 1;
 
-var sensor_tablename_list = ['sensor1', 'sensor2', 'sensor3', 'sendor4', 'sensor5', 'sensor6', 'sensor7', 'sensor8', 'sensor9', 'sensor10', 'sensor11', 'sensor12', 'sensor13', 'sensor14', 'sensor15', 'sensor16', 'sensor17', 'sensor18', 'sensor19', 'sensor20'];
+let sensor_tablename_list = ['sensor1', 'sensor2', 'sensor3', 'sendor4', 'sensor5', 'sensor6', 'sensor7', 'sensor8', 'sensor9', 'sensor10', 'sensor11', 'sensor12', 'sensor13', 'sensor14', 'sensor15', 'sensor16', 'sensor17', 'sensor18', 'sensor19', 'sensor20'];
 
 
 var traffic_show_number = 6;
 
-for (var i = 0; i < loader_id_list.length; i++) {
+for (let i = 0; i < loader_id_list.length; i++) {
   let loader_id = loader_id_list[i];
   let sensor_tablename = sensor_tablename_list[i];
   let loader_element_id = 'loader_' + loader_id;

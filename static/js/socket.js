@@ -1,4 +1,4 @@
-var traffic_socket = io('http://localhost:5000');
+let traffic_socket = io('http://localhost:5000');
 
 traffic_socket.on('traffic_data', function() {
     console.log('Connected to server');
@@ -26,6 +26,8 @@ function show_table_data(id, data_queue) {
         var row = $('<tr>');
         for (let data in data_array[i])
         {
+            if (data === 'modified')
+                continue;
             row.append($('<td  style ="color: white" align="center">').text(data_array[i][data]));
         }
         $(id).append(row);
@@ -42,7 +44,16 @@ let index_table = {
         'index15': 14, 'index16': 15, 'index17': 16, 'index18': 17, 'index19': 18, 'index20': 19
     };
 let index = index_table[url_name];
-current_loaderid = loader_id_list[index];
+let loaderid_list = [
+    "401A", "402A", "403A",
+    "401B", "402B", "403B",
+    "501A", "502A", "503A",
+    "501B", "502B", "503B",
+    "601A", "602A", "603A", "604A",
+    "601B", "602B", "603B", "604B",
+];
+current_loaderid = loaderid_list[index];
+console.log('current_loaderid: '+current_loaderid);
 
 traffic_socket.on('traffic_data_queue', function(data) {
     // 遍历数据，添加到表格中
@@ -71,8 +82,8 @@ traffic_socket.on('traffic_data_queue', function(data) {
 
 
 traffic_socket.on('traffic_data', function(data) {
-    // console.log(data.loaderid);
-    // console.log("current_loaderid: "+current_loaderid);
+    console.log(data.loaderid);
+    console.log("current_loaderid: "+current_loaderid);
     if (data.loaderid === current_loaderid)
     {
         if (data.modified)
@@ -98,9 +109,9 @@ function get_overview_data(data)
     {
         overview_data_queue.clear();
     }
-    for (let i = 0; i < data.length; i++) {
+    for (let i = data.length; i > 0; i--) {
         // 将数据添加到队列中
-        overview_data_queue.push(data[i]);
+        overview_data_queue.push(data[i-1]);
     }
     console.log(overview_data_queue.len);
     show_table_data('#overview-data', overview_data_queue);

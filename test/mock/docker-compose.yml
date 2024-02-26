@@ -1,0 +1,171 @@
+version: "3.3"
+services:
+  sensor1:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.59
+  sensor2:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.65
+  sensor3:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.71
+  sensor4:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.77
+  sensor5:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.83
+  sensor6:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.89
+  sensor7:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.95
+  sensor8:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.101
+  sensor9:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.107
+  sensor10:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.113
+  sensor11:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.119
+  sensor12:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.125
+  sensor13:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.131
+  sensor14:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.137
+  sensor15:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.143
+  sensor16:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.149
+  sensor17:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.155
+  sensor18:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.161
+  sensor19:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.167
+  sensor20:
+    build: ./sensor
+    restart: always
+    volumes: 
+      - ./sensor:/usr/src/app
+    networks:
+      host-networks:
+        ipv4_address: 172.16.175.173
+
+
+networks:
+  host-networks:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.0.0/16
+          gateway: 172.16.0.1
