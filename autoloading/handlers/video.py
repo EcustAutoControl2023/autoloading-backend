@@ -3,7 +3,7 @@ from flask import Response
 import cv2
 
 import threading, time
-from autoloading.config import LOADER, CAP_TIME_OUT
+from autoloading.config import CAP_TIME_OUT
 
 
 # 减少摄像头连接不上超时等待问题
@@ -64,9 +64,6 @@ def generate_frames(i):
     cap_thread.join(timeout=time_out)
     logging.debug(f'摄像头链接超时时间:{time.time() - start}')
     capture = cap_thread.result
-
-    if capture is None:
-        logging.debug(f'装料点({LOADER}): 无法连接摄像头')
 
     if capture is None:
         # while True:
@@ -181,9 +178,6 @@ def generate_license_frames(i):
     cap_thread.join(timeout=time_out)
     logging.debug(f'车牌摄像头链接超时时间:{time.time() - start}')
     capture = cap_thread.result
-
-    if capture is None:
-        logging.debug(f'装料点({LOADER.queue[0]}): 无法连接车牌摄像头')
 
     if capture is None:
         # while True:

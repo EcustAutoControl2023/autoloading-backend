@@ -1,9 +1,9 @@
 import logging
 from flask import session
 from flask_socketio import SocketIO
+
 from ..config import TRUCK_CONFIRM
 from autoloading.models.sensor import Traffic
-from autoloading.config import LOADER
 
 
 socketio = SocketIO()
@@ -18,7 +18,7 @@ def test_disconnect():
 
 # 车牌弹窗
 def truck_id_popup(data):
-    global socketio
+    # global socketio
     socketio.emit('truck_id_popup', data)
 @socketio.on('truck_id_popup_confirm')
 def truck_id_popup_confirm(confirm):
@@ -28,7 +28,7 @@ def truck_id_popup_confirm(confirm):
 
 # 中控弹窗
 def center_popup(data):
-    global socketio
+    # global socketio
     socketio.emit('center_popup', data)
 @socketio.on('center_popup_confirm')
 def center_popup_confirm(confirm):
@@ -38,12 +38,12 @@ def center_popup_confirm(confirm):
 
 # 向前端发送传感器数据
 def sensor_data(data):
-    global socketio
+    # global socketio
     socketio.emit('sensor_data', data)
 
 # 向前端发送最近n条车辆数据
 def traffic_data_history(data):
-    global socketio
+    # global socketio
     ret = list()
     for traffic_data in data:
         ret.append({
@@ -64,41 +64,39 @@ def traffic_data_history(data):
 # @data: data['data']取值为前端请求数据数量
 @socketio.on('traffic_data_request')
 def traffic_data_request(data):
-    global LOADER
+    # global LOADER
     # FIXME: 打印前端发送的请求数据
     # logging.debug(f'#####traffic_data_request->data: { data }')
-    traffics = Traffic.query.filter_by(loaderid=LOADER.queue[0]).order_by(Traffic.id.desc()).limit(data['number']).all()
+    traffics = Traffic.query.filter_by(loaderid=data['loaderid']).order_by(Traffic.id.desc()).limit(data['number']).all()
     # FIXME: 打印后端返回的车辆数据
     # logging.debug(f'#####traffic_data_request->traffics: { traffics }')
     traffic_data_history(list(reversed(traffics)))
 
 # 向前端发送数据库最新数据
 def traffic_data(data):
-    global socketio
-    global LOADER
-    if data['loaderid'] == LOADER.queue[0]:
-        socketio.emit('traffic_data', data)
+    # global socketio
+    socketio.emit('traffic_data', data)
 
-# 切换当前的，获取loaderid
-@socketio.on('tab_switch')
-def tab_switch(data):
-    global LOADER
-
-    # FIXME: 打印当前选择的页面的数据表名
-    # logging.debug(f'####tab_switch: { data }')
-
-    # 清空队列
-    while not LOADER.empty():
-        LOADER.get()
-
-    LOADER.put(data['loader'])
+# # 切换当前的，获取loaderid
+# @socketio.on('tab_switch')
+# def tab_switch(data):
+#     global LOADER
+#
+#     # FIXME: 打印当前选择的页面的数据表名
+#     # logging.debug(f'####tab_switch: { data }')
+#
+#     # 清空队列
+#     while not LOADER.empty():
+#         LOADER.get()
+#
+#     LOADER.put(data['loader'])
 
 def control_status_socket(val):  #发送控制器状态
-    global socketio
+    # global socketio
     socketio.emit('control_status', val)
 
 def loader_status_socket(val):  #发送装车状态
-    global socketio
+    # global socketio
     socketio.emit('loading_status', val)
 
 @socketio.on('overview_data_request')
@@ -106,7 +104,8 @@ def overview_data_request(data):
     # FIXME: 打印前端发送的请求数据
     # logging.debug(f'#####traffic_data_request->data: { data }')
     traffics = list()
-    for loadid in range(1, 21):
+    from autoloading.handlers.loaderpoint import LoadPoint
+    for loadid in LoadPoint.loader_id_list:
         traffic = Traffic.query.filter_by(loaderid=loadid).order_by(Traffic.id.desc()).first()
         traffics.append(traffic)
     # FIXME: 打印后端返回的车辆数据
@@ -114,7 +113,7 @@ def overview_data_request(data):
     overview_data_history(list(traffics))
 
 def overview_data_history(data):
-    global socketio
+    # global socketio
     def getdata(data, field, i):
         # 从LoaderPoint中生成默认的数据
         default_data_list = list()

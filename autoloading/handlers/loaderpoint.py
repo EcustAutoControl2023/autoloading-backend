@@ -34,7 +34,14 @@ def gen_return_data(
 
 class LoadPoint:
     # 定义装料点的id列表 [1-20]
-    loader_id_list = [i+1 for i in range(loader_num)]
+    loader_id_list = [
+        "401A", "402A", "403A",
+        "401B", "402B", "403B",
+        "501A", "502A", "503A",
+        "501B", "502B", "503B",
+        "601A", "602A", "603A", "604A",
+        "601B", "602B", "603B", "604B",
+    ]
     # 定义装料点的index列表
     loader_index_list = [i for i in range(loader_num)]
     loader_index_dict = dict(zip(loader_id_list, loader_index_list))
@@ -98,6 +105,8 @@ class LoadPoint:
         self.time_record_flag = True
         self.height_load = None
         self.goods_type = ""
+        self.work_total = 0
+
 
         # XXX: 定义装料高度上限
         self.load_level_limit1 = 3.7       # 第一次装料高度限制
@@ -208,7 +217,7 @@ class LoadPoint:
                 loadstatus=self.loadstatus,
                 location=self.location,
                 stackpos=self.stackpos,
-                load_height=None,
+                load_height=0,
                 loadpoint1=self.distance_0,
                 loadpoint2=self.distance_1,
                 loadpoint3=self.distance_2
@@ -272,6 +281,7 @@ class LoadPoint:
                 if self.icps_differ == self.distance_0 : # 判断车辆引导位置，执行相应装料点控制程序
                     self.load_control0() # 执行前装料点控制程序
                     self.height_load = self.load_height.data
+                    self.logging.debug(f'load_height.data: {self.load_height.data}')
                     control_status_socket(self.allow_plc_work)
                     loader_status_socket(self.work_finish)
                     # 记录第一个装车点料高和时间
@@ -360,6 +370,10 @@ class LoadPoint:
                     control_status_socket(self.allow_plc_work)
                     loader_status_socket(self.work_finish)
 
+            control_status_socket(self.allow_plc_work)
+            loader_status_socket(self.work_finish)
+
+            self.loadstatus = '装车中' if self.work_finish == 0 else '未装车'
             if self.work_finish:
                 # 更新数据库
                 update_truck_content(
@@ -497,9 +511,9 @@ class LoadPoint:
         if self.icps_differ == self.distance_0 :
             duration = datetime.datetime.now() - self.load_start_time  # 计算装料持续时间
             self.logging.debug(f'duration:{duration}, duration.total_seconds(): {duration.total_seconds()}')
-            self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,duration.total_seconds()) # 估算当前装料量
+            #self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,duration.total_seconds()) # 估算当前装料量
 
-            if duration.total_seconds() < 1*2:  # 前一分钟持续装料
+            if duration.total_seconds() < 1*60:  # 前一分钟持续装料
                 current_time = datetime.datetime.now()
                 self.load_height = self.Sensor.query.order_by(self.Sensor.id.desc()).first()
                 self.logging.debug(f'load_height:{self.load_height.data}')
@@ -578,7 +592,7 @@ class LoadPoint:
 
             duration = datetime.datetime.now() - self.load_start_time  # 计算装料持续时间
             self.logging.debug(f'duration:{duration}, duration.total_seconds(): {duration.total_seconds()}')
-            self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,duration.total_seconds()) # 估算当前装料量
+            #self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,duration.total_seconds()) # 估算当前装料量
             current_time = datetime.datetime.now()
             self.load_height = self.Sensor.query.order_by(self.Sensor.id.desc()).first()
 
@@ -608,7 +622,7 @@ class LoadPoint:
         if self.icps_differ == self.distance_2 or self.icps_differ == self.distance_1:
             duration = datetime.datetime.now() - self.load_start_time  # 计算装料持续时间
             self.logging.debug(f'duration:{duration}, duration.total_seconds(): {duration.total_seconds()}')
-            self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,duration.total_seconds()) # 估算当前装料量
+            #self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,duration.total_seconds()) # 估算当前装料量
             current_time = datetime.datetime.now()
             self.load_height = self.Sensor.query.order_by(self.Sensor.id.desc()).first()
 

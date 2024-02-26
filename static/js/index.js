@@ -133,11 +133,17 @@ sensor_socket.on('sensor_data', (data) => {
 
 $(function () {
     echart_3('chart_3', data_queue);
-    sensor_socket.emit('traffic_data_request', {number: traffic_show_number});
     let url_name = window.location.pathname.split('/')[1];
     //console.log(url_name);
 
-    let loader_id_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+    let loader_id_list = [
+        "401A", "402A", "403A",
+        "401B", "402B", "403B",
+        "501A", "502A", "503A",
+        "501B", "502B", "503B",
+        "601A", "602A", "603A", "604A",
+        "601B", "602B", "603B", "604B",
+    ];
 
     let sensor_tablename_list = ['sensor1', 'sensor2', 'sensor3', 'sensor4', 'sensor5', 'sensor6', 'sensor7', 'sensor8', 'sensor9', 'sensor10', 'sensor11', 'sensor12', 'sensor13', 'sensor14', 'sensor15', 'sensor16', 'sensor17', 'sensor18', 'sensor19', 'sensor20'];
 
@@ -150,6 +156,7 @@ $(function () {
     };
     let index = index_table[url_name];
     tablename = sensor_tablename_list[index];
+    sensor_socket.emit('traffic_data_request', {number: traffic_show_number, loaderid: loader_id_list[index]});
     socket.emit('tab_switch', {'loader': loader_id_list[index], 'sensor': sensor_tablename_list[index]});
     //点击跳转
     // $('.t_btn7').click(function(){

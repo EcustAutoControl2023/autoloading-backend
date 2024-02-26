@@ -65,7 +65,7 @@ class Traffic(db.Model):
     truckweightout = db.Column(db.Float, nullable=False)
     goodstype = db.Column(db.String(10), nullable=False)
     storeid = db.Column(db.Integer, nullable=False)
-    loaderid = db.Column(db.Integer, nullable=False)
+    loaderid = db.Column(db.String(20), nullable=True)
     loadlevelheight1 = db.Column(db.Integer, nullable=True)
     loadlevelheight2 = db.Column(db.Integer, nullable=True)
     loadlevelheight3 = db.Column(db.Integer, nullable=True)
