@@ -18,17 +18,9 @@ class SensorBase(db.Model):
 
     @staticmethod
     def before_insert(target,value,initiator):
-        # FIXME: 检查数据库trigger函数
-        # logging.debug('trigger before insert')
-        # logging.debug(f'target is {target}')
-        # logging.debug(f'value is {value}')
-        # logging.debug(f'initiator is {initiator}')
         database_capacity = type(initiator).query.order_by(type(initiator).id.desc()).count()
-        # logging.debug('database_capacity is %s',database_capacity) 
         # 数据库容量大于10,000条时，删除最早的一条数据
         if database_capacity >= 100000:
-            # FIXME: 检查trigger函数是否触发
-            # logging.debug('database is full')
             # 删除最早的一条数据
             ids_to_delete = type(initiator).query.order_by(type(initiator).id.desc()).offset(10).all()
             for id in ids_to_delete:
@@ -60,7 +52,7 @@ class Traffic(db.Model):
     boxlength = db.Column(db.Float, nullable=False)
     boxwidth = db.Column(db.Float, nullable=False)
     boxheight = db.Column(db.Float, nullable=False)
-    truckweightin = db.Column(db.Float, nullable=False)
+    truckweightin = db.Column(db.Float, nullable=True)
     truckweightout = db.Column(db.Float, nullable=False)
     goodstype = db.Column(db.String(10), nullable=False)
     storeid = db.Column(db.Integer, nullable=False)
@@ -69,10 +61,14 @@ class Traffic(db.Model):
     loadlevelheight2 = db.Column(db.Integer, nullable=True)
     loadlevelheight3 = db.Column(db.Integer, nullable=True)
     loadstarttime = db.Column(db.DateTime, nullable=True)
+    loadendtime = db.Column(db.DateTime, nullable=True)
     loadtime1 = db.Column(db.DateTime, nullable=True)
     loadtime2 = db.Column(db.DateTime, nullable=True)
     loadtime3 = db.Column(db.DateTime, nullable=True)
-    loadcurrent = db.Column(db.Float, nullable=False)
+    loadcurrent = db.Column(db.Float, nullable=True)
+    loadcurrent1 = db.Column(db.Float, nullable=True)
+    loadcurrent2 = db.Column(db.Float, nullable=True)
+    loadcurrent3 = db.Column(db.Float, nullable=True)
     loadestimate = db.Column(db.Float, nullable=True)
     worktotal = db.Column(db.Integer, nullable=False)
     jobid = db.Column(db.Integer, nullable=True)

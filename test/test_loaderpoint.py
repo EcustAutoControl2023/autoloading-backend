@@ -39,7 +39,7 @@ def goods_type(goods_type):
     # print(f'goods_type: {goods_type}')
     return goods_type
 
-@given(parsers.parse("装料点: {loader_id}"), target_fixture="loader_id")
+@given(parsers.parse("装料点: {loader_id:d}"), target_fixture="loader_id")
 def loader_id(loader_id):
     # print(f'loader_id: {loader_id}')
     return loader_id

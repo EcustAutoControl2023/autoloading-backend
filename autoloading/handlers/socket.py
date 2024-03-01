@@ -77,19 +77,6 @@ def traffic_data(data):
     # global socketio
     socketio.emit('traffic_data', data)
 
-# # 切换当前的，获取loaderid
-# @socketio.on('tab_switch')
-# def tab_switch(data):
-#     global LOADER
-#
-#     # FIXME: 打印当前选择的页面的数据表名
-#     # logging.debug(f'####tab_switch: { data }')
-#
-#     # 清空队列
-#     while not LOADER.empty():
-#         LOADER.get()
-#
-#     LOADER.put(data['loader'])
 
 def control_status_socket(val):  #发送控制器状态
     # global socketio

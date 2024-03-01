@@ -38,6 +38,8 @@ def update_truck_content(truckid:str, loaderid, update_data:dict):
             traffic.loadpoint2 = value
         elif 'loadpoint3' == key:
             traffic.loadpoint3 = value
+        elif 'loadendtime' == key:
+            traffic.loadendtime = value
 
 
     db.session.commit()
@@ -48,7 +50,7 @@ def update_truck_content(truckid:str, loaderid, update_data:dict):
         'truckweightout': traffic.truckweightout,
         'goodstype': traffic.goodstype,
         'truckload': traffic.truckload,
-        'loadcurrent': traffic.loadcurrent,
+        'loadcurrent': None, #FIXME
         'storeid': traffic.storeid,
         'loaderid': traffic.loaderid,
         'modified': True
@@ -72,6 +74,7 @@ def insert_truck_content(req_time,
                          load_level_height2, # 需要更新
                          load_level_height3, # 需要更新
                          load_start_time, # 需要更新
+                         load_end_time,  # 需要更新
                          load_time1, # 需要更新
                          load_time2, # 需要更新
                          load_time3, # 需要更新
@@ -84,14 +87,9 @@ def insert_truck_content(req_time,
                          load_height, # 需要更新
                          loadpoint1,
                          loadpoint2,
-                         loadpoint3
+                         loadpoint3,
                          ):
-    # load_level_height1: 物位计第一次装车高度
-    # load_level_height2: 物位计第二次装车高度
-    # load_level_height3: 物位计第三次装车高度
-    # load_time1: 第一次装车结束时间
-    # load_time2：第二次装车结束时间
-    # load_time3：第三次装车结束时间
+
     traffic = Traffic(time = req_time,
                       truckid=truck_id,
                       truckload = truck_load,
@@ -107,6 +105,7 @@ def insert_truck_content(req_time,
                       loadlevelheight2 = load_level_height2,
                       loadlevelheight3 = load_level_height3,
                       loadstarttime = load_start_time,
+                      loadendtime = load_end_time,
                       loadtime1 = load_time1,
                       loadtime2 = load_time2,
                       loadtime3 = load_time3,
@@ -132,19 +131,11 @@ def insert_truck_content(req_time,
         'truckweightout': truck_weight_out,
         'goodstype': goods_type,
         'truckload': truck_load,
-        'loadcurrent': load_current,
+        'loadcurrent': load_current, 
         'storeid': store_id,
         'loaderid': loader_id,
         'modified': False
     })
     overview_data_request(1) # 更新总览
 
-#更新车辆数据函数测试
-#@app.route('/update', methods=['POST'])  
-def update():
-    data = request.get_json()
-
-    update_truck_content(data.get('truckid'), data.get('loaderid'), data.get('update_data'))
-
-    return jsonify("{'code': 'ok'}")
 

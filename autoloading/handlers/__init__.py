@@ -73,6 +73,7 @@ from .video import (
 
 from .app import(
     connect,
+    stop,
 )
 
 from .socket import(
@@ -151,4 +152,4 @@ def init_app(app:Flask):
     app.add_url_rule('/index20', endpoint='index20', view_func=index20)
     app.add_url_rule('/overview', endpoint='overview', view_func=overview)
     app.add_url_rule('/connect', endpoint='connect',view_func=connect, methods=['POST'])
-    app.add_url_rule('/update', endpoint='update',view_func=update, methods=['POST'])
+    app.add_url_rule('/stop', endpoint='stop',view_func=stop, methods=['POST'])

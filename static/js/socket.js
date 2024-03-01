@@ -121,3 +121,5 @@ function get_overview_data(data)
 traffic_socket.on('overview_data_queue', get_overview_data);
 
 traffic_socket.on('overview_data', get_overview_data);
+
+

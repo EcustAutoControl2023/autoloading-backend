@@ -22,7 +22,7 @@ def app():
     # db_fd, db_path = tempfile.mkstemp()
 
     # create the app with common test config
-    db_path='/mnt/BaiduSyncdisk/OB/notes/2--Inputs/代码/自动装车/autoloading-backend/test/test.db'
+    db_path='./test/test.db'
     db_uri = f'sqlite:///{db_path}'
     app = create_app({
         "TESTING": True,

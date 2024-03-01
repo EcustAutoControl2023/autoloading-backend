@@ -10,7 +10,7 @@ def read_from_csv(filepath):
     sdata = pd.read_csv(filepath)
 
     # 数据生成器
-    def gen_data(sdata: pd.DataFrame):
+    def gen_data(sdata):
         sdata_step = 0
         sdata_len = len(sdata) - 1
         while True:
