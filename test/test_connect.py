@@ -56,7 +56,7 @@ def check_strategy_0(app, db, response, expected_icps_differ):
     actual_icps_differ = responsedata.get('operating_stations').get('icps_differ')
     if actual_icps_differ is None:
         actual_icps_differ = "None"
-    assert actual_icps_differ == expected_icps_differ
+    assert str( actual_icps_differ ) == expected_icps_differ
 
     with app.app_context():
         traffics = db.session.query(Traffic).all()

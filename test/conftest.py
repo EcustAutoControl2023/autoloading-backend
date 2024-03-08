@@ -22,7 +22,7 @@ def app():
     # db_fd, db_path = tempfile.mkstemp()
 
     # create the app with common test config
-    db_path='./test/test.db'
+    db_path='/mnt/BaiduSyncdisk/OB/notes/2--Inputs/代码/自动装车/autoloading-backend/test/test.db'
     db_uri = f'sqlite:///{db_path}'
     app = create_app({
         "TESTING": True,
@@ -34,6 +34,8 @@ def app():
     # close and remove the temporary database
     # os.close(db_fd)
     # os.unlink(db_path)
+    # 删除数据库
+    os.unlink(db_path)
 
 
 @pytest.fixture

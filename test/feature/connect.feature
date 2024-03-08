@@ -7,11 +7,11 @@ Feature: connect接口测试
 
     Examples: 5种装车过程（最后一种为错误情况）
     | file                        | distance_0 | distance_1 | distance_2 | expected_icps_differ |
-    | ./test/json/postdata-1.json | 1.1        | 1.1        | 1.1        | 0001                 |
-    | ./test/json/postdata-1.json | 1.2        | 1.2        | 1.1        | 0012                 |
-    | ./test/json/postdata-1.json | 1.1        | 1.2        | 1.2        | 0112                 |
-    | ./test/json/postdata-1.json | 1.1        | 1.2        | 1.3        | 0123                 |
-    | ./test/json/postdata-1.json | 1.2        | 1.1        | 1.2        | None                 |
+    | ./test/json/postdata-1.json | 1.1        | 1.1        | 1.1        | [1.1]                 |
+    | ./test/json/postdata-1.json | 1.2        | 1.2        | 1.1        | [1.2, 1.1]                 |
+    | ./test/json/postdata-1.json | 1.1        | 1.2        | 1.2        | [1.1, 1.2]                 |
+    | ./test/json/postdata-1.json | 1.1        | 1.2        | 1.3        | [1.1, 1.2, 1.3]                 |
+    | ./test/json/postdata-1.json | 1.2        | 1.1        | 1.2        | []                 |
 
   Scenario Outline: 2.1.2 集卡引导到位，获取时庐的 PLC 控制策略
     Given 测试的post文件为: <file>

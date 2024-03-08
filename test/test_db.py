@@ -36,7 +36,7 @@ def test_db_insert_traffic(app, db):
             truckweightout=20.0,
             goodstype='木片',
             storeid=1,
-            loaderid=1,
+            loaderid="402A",
             loadcurrent=10.0,
             worktotal=10
         ) for i in range(10)]
@@ -66,7 +66,7 @@ def test_db_query_traffic(app, db):
             truckweightout=20.0,
             goodstype='木片',
             storeid=1,
-            loaderid=1,
+            loaderid="402A",
             loadcurrent=10.0,
             worktotal=10
         ) for i in range(10)]

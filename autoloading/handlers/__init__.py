@@ -80,10 +80,6 @@ from .socket import(
     socketio
 )
 
-from .truck_store import(
-    update
-)
-
 
 # 集成路由
 def init_app(app:Flask):
