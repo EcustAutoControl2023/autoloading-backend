@@ -1,5 +1,4 @@
 import logging
-from flask import jsonify, request
 from autoloading.models import db
 from autoloading.models.sensor import Traffic
 
@@ -9,6 +8,9 @@ def update_truck_content(truckid:str, loaderid, update_data:dict):
     traffic = Traffic.query.filter_by(truckid=truckid, loaderid=loaderid).order_by(Traffic.id.desc()).first()
     # FIXME: 打印车辆数据
     # logging.debug(traffic)
+    if traffic is None:
+        return
+
     for key, value in update_data.items():
         if 'truck_weight_out' == key:
             traffic.truckweightout = value

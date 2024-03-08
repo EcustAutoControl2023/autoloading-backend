@@ -16,8 +16,8 @@ Feature: 测试LoaderPoint类
     Then 检查估计的重量: <expect_value>
 
     Examples:
-    | goods_type | loader_id | time_difference | csv_file                 | expect_value |
-    | 木片       | 401A         | 2.              | ./test/csv/traffic-1.csv | None         |
-    | 木片       | 402B         | 2.              | ./test/csv/traffic-2.csv | None         |
-    | 薯条       | 402B         | 2.              | ./test/csv/traffic-2.csv | None         |
+    | goods_type | loader_id | time_difference | csv_file                   | expect_value |
+    | 木片       | 401A      | 2.              | ./test/csv/traffic-new.csv | 5.6302       |
+    | 木片       | 402B      | 2.              | ./test/csv/traffic-2.csv   | None         |
+    | 薯条       | 402B      | 2.              | ./test/csv/traffic-2.csv   | None         |
 

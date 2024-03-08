@@ -1,5 +1,4 @@
 import logging
-import datetime, time
 from flask import Flask
 from autoloading.handlers.loaderpoint import LoadPoint, load_point_dict
 from autoloading.config import RUNNING

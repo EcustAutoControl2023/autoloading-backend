@@ -20,9 +20,13 @@ def app():
     """Create and configure a new app instance for each test."""
     # create a temporary file to isolate the database for each test
     # db_fd, db_path = tempfile.mkstemp()
+    # printr('on app setup')
 
     # create the app with common test config
-    db_path='/mnt/BaiduSyncdisk/OB/notes/2--Inputs/代码/自动装车/autoloading-backend/test/test.db'
+    # 在当前目录下test子目录下
+    db_path = os.path.join(os.path.realpath(""), "test/test.db")
+    # db_path='/mnt/BaiduSyncdisk/OB/notes/2--Inputs/代码/自动装车/autoloading-backend/test/test.db'
+
     db_uri = f'sqlite:///{db_path}'
     app = create_app({
         "TESTING": True,
@@ -35,7 +39,9 @@ def app():
     # os.close(db_fd)
     # os.unlink(db_path)
     # 删除数据库
-    os.unlink(db_path)
+    # os.unlink(db_path)
+
+    # printr('on app teardown')
 
 
 @pytest.fixture

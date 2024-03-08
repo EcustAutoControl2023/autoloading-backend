@@ -1,9 +1,5 @@
 import time
-from flask import jsonify
-import math
-import pandas as pd
 import json
-import pytest
 from pytest_bdd import scenarios, given, when, then, parsers, scenario
 from autoloading.handlers.loaderpoint import LoadPoint
 from autoloading.models.sensor import Traffic
@@ -34,9 +30,47 @@ def clientdata(jsondata, distance_0, distance_1, distance_2):
     jsondata['operating_stations']['distance_2'] = distance_2
 
 @when("客户端发送post请求data_type=0", target_fixture='response')
-def response(client, jsondata):
+def post0(client, jsondata):
+    jsondata["data_type"] = 0
     printr(jsondata)
     response = client.post("/connect", json=jsondata)
+    return response
+
+@when("根据装料点位发送post请求data_type=1")
+def post1(client, jsondata):
+    jsondata["data_type"] = 1
+    printr(jsondata)
+    distance_0 = jsondata['operating_stations']['distance_0']
+    distance_1 = jsondata['operating_stations']['distance_1']
+    distance_2 = jsondata['operating_stations']['distance_2']
+    if (distance_0 != distance_1) and (distance_0 != distance_2) and (distance_1 != distance_2):
+        jsondata["operating_stations"]["icps_differ_current"] = distance_0
+        response = client.post("/connect", json=jsondata)
+        jsondata["operating_stations"]["icps_differ_current"] = distance_1
+        response = client.post("/connect", json=jsondata)
+        jsondata["operating_stations"]["icps_differ_current"] = distance_2
+        jsondata["operating_stations"]["temp_manual_stop"] = 1
+        response = client.post("/connect", json=jsondata)
+    elif (distance_0 == distance_1) and (distance_1 != distance_2) :
+        jsondata["operating_stations"]["icps_differ_current"] = distance_0
+        response = client.post("/connect", json=jsondata)
+        jsondata["operating_stations"]["icps_differ_current"] = distance_2
+        jsondata["operating_stations"]["temp_manual_stop"] = 1
+        response = client.post("/connect", json=jsondata)
+    elif (distance_1 == distance_2) and (distance_1 != distance_0) :
+        jsondata["operating_stations"]["icps_differ_current"] = distance_0
+        response = client.post("/connect", json=jsondata)
+        jsondata["operating_stations"]["icps_differ_current"] = distance_1
+        jsondata["operating_stations"]["temp_manual_stop"] = 1
+        response = client.post("/connect", json=jsondata)
+    elif (distance_0 == distance_1) and (distance_1== distance_2) :
+        jsondata["operating_stations"]["icps_differ_current"] = distance_0
+        jsondata["operating_stations"]["temp_manual_stop"] = 1
+        response = client.post("/connect", json=jsondata)
+    else:
+        jsondata["operating_stations"]["icps_differ_current"] = None
+        jsondata["operating_stations"]["temp_manual_stop"] = 1
+        response = client.post("/connect", json=jsondata)
     return response
 
 @then(parsers.parse("返回正确的装车策略: {expected_icps_differ}"))
@@ -67,6 +101,29 @@ END
 """
 
 """
+2.1.1 将任务信息传给时庐获取引导策略——异常测试(data_type=1未收到结束或移动点位响应，但请求data_type=0)
+"""
+@then(parsers.parse("返回错误的装车策略: {expected_icps_differ}"))
+def check_strategy_0_exception(app, db, response, expected_icps_differ):
+    # 确保后端无逻辑错误
+    assert response.status_code == 200
+
+    responsedata = json.loads(response.data)
+
+    # 确保返回参数符合要求
+    actual_icps_differ = responsedata.get('operating_stations').get('icps_differ')
+    if actual_icps_differ is None:
+        actual_icps_differ = "None"
+    assert str( actual_icps_differ ) == expected_icps_differ
+
+    with app.app_context():
+        traffics = db.session.query(Traffic).all()
+        assert len(traffics) == 1
+"""
+END
+"""
+
+"""
 2.1.2 集卡引导到位，获取时庐的 PLC 控制策略
 """
 
@@ -84,7 +141,7 @@ def post_generator(client, jsondata):
     jsondata["data_type"] = 1
     def gen_post(client, jsondata):
         while True:
-            # printr(jsondata, "jsondata")
+            printr(jsondata, "jsondata")
             response = client.post("/connect", json=jsondata)
             yield response
             josnresponse = json.loads(response.data)
@@ -126,10 +183,42 @@ def check_strategy_1(app, db, gen_post, expected_return_file):
 END
 """
 
+"""
+2.1.2 集卡引导到位，获取时庐的 PLC 控制策略——异常测试(未请求data_type=0)
+"""
+@when("客户端发送post请求data_type=1", target_fixture='response')
+def response(client, jsondata):
+    jsondata["data_type"] = 1
+    response = client.post("/connect", json=jsondata)
+    return response
+
+@then(parsers.parse("返回错误的料高: {expected_height_load:d}"))
+def check_strategy_1_error(app, db, response, expected_height_load):
+    # 确保后端无逻辑错误
+    assert response.status_code == 200
+
+    responsedata = json.loads(response.data)
+
+    # 确保返回参数符合要求
+    actual_height_load = responsedata.get('operating_stations').get('height_load')
+    assert expected_height_load == actual_height_load
+
+    with app.app_context():
+        traffics = db.session.query(Traffic).all()
+        assert len(traffics) == 0
+
 @scenario("./feature/connect.feature", "2.1.1 将任务信息传给时庐获取引导策略")
 def test_data_type0():
+    pass
+
+@scenario("./feature/connect.feature", "2.1.1 将任务信息传给时庐获取引导策略——异常测试(data_type=1未收到结束或移动点位响应，但请求data_type=0)")
+def test_data_type0_exception():
     pass
 
 # @scenario("./feature/connect.feature", "2.1.2 集卡引导到位，获取时庐的 PLC 控制策略")
 # def test_data_type1():
 #     pass
+
+@scenario("./feature/connect.feature", "2.1.2 集卡引导到位，获取时庐的 PLC 控制策略——异常测试(未请求data_type=0)")
+def test_data_type1_exception():
+    pass

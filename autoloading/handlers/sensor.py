@@ -55,7 +55,7 @@ def read_per_second(loadpoint):  # 每秒读取一次物位计数据
     float_hex = struct.unpack('!f', bytes.fromhex(hex_num))[0]
     int_distance = round(float_hex*1.0,3)  # 数据保留3位小数
     # logging.debug(f'int_distance: {int_distance}')
-    latest_data = loadpoint.Sensor.query.order_by(loadpoint.Sensor.id.desc()).first()
+    # latest_data = loadpoint.Sensor.query.order_by(loadpoint.Sensor.id.desc()).first()
     # 将数据存入数据库中并发送至前端(如果数据库中无数据或者当前数据获取时间比数据库中数据获取时间晚1s)
     # if (latest_data is None) or ((current_time - latest_data.time).total_seconds() > 1): 
     insert_data(loadpoint.Sensor,int_distance, current_time)
