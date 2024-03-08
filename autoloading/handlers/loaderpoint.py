@@ -576,7 +576,7 @@ class LoadPoint:
 
             if duration.total_seconds() < 1*60:  # 前一分钟持续装料
                 current_time = datetime.datetime.now()
-                self.load_height = self.Sensor.query.order_by(self.Sensor.id.desc()).first()  # 获取当前料高
+                self.load_height = self.get_sensor_data()
                 self.logging.debug(f'load_height:{self.load_height.data}')
                 self.allow_plc_work = 1        # PLC启动
                 self.flag_load = 1             # 装料机装车中
