@@ -1,35 +1,92 @@
 import logging
 from flask import Response
 import cv2
+from queue import Queue
+import os
+from abc import ABC, abstractmethod
 
 import threading, time
-from autoloading.config import CAP_TIME_OUT
+
+from autoloading.handlers.loaderpoint import LoadPoint
 
 
-# 减少摄像头连接不上超时等待问题
-class videocapture_Thread(threading.Thread):
-    def __init__(self, rtsp):
-        super(videocapture_Thread, self).__init__()
-        self.result = None
+# 摄像头类
+class Camera(ABC):
+    def __init__(self, rtsp) -> None:
         self.rtsp = rtsp
+        self.cap  = None
+        self.loaderid = None
+        self.frame_alt = open(os.getcwd() + '/static/img/video_alt.png', 'rb').read()
 
-    def run(self):
-        self.result = self.open_videocapture()
+    def ishealthy(self):
+        if self.cap is None:
+            return False
+        return True
 
-    def open_videocapture(self):
-        cap = cv2.VideoCapture(self.rtsp)
-        if cap.isOpened():
-            return cap
-        else:
-            cap.release()
-            return None
+    def connect(self):
+        '''
+        没用到
+        '''
+        if self.cap is None:
+            self.cap = cv2.VideoCapture(self.rtsp)
+            if self.cap.isOpened():
+                return True
+            self.cap.release()
+        self.cap = None
+        return False
+        # from autoloading.config import CAP_TIME_OUT
+        # capture = None
+        #
+        # time_out = CAP_TIME_OUT
+        # start = time.time()
+        # cap_thread = videocapture_Thread(self.rtsp)
+        # cap_thread.daemon = True
+        # cap_thread.start()
+        # cap_thread.join(timeout=time_out)
+        # logging.debug(f'摄像头链接超时时间:{time.time() - start}')
+        # capture = cap_thread.result
+        # logging.debug(f'capture：{capture}')
+        # if capture is not None:
+        #     self.cap = capture
+        #     self.flag.put(1)
+        #     return True
+        # return False
 
-def generate_frames(i):
-    # 主码流
+    def say(self):
+        return f"rtsp: {self.rtsp}"
 
-    #video = "rtsp://admin:1234567a@192.168.100.2:554/h265/ch1/sub/av_stream"
+    @classmethod
+    def empty_frame(cls):
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n'+ b'\r\n')
 
-    video_url = [
+    @abstractmethod
+    def scheduler(self):
+        '''
+        子类实现，对应的定时任务
+        '''
+        pass
+
+    def show_frame(self):
+
+        while True:
+            try:
+                (self.status, self.frame) = self.cap.read()
+                if self.status is not True:
+                    self.scheduler() # 断线重连
+                    frame = self.frame_alt
+                else:
+                    ret, buffer = cv2.imencode('.jpg', self.frame)
+                    frame = buffer.tobytes()
+            except Exception as e:
+                frame = self.frame_alt # 显示加载失败图片
+                time.sleep(0.5) # 防止卡死
+
+            yield (b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+class LoaderCamera(Camera):
+    loader_video_url_list = [
         "rtsp://admin:1234567a@172.16.175.58:554/h265/ch1/sub/av_stream",#url_1 401南监控相机
         "rtsp://admin:1234567a@172.16.175.64:554/h265/ch1/sub/av_stream",#url_2 402南监控相机
         "rtsp://admin:1234567a@172.16.175.70:554/h265/ch1/sub/av_stream",#url_3 403南监控相机
@@ -52,99 +109,20 @@ def generate_frames(i):
         "rtsp://admin:1234567a@172.16.175.172:554/h265/ch1/sub/av_stream",#url_20 604北监控相机    
     ]
 
-    video = video_url[i]
+    def __init__(self, loaderid:str) -> None:
+        rtsp = self.loader_video_url_list[LoadPoint.loader_index_dict[loaderid]]
+        super().__init__(rtsp)
+        self.loaderid = loaderid
+        self.scheduler()
 
-    capture = None
+    def scheduler(self):
+        from autoloading.handlers.scheduler import scheduler, camera
+        logging.debug(f'开始连接装料点{self.loaderid}的料口相机数据！')
+        id = f'loadercamera: {self.loaderid}'
+        scheduler.add_job(camera, 'interval', seconds=1, args=(LoaderCamera, LOADING_CAMERA, self.loaderid, id), id=id)
 
-    time_out = CAP_TIME_OUT
-    start = time.time()
-    cap_thread = videocapture_Thread(video)
-    cap_thread.daemon = True
-    cap_thread.start()
-    cap_thread.join(timeout=time_out)
-    logging.debug(f'摄像头链接超时时间:{time.time() - start}')
-    capture = cap_thread.result
-
-    if capture is None:
-        # while True:
-        yield (b'--frame\r\n'
-            b'Content-Type: image/jpeg\r\n\r\n'+ b'\r\n')
-    else:
-        logging.debug("连接成功！")
-        while True:
-            success, img = capture.read()
-            if not success:
-                break
-            ret, buffer = cv2.imencode('.jpg', img)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-
-def video_feed():
-    return Response(generate_frames(0), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed1():
-    return Response(generate_frames(1), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed2():
-    return Response(generate_frames(2), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed3():
-    return Response(generate_frames(3), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed4():
-    return Response(generate_frames(4), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed5():
-    return Response(generate_frames(5), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed6():
-    return Response(generate_frames(6), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed7():
-    return Response(generate_frames(7), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed8():
-    return Response(generate_frames(8), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed9():
-    return Response(generate_frames(9), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed10():
-    return Response(generate_frames(10), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed11():
-    return Response(generate_frames(11), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed12():
-    return Response(generate_frames(12), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed13():
-    return Response(generate_frames(13), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed14():
-    return Response(generate_frames(14), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed15():
-    return Response(generate_frames(15), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed16():
-    return Response(generate_frames(16), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed17():
-    return Response(generate_frames(17), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed18():
-    return Response(generate_frames(18), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def video_feed19():
-    return Response(generate_frames(19), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-
-def generate_license_frames(i):
-
-    video_url = [
+class LicensePlateCamera(Camera):
+    license_video_url_list = [
         "rtsp://admin:1234567a@172.16.175.61:554/h265/ch1/sub/av_stream",#url_1 401南车牌识别相机
         "rtsp://admin:1234567a@172.16.175.67:554/h265/ch1/sub/av_stream",#url_2 402南车牌识别相机
         "rtsp://admin:1234567a@172.16.175.73:554/h265/ch1/sub/av_stream",#url_3 403南车牌识别相机
@@ -167,89 +145,63 @@ def generate_license_frames(i):
         "rtsp://admin:1234567a@172.16.175.175:554/h265/ch1/sub/av_stream",#url_20 604北车牌识别相机    
     ]
 
-    video = video_url[i]
-    capture = None
+    def __init__(self, loaderid:str) -> None:
+        rtsp = self.license_video_url_list[LoadPoint.loader_index_dict[loaderid]]
+        super().__init__(rtsp)    
+        self.loaderid = loaderid    
+        self.scheduler()
 
-    time_out = CAP_TIME_OUT
-    start = time.time()
-    cap_thread = videocapture_Thread(video)
-    cap_thread.daemon = True
-    cap_thread.start()
-    cap_thread.join(timeout=time_out)
-    logging.debug(f'车牌摄像头链接超时时间:{time.time() - start}')
-    capture = cap_thread.result
+    def scheduler(self):
+        from autoloading.handlers.scheduler import scheduler, camera
+        logging.debug(f'开始连接装料点{self.loaderid}的车牌相机数据！')
+        id = f'licenseplatecamera: {self.loaderid}'
+        scheduler.add_job(camera, 'interval', seconds=1, args=(LicensePlateCamera, LICENSE_PLATE_CAMERA, self.loaderid, id), id=id)
 
-    if capture is None:
-        # while True:
-        yield (b'--frame\r\n'
-            b'Content-Type: image/jpeg\r\n\r\n'+ b'\r\n')
-    else:
-        while True:
-            success, img = capture.read()
-            if not success:
-                break
-            ret, buffer = cv2.imencode('.jpg', img)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+# 装料口摄像头dict
+LOADING_CAMERA:dict[str, Camera] = dict()
+
+# 车牌摄像头dict
+LICENSE_PLATE_CAMERA:dict[str, Camera] = dict()
+
+def gen_video_feed(loaderid:str):
+    def video_feed():
+        camera = None
+        try:
+            camera = LOADING_CAMERA[loaderid]
+        except KeyError:
+            LOADING_CAMERA[loaderid] = LoaderCamera(loaderid)
+            camera = LOADING_CAMERA[loaderid]
+        return Response(camera.show_frame(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return video_feed
+
+def gen_license_video_feed(loaderid:str):
+    def video_feed():
+        camera = None
+        try:
+            camera = LICENSE_PLATE_CAMERA[loaderid]
+        except KeyError:
+            LICENSE_PLATE_CAMERA[loaderid] = LicensePlateCamera(loaderid)
+            camera = LICENSE_PLATE_CAMERA[loaderid]
+        return Response(camera.show_frame(), mimetype='multipart/x-mixed-replace; boundary=frame')
+        
+    return video_feed
 
 
-def license_video_feed():
-    return Response(generate_license_frames(0), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed1():
-    return Response(generate_license_frames(1), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed2():
-    return Response(generate_license_frames(2), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed3():
-    return Response(generate_license_frames(3), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed4():
-    return Response(generate_license_frames(4), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed5():
-    return Response(generate_license_frames(5), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed6():
-    return Response(generate_license_frames(6), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed7():
-    return Response(generate_license_frames(7), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed8():
-    return Response(generate_license_frames(8), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed9():
-    return Response(generate_license_frames(9), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed10():
-    return Response(generate_license_frames(10), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed11():
-    return Response(generate_license_frames(11), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed12():
-    return Response(generate_license_frames(12), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed13():
-    return Response(generate_license_frames(13), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed14():
-    return Response(generate_license_frames(14), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed15():
-    return Response(generate_license_frames(15), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed16():
-    return Response(generate_license_frames(16), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed17():
-    return Response(generate_license_frames(17), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed18():
-    return Response(generate_license_frames(18), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def license_video_feed19():
-    return Response(generate_license_frames(19), mimetype='multipart/x-mixed-replace; boundary=frame')
+# # 减少摄像头连接不上超时等待问题
+# class videocapture_Thread(threading.Thread):
+#     def __init__(self, rtsp):
+#         super(videocapture_Thread, self).__init__()
+#         self.result = None
+#         self.rtsp = rtsp
+#
+#     def run(self):
+#         self.result = self.open_videocapture()
+#
+#     def open_videocapture(self):
+#         cap = cv2.VideoCapture(self.rtsp)
+#         if cap.isOpened():
+#             return cap
+#         else:
+#             cap.release()
+#             return None
+#

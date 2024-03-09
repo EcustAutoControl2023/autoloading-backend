@@ -2,7 +2,6 @@ import logging
 from flask import session
 from flask_socketio import SocketIO
 
-from ..config import TRUCK_CONFIRM
 from autoloading.models.sensor import Traffic
 
 
@@ -22,7 +21,7 @@ def truck_id_popup(data):
     socketio.emit('truck_id_popup', data)
 @socketio.on('truck_id_popup_confirm')
 def truck_id_popup_confirm(confirm):
-    global TRUCK_CONFIRM
+    from ..config import TRUCK_CONFIRM
     session['truck_id_popup_confirm'] = confirm['data']
     TRUCK_CONFIRM.put(confirm['data'])
 
@@ -32,7 +31,7 @@ def center_popup(data):
     socketio.emit('center_popup', data)
 @socketio.on('center_popup_confirm')
 def center_popup_confirm(confirm):
-    global TRUCK_CONFIRM
+    from ..config import TRUCK_CONFIRM
     session['center_popup_confirm'] = confirm['data']
     TRUCK_CONFIRM.put(confirm['data'])
 

@@ -2,7 +2,6 @@ import datetime
 import logging
 from operator import and_
 import socket
-from autoloading.config import TRUCK_CONFIRM
 from flask import jsonify, session
 from autoloading.handlers.truck_store import insert_truck_content, update_truck_content
 from autoloading.models.sensor import Traffic, loader_num
@@ -538,6 +537,7 @@ class LoadPoint:
 
         elif data_type == 4:
             # TODO: 车牌弹窗确认
+            from autoloading.config import TRUCK_CONFIRM
             self.logging.debug("data_type:4")
             truck_id_confirm = session.get('truck_id_popup_confirm', True)
             if not truck_id_confirm:
