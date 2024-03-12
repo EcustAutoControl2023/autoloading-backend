@@ -148,9 +148,7 @@ class LoaderCamera(Camera):
 
 class LicensePlateCamera(Camera):
     license_video_url_list = [
-        # "rtsp://admin:123456@10.102.219.104:8554/live",
-        "rtsp://admin:123456@192.168.31.223:8554/live",
-        # "rtsp://admin:1234567a@172.16.175.61:554/h265/ch1/sub/av_stream",#url_1 401南车牌识别相机
+        "rtsp://admin:1234567a@172.16.175.61:554/h265/ch1/sub/av_stream",#url_1 401南车牌识别相机
         "rtsp://admin:1234567a@172.16.175.67:554/h265/ch1/sub/av_stream",#url_2 402南车牌识别相机
         "rtsp://admin:1234567a@172.16.175.73:554/h265/ch1/sub/av_stream",#url_3 403南车牌识别相机
         "rtsp://admin:1234567a@172.16.175.79:554/h265/ch1/sub/av_stream",#url_4 401北车牌识别相机
