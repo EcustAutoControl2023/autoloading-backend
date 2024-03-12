@@ -18,7 +18,7 @@ TRUCK_CONFIRM = Queue()
 SENSOR_STATUS = Queue()
 
 # 摄像头连接超时时间(s)
-CAP_TIME_OUT = 60
+CAP_TIME_OUT = 15
 
 # 传感器数据请求任务标志位
 MEASURE_START = False

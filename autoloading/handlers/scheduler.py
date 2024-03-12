@@ -3,7 +3,7 @@ import datetime
 import cv2
 from flask import Flask
 from autoloading.handlers.loaderpoint import LoadPoint, load_point_dict
-from autoloading.handlers.video import LicensePlateCamera, LoaderCamera, Camera, LOADING_CAMERA, LICENSE_PLATE_CAMERA
+from autoloading.handlers.camera import Camera
 from autoloading.config import RUNNING
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -17,18 +17,22 @@ def sensor(app, loadpoint:LoadPoint):
 def camera(Camera, camera_dict:dict[str, Camera], loaderid:str, jobid:str):
     global scheduler
     camera = camera_dict[loaderid]
+    if camera.cap is not None and camera.cap.isOpened():
+        camera.cap.release()
+        camera.cap = None
+        print(f'相机{jobid}已连接,清理！')
     capture = cv2.VideoCapture(camera.rtsp)
+    # status = camera.connect()
 
     if capture.isOpened():
+    # if status:
         camera.cap = capture
+        camera.cameraStatus = True
         logging.debug(f'相机{jobid}连接成功！')
-        # 连接成功后，移除定时任务
-        scheduler.remove_job(jobid)
+        scheduler.remove_job(jobid) # 移除定时任务
     else:
         logging.debug(f'相机{jobid}连接失败！')
-        # 延长重连任务时间间隔
-        scheduler.reschedule_job(jobid, trigger='interval', seconds=59)
-        # scheduler.remove_job(jobid)
+        scheduler.remove_job(jobid) # 移除定时任务
     
 
 def schedulers_start(app:Flask):

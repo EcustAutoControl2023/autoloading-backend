@@ -28,8 +28,8 @@ from .login import (
 )
 
 from .video import (
-    gen_video_feed,
-    gen_license_video_feed,
+    video_feed_new,
+    license_video_feed_new
 )
 
 from .app import(
@@ -46,10 +46,6 @@ def init_app(app:Flask):
     socketio.init_app(app=app, cors_allowed_origins='*')
     app.add_url_rule('/', endpoint='login', view_func=login, methods=['GET','POST'])
     app.add_url_rule('/login', endpoint='login', view_func=login)
-    from autoloading.handlers.loaderpoint import LoadPoint
-    for loaderid, index in LoadPoint.loader_index_dict.items():
-        app.add_url_rule(f'/video_feed{index if index != 0 else ""}', endpoint=f'video_feed{index if index != 0 else ""}', view_func=gen_video_feed(loaderid), methods=['GET'])
-        app.add_url_rule(f'/license_video_feed{index if index != 0 else ""}', endpoint=f'license_video_feed{index if index != 0 else ""}', view_func=gen_license_video_feed(loaderid), methods=['GET'])
     app.add_url_rule('/index1', endpoint='index1', view_func=index1)
     app.add_url_rule('/index2', endpoint='index2', view_func=index2)
     app.add_url_rule('/index3', endpoint='index3', view_func=index3)
@@ -72,3 +68,5 @@ def init_app(app:Flask):
     app.add_url_rule('/index20', endpoint='index20', view_func=index20)
     app.add_url_rule('/overview', endpoint='overview', view_func=overview)
     app.add_url_rule('/connect', endpoint='connect',view_func=connect, methods=['POST'])
+    app.add_url_rule('/video_feed_new/<video_id>', endpoint='video_feed_new', view_func=video_feed_new)
+    app.add_url_rule('/license_video_feed_new/<license_video_id>', endpoint='license_video_feed_new', view_func=license_video_feed_new)
