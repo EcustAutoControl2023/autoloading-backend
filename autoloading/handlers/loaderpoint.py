@@ -118,6 +118,7 @@ class LoadPoint:
         self.goods_type = ""
         self.work_total = 0             # 当前任务装料总次数
         self.load_current = None      # 本次装载量(任务装载量)
+        self.loading_state = None     # 下料状态，true：下料中，false停止下料
 
 
         # XXX: 定义装料高度上限
@@ -152,7 +153,7 @@ class LoadPoint:
                      goods_type, store_id, loader_id,
                      load_current,temp_manual_stop,
                      distance0, distance1, distance2, icps_differ_current,
-                     picture_url_plate, picture_url_request, jobid):
+                     picture_url_plate, picture_url_request, jobid,loading_state):
         self.req_time       = datetime.datetime.now()
         self.data_type      = data_type
         self.truck_id       = truck_id
@@ -171,16 +172,10 @@ class LoadPoint:
         self.jobid          = jobid
         self._weight_in     = truck_weight_in
         self.temp_manual_stop = temp_manual_stop
-        #self.logging.debug(f'load_current:{self.load_current}')
+        self.loading_state = loading_state
+
         
 
-        # if(self.distance_0 != None):
-        #     self.icps_differ.append(self.distance_0)
-        # if(self.distance_1 != None): 
-        #     self.icps_differ.append(self.distance_1)
-        # if(self.distance_2 != None):
-        #     self.icps_differ.append(self.distance_2)
-        # self.icps_length = len(self.icps_differ)
 
 
         if self.data_type == 0:  # 接收任务信息并发送引导策略
@@ -284,6 +279,28 @@ class LoadPoint:
             # self.logging.debug(f"temp_manual_stop == False: {self.temp_manual_stop == False}")
             # self.logging.debug(f"temp_manual_stop == 0: {self.temp_manual_stop == 0}")
             # self.logging.debug(f"temp_manual_stop == 1: {self.temp_manual_stop == 1}")
+            
+            
+            self.logging.debug(f"loading_state:{self.loading_state}")
+            self.logging.debug(f"loading_state==false:{self.loading_state==0}")
+            if(self.loading_state == 0):
+
+                self.allow_plc_work = 0
+                result = gen_return_data(
+                    time = self.req_time,
+                    store_id = self.store_id,
+                    loader_id = self.loader_id,
+                    operating_stations={
+                        "truck_id" : self.truck_id,
+                        "allow_plc_work" : self.allow_plc_work,
+                        "work_finish" : self.work_finish,
+                        "work_weight_status": self.work_weight_status,
+                        "loading_state":self.loading_state
+                    }
+                )
+
+                return result
+
 
 
             if(self.temp_manual_stop!=0):

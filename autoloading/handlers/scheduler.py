@@ -17,6 +17,8 @@ def sensor(app, loadpoint:LoadPoint):
 def camera(Camera, camera_dict:dict[str, Camera], loaderid:str, jobid:str):
     global scheduler
     camera = camera_dict[loaderid]
+    if camera.cap is not None:
+        logging.debug(f'camera.cap.isOpened()={camera.cap.isOpened()}')
     if camera.cap is not None and camera.cap.isOpened():
         camera.cap.release()
         camera.cap = None

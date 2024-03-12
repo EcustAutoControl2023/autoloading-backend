@@ -34,6 +34,8 @@ def connect():
     picture_url_request = operating_stations.get('picture_url_request','https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
     breakdowncode = operating_stations.get('breakdowncode', None)
     icps_differ_current = operating_stations.get('icps_differ_current', None)
+    loading_state = operating_stations.get('loading_state', None)
+
 
 
     return_data = load_point_dict[loader_id].load_control(
@@ -45,7 +47,7 @@ def connect():
         load_current=load_current,
         distance0=distance_0, distance1=distance_1, distance2=distance_2, icps_differ_current=icps_differ_current,
         picture_url_plate=picture_url_plate, picture_url_request=picture_url_request,
-        jobid=job_id
+        jobid=job_id,loading_state=loading_state
     )
 
     return return_data
