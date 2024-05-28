@@ -29,10 +29,11 @@ summary {
 }
 audio,
 canvas,
-progress,
-video {
+progress
+{
   display: inline-block;
   vertical-align: baseline;
+  width: 100%;
 }
 audio:not([controls]) {
   display: none;

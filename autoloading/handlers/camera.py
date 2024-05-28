@@ -1,7 +1,8 @@
 import os, time, logging
-from queue import Queue
 from abc import ABC, abstractmethod
 import cv2
+from queue import Queue
+import threading
 
 
 # 摄像头类
@@ -13,7 +14,9 @@ class Camera(ABC):
         self.jobid = None
         self.cameraStatus = False
         self.frame_alt = open(os.getcwd() + '/static/img/valt.png', 'rb').read()
-        self.frame_queue = Queue(maxsize=2)
+        self.frame = self.frame_alt
+        self.frame_queue = Queue(maxsize=100)
+        self.connecting = False
 
     def ishealthy(self):
         if self.cap is None:
@@ -29,49 +32,66 @@ class Camera(ABC):
                 else:
                     self.status = False
                 if self.status is not True:
-                    logging.debug(f'摄像头{self.jobid}断线！')
-                    self.scheduler()
+                    # logging.debug(f'摄像头{self.jobid}断线！')
+                    # logging.debug(f'connecting: {self.connecting}')
+                    if not self.connecting and self.cameraStatus:
+                        self.scheduler()
+                    # self.frame = self.frame_alt
                     self.frame_queue.put(self.frame_alt)
+                    logging.debug(f'{self.jobid}put1队列的大小为:{self.frame_queue.qsize()}')
+
                 else:
                     ret, buffer = cv2.imencode('.jpg', self.frame)
                     frame = buffer.tobytes()
+                    # self.frame = frame
                     self.frame_queue.put(frame)
+                    # self.frame_queue.task_done()
+                    logging.debug(f'{self.jobid}put2队列的大小为:{self.frame_queue.qsize()}')
+                    
                     # logging.debug(f'摄像头{self.jobid}显示！')
             except Exception as e:
                 if self.cap is not None:
-                    logging.debug(f'摄像头{self.jobid}寄了！')
+                    logging.debug(f'摄像头{self.jobid}了！')
                     self.cap.release()
+                # self.frame = self.frame_alt
                 self.frame_queue.put(self.frame_alt)
 
 
+
     def connect(self):
-        '''
-        没用到
-        '''
-        if self.cap is None:
-            self.cap = cv2.VideoCapture(self.rtsp)
-            if self.cap.isOpened():
-                return True
-            self.cap.release()
-        self.cap = None
+        # 减少摄像头连接不上超时等待问题
+        class videocapture_Thread(threading.Thread):
+            def __init__(self, rtsp):
+                super(videocapture_Thread, self).__init__()
+                self.result = None
+                self.rtsp = rtsp
+
+            def run(self):
+                self.result = self.open_videocapture()
+
+            def open_videocapture(self):
+                cap = cv2.VideoCapture(self.rtsp)
+                if cap.isOpened():
+                    return cap
+                else:
+                    cap.release()
+                    return None
+        from autoloading.config import CAP_TIME_OUT
+        capture = None
+        
+        time_out = CAP_TIME_OUT
+        start = time.time()
+        cap_thread = videocapture_Thread(self.rtsp)
+        cap_thread.daemon = True
+        cap_thread.start()
+        cap_thread.join(timeout=time_out)
+        logging.debug(f'摄像头链接超时时间:{time.time() - start}')
+        capture = cap_thread.result
+        logging.debug(f'capture:{capture}')
+        if capture is not None:
+            self.cap = capture
+            return True
         return False
-        # from autoloading.config import CAP_TIME_OUT
-        # capture = None
-        #
-        # time_out = CAP_TIME_OUT
-        # start = time.time()
-        # cap_thread = videocapture_Thread(self.rtsp)
-        # cap_thread.daemon = True
-        # cap_thread.start()
-        # cap_thread.join(timeout=time_out)
-        # logging.debug(f'摄像头链接超时时间:{time.time() - start}')
-        # capture = cap_thread.result
-        # logging.debug(f'capture：{capture}')
-        # if capture is not None:
-        #     self.cap = capture
-        #     self.flag.put(1)
-        #     return True
-        # return False
 
     def say(self):
         return f"rtsp: {self.rtsp}"
@@ -92,16 +112,27 @@ class Camera(ABC):
 
         logging.debug(f'摄像头{self.jobid}开始显示！')
         start = time.time()
+
         while True:
             from autoloading.config import CAP_TIME_OUT
-            if (time.time() - start) > CAP_TIME_OUT and self.cameraStatus is False:
+            if (time.time() - start) > CAP_TIME_OUT*2 and self.cameraStatus is False:
                 logging.debug(f'摄像头{self.__class__}{self.jobid}显示超时！')
                 yield (b'--frame\r\n'
                         b'Content-Type: image/jpeg\r\n\r\n'+ b'\r\n')
                 break
 
-            yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + self.frame_queue.get() + b'\r\n')
+            try: 
+                yield (b'--frame\r\n'
+                        b'Content-Type: image/jpeg\r\n\r\n' + self.frame_queue.get(block=False,timeout=5) + b'\r\n')
+                logging.debug(f'{self.jobid}get队列的大小为:{self.frame_queue.qsize()}')
+
+            except Exception as e:
+                yield (b'--frame\r\n'
+                        b'Content-Type: image/jpeg\r\n\r\n'+ self.frame_alt + b'\r\n')
+        
+        # while True:wogg
+        #     yield (b'--frame\r\n'
+        #                 b'Content-Type: image/jpeg\r\n\r\n'+ b'\r\n')
 
 class LoaderCamera(Camera):
     loader_video_url_list = [
@@ -141,15 +172,14 @@ class LoaderCamera(Camera):
 
     def scheduler(self):
         from autoloading.handlers.scheduler import scheduler, camera
-        logging.debug(f'开始连接装料点{self.jobid}的料口相机数据！')
         self.jobid = f'loadercamera: {self.index}'
+        logging.debug(f'开始连接装料点{self.jobid}的料口相机数据！')
+        from autoloading.config import CAP_TIME_OUT
         if scheduler.get_job(self.jobid) is None:
             scheduler.add_job(camera, 'interval', seconds=1, args=(LoaderCamera, LOADING_CAMERA, self.index, self.jobid), id=self.jobid)
 
 class LicensePlateCamera(Camera):
     license_video_url_list = [
-        # "rtsp://admin:123456@10.102.219.104:8554/live",
-        # "rtsp://admin:123456@192.168.31.223:8554/live",
         "rtsp://admin:1234567a@172.16.175.61:554/h265/ch1/sub/av_stream",#url_1 401南车牌识别相机
         "rtsp://admin:1234567a@172.16.175.67:554/h265/ch1/sub/av_stream",#url_2 402南车牌识别相机
         "rtsp://admin:1234567a@172.16.175.73:554/h265/ch1/sub/av_stream",#url_3 403南车牌识别相机
@@ -186,6 +216,7 @@ class LicensePlateCamera(Camera):
 
     def scheduler(self):
         from autoloading.handlers.scheduler import scheduler, camera
+        from autoloading.config import CAP_TIME_OUT
         logging.debug(f'开始连接装料点{self.jobid}的车牌相机数据！')
         self.jobid = f'licenseplatecamera: {self.index}'
         if scheduler.get_job(self.jobid) is None:

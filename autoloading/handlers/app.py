@@ -29,12 +29,18 @@ def connect():
     truck_weight_out = 0 if (truck_weight_out is None) or (isinstance(truck_weight_out, dict) or (isinstance(truck_weight_out, list))) else truck_weight_out
     goods_type = operating_stations.get('goods_type', None)
     store_id = operating_stations.get('store_id', None)
-    loader_id = operating_stations.get('loader_id', None)
+    loader_id = str.upper(operating_stations.get('loader_id', None))
     picture_url_plate = operating_stations.get('picture_url_plate', 'https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
     picture_url_request = operating_stations.get('picture_url_request','https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
     breakdowncode = operating_stations.get('breakdowncode', None)
     icps_differ_current = operating_stations.get('icps_differ_current', None)
     loading_state = operating_stations.get('loading_state', None)
+    type_of_opening = operating_stations.get('type_of_opening',None)
+    opening_length_bias = operating_stations.get('opening_length_bias',None)
+    opening_width_bias = operating_stations.get('opening_width_bias',None)
+    opening_length = operating_stations.get('opening_length',None)
+    opening_width = operating_stations.get('opening_width',None)
+
 
 
 
@@ -47,7 +53,9 @@ def connect():
         load_current=load_current,
         distance0=distance_0, distance1=distance_1, distance2=distance_2, icps_differ_current=icps_differ_current,
         picture_url_plate=picture_url_plate, picture_url_request=picture_url_request,
-        jobid=job_id,loading_state=loading_state
+        jobid=job_id,loading_state=loading_state,type_of_opening=type_of_opening,
+        opening_length_bias=opening_length_bias,opening_width_bias=opening_width_bias,
+        opening_length=opening_length,opening_width=opening_width
     )
 
     return return_data

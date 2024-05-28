@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8">
@@ -18,7 +18,8 @@
     <script src="{{url_for('static',filename='js/echarts.min.js')}}"></script>
     <script src="{{url_for('static',filename='js/dataTool.js')}}"></script>
     <script src="{{url_for('static',filename='js/index.js')}}"></script>
-
+    <script src="{{url_for('static',filename='js/adapter.min.js')}}"></script>
+    <script src="{{url_for('static',filename='js/webrtcstreamer.js')}}"></script>
     <script src="{{url_for('static',filename='js/jQuery.js')}}"></script>
     <script src="{{url_for('static',filename='js/socket.js')}}"></script>
 
@@ -114,6 +115,16 @@
             width: 100%;
             height: 100%;
             z-index: 999;
+        }
+        #video{
+            display: inline-block;
+            vertical-align: baseline;
+            width: 59%;
+        }
+        #video1{
+            display: inline-block;
+            vertical-align: baseline;
+            width: 100%;
         }
     </style>
 </head>
@@ -228,7 +239,7 @@
                 </div>
                 <br>
                     <div class="sxt">
-                        <img src="{{ url_for('video_feed_new',video_id='19') }}" alt="視頻加載失敗"  style="color:red;font-size:18px">
+                        <video id="video" autoplay></video>
                     </div>
             </div>
             <div class="center_text1">
@@ -319,43 +330,45 @@
                     视频画面1(车头画面)
                 </div>
                 <div class="license">
-                    <img src="{{ url_for('license_video_feed_new',license_video_id='19') }}" alt="視頻加載失敗"  style="color:red;font-size:18px">
+                    <video id="video1" autoplay></video>
                 </div>
             </div>
-           <div class="right_2">
-                <!--左上边框-->
-                <div class="t_line_box">
-                    <i class="t_l_line"></i> 
-                    <i class="l_t_line"></i> 
-                </div> 
-                <!--右上边框-->
-                <div class="t_line_box">
-                    <i class="t_r_line"></i> 
-                    <i class="r_t_line"></i> 
-                </div> 
-                <!--左下边框-->
-                <div class="t_line_box">
-                    <i class="l_b_line"></i> 
-                    <i class="b_l_line"></i> 
-                </div> 
-                    <!--右下边框-->
-                    <div class="t_line_box">
-                    <i class="r_b_line"></i> 
-                    <i class="b_r_line"></i> 
-                </div> 
-                <div class="main_title">
-                    视频画面2(车尾画面)
-                </div>
-                <div class="video">
-                    <video controls>
-                        <source src="{{url_for('static',filename='video/2023-08-16 10-48-31.mp4')}}" type="video/mp4">
-                    </video>
-                </div>
-           </div>
         </div>
     </div>
 </div>
 <script src="{{url_for('static',filename='js/control status.js')}}"></script>
+<script>
+    // var webRtcServer      = null;
+    // window.onload         = function() { 
+    //     webRtcServer      = new WebRtcStreamer("video","http://localhost:8000");
+    // webRtcServer.connect("rtsp://admin:1234567a@172.16.175.172:554/h264/ch1/sub/av_stream");
+    // }
+    // window.onbeforeunload = function() { webRtcServer.disconnect(); }
+
+    // var webRtcServer1      = null;
+    // window.onload         = function() { 
+    //     webRtcServer1      = new WebRtcStreamer("video1","http://localhost:8000");
+    // webRtcServer1.connect("rtsp://admin:1234567a@172.16.175.175:554/h264/ch1/sub/av_stream");
+    // }
+    // window.onbeforeunload = function() { webRtcServer1.disconnect(); }
+
+
+    var webRtcServer      = null;
+    var webRtcServer1      = null;
+
+    window.onload = function() { 
+        webRtcServer = new WebRtcStreamer("video","http://localhost:8000");
+        webRtcServer1 = new WebRtcStreamer("video1","http://localhost:8000");
+        webRtcServer.connect("rtsp://admin:1234567a@172.16.175.172:554/h264/ch1/sub/av_stream");
+        webRtcServer1.connect("rtsp://admin:1234567a@172.16.175.175:554/h264/ch1/sub/av_stream");
+        console.log("链接成功");
+    }
+    
+    window.onbeforeunload = function() { 
+        webRtcServer.disconnect();
+        webRtcServer1.disconnect(); 
+    }
+</script>
 </body>
 
 </html>
