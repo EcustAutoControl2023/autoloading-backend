@@ -7,13 +7,13 @@ from autoloading.models.sensor import Traffic
 
 socketio = SocketIO()
 
-@socketio.on('connect')
-def test_connect():
-    print('Client connected')
+# @socketio.on('connect')
+# def test_connect():
+#     print('Client connected')
 
-@socketio.on('disconnect')
-def test_disconnect():
-    print('Client disconnected')
+# @socketio.on('disconnect')
+# def test_disconnect():
+#     print('Client disconnected')
 
 # 车牌弹窗
 def truck_id_popup(data):
@@ -38,6 +38,7 @@ def center_popup_confirm(confirm):
 # 向前端发送传感器数据
 def sensor_data(data):
     # global socketio
+    #logging.debug(f'data:{data}')
     socketio.emit('sensor_data', data)
 
 # 向前端发送最近n条车辆数据

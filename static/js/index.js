@@ -122,8 +122,9 @@ var sensor_socket = io('http://localhost:5000');
 sensor_socket.on('sensor_data', (data) => {
     // console.log("tablename out: " + data.tablename);
     if (data.tablename === tablename) {
-        // console.log("tablename: " + data.tablename);
-        // console.log("data: " + data.value);
+        console.log("current_time"+ new Date().toString())
+        console.log("tablename: " + data.value);
+        //console.log("data: " + data.value);
         data_queue.push(data.value);
         echart_3('chart_3', data_queue);
     }

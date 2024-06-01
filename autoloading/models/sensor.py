@@ -36,7 +36,7 @@ def create_sensor_table_class():
             })
         globals()[sensor_class.__name__] = sensor_class
         # 添加trigger
-        exec(f'db.event.listen({sensor_class.__name__}, "before_insert",{sensor_class.__name__}.before_insert)')
+        # exec(f'db.event.listen({sensor_class.__name__}, "before_insert",{sensor_class.__name__}.before_insert)')
 
 create_sensor_table_class()
 
@@ -62,16 +62,11 @@ class Traffic(db.Model):
     loadlevelheight3 = db.Column(db.Integer, nullable=True)
     loadstarttime = db.Column(db.DateTime, nullable=True)
     loadendtime = db.Column(db.DateTime, nullable=True)
-    loadtime1 = db.Column(db.DateTime, nullable=True)
-    loadtime2 = db.Column(db.DateTime, nullable=True)
-    loadtime3 = db.Column(db.DateTime, nullable=True)
+    loadtimetotal = db.Column(db.Integer, nullable=True)
     loadcurrent = db.Column(db.Float, nullable=True)
-    loadcurrent1 = db.Column(db.Float, nullable=True)
-    loadcurrent2 = db.Column(db.Float, nullable=True)
-    loadcurrent3 = db.Column(db.Float, nullable=True)
     loadestimate = db.Column(db.Float, nullable=True)
     worktotal = db.Column(db.Integer, nullable=False)
-    jobid = db.Column(db.Integer, nullable=True)
+    jobid = db.Column(db.String(20), nullable=True)
     loadstatus = db.Column(db.String(20), nullable=True)
     location = db.Column(db.String(20), nullable=True)
     stackpos = db.Column(db.String(20), nullable=True)
@@ -79,6 +74,11 @@ class Traffic(db.Model):
     loadpoint1 = db.Column(db.Float, nullable=True)
     loadpoint2 = db.Column(db.Float, nullable=True)
     loadpoint3 = db.Column(db.Float, nullable=True)
+    type_of_opening = db.Column(db.String(20), nullable=True)
+    opening_length_bias = db.Column(db.Float, nullable=True)
+    opening_width_bias = db.Column(db.Float, nullable=True)
+    opening_length = db.Column(db.Float, nullable=True)
+    opening_width = db.Column(db.Float, nullable=True)
 
     @staticmethod
     def before_insert(target,value,initiator):

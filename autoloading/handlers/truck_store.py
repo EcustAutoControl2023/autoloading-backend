@@ -22,12 +22,6 @@ def update_truck_content(truckid:str, loaderid, update_data:dict):
             traffic.loadlevelheight2 = value
         elif 'load_level_height3' == key:
             traffic.loadlevelheight3 = value
-        elif 'load_time1' == key:
-            traffic.loadtime1 = value
-        elif 'load_time2' == key:
-            traffic.loadtime2 = value
-        elif 'load_time3' == key:
-            traffic.loadtime3 = value
         elif 'loadestimate' == key:
             traffic.loadestimate = value
         elif 'loadstatus' == key:
@@ -42,6 +36,8 @@ def update_truck_content(truckid:str, loaderid, update_data:dict):
             traffic.loadpoint3 = value
         elif 'loadendtime' == key:
             traffic.loadendtime = value
+        elif 'loadtimetotal'  == key:
+            traffic.loadtimetotal = value
 
 
     db.session.commit()
@@ -72,16 +68,8 @@ def insert_truck_content(req_time,
                          goods_type,
                          store_id,
                          loader_id,
-                         load_level_height1, # 需要更新
-                         load_level_height2, # 需要更新
-                         load_level_height3, # 需要更新
                          load_start_time, # 需要更新
-                         load_end_time,  # 需要更新
-                         load_time1, # 需要更新
-                         load_time2, # 需要更新
-                         load_time3, # 需要更新
                          work_total,
-                         load_estimate, # 需要更新
                          jobid,
                          loadstatus, # 需要更新
                          location,
@@ -90,6 +78,12 @@ def insert_truck_content(req_time,
                          loadpoint1,
                          loadpoint2,
                          loadpoint3,
+                         type_of_opening,
+                         opening_length_bias,
+                         opening_width_bias,
+                         opening_length,
+                         opening_width ,
+                         load_time
                          ):
 
     traffic = Traffic(time = req_time,
@@ -103,17 +97,9 @@ def insert_truck_content(req_time,
                       goodstype = goods_type,
                       storeid = store_id,
                       loaderid = loader_id,
-                      loadlevelheight1 = load_level_height1,
-                      loadlevelheight2 = load_level_height2,
-                      loadlevelheight3 = load_level_height3,
                       loadstarttime = load_start_time,
-                      loadendtime = load_end_time,
-                      loadtime1 = load_time1,
-                      loadtime2 = load_time2,
-                      loadtime3 = load_time3,
                       loadcurrent = load_current,
                       worktotal = work_total,
-                      loadestimate = load_estimate,
                       jobid=jobid,
                       loadstatus=loadstatus,
                       location=location,
@@ -121,7 +107,13 @@ def insert_truck_content(req_time,
                       loadheight=load_height,
                       loadpoint1=loadpoint1,
                       loadpoint2=loadpoint2,
-                      loadpoint3=loadpoint3
+                      loadpoint3=loadpoint3,
+                      type_of_opening=type_of_opening,
+                      opening_length_bias=opening_length_bias,
+                      opening_width_bias=opening_width_bias,
+                      opening_length=opening_length,
+                      opening_width=opening_width,
+                      loadtimetotal=load_time
                       )
 
     db.session.add(traffic)

@@ -1,3 +1,4 @@
+import datetime
 import time
 import json
 from pytest_bdd import scenarios, given, when, then, parsers, scenario
@@ -13,7 +14,7 @@ Scenario Outline: 2.1.1 将任务信息传给时庐获取引导策略
 """
 @given(parsers.parse("测试的post文件为: {file}"), target_fixture="jsondata", converters={"file": str})
 def jsondata(file):
-    with open(file) as json_file:
+    with open(file, encoding="utf8") as json_file:
         jsondata = json.load(json_file)
     return jsondata
 
@@ -38,6 +39,8 @@ def post0(client, jsondata):
 
 @when("根据装料点位发送post请求data_type=1")
 def post1(client, jsondata):
+    wait_time = jsondata.get("delay_send")
+    printr(wait_time, "wait_time")
     jsondata["data_type"] = 1
     printr(jsondata)
     distance_0 = jsondata['operating_stations']['distance_0']
@@ -45,32 +48,34 @@ def post1(client, jsondata):
     distance_2 = jsondata['operating_stations']['distance_2']
     if (distance_0 != distance_1) and (distance_0 != distance_2) and (distance_1 != distance_2):
         jsondata["operating_stations"]["icps_differ_current"] = distance_0
+        time.sleep(wait_time)
         response = client.post("/connect", json=jsondata)
         jsondata["operating_stations"]["icps_differ_current"] = distance_1
+        time.sleep(wait_time)
         response = client.post("/connect", json=jsondata)
         jsondata["operating_stations"]["icps_differ_current"] = distance_2
-        jsondata["operating_stations"]["temp_manual_stop"] = 1
-        response = client.post("/connect", json=jsondata)
+        jsondata["operating_stations"]["temp_manual_stop"] = jsondata["temp_manual_stop"]
     elif (distance_0 == distance_1) and (distance_1 != distance_2) :
         jsondata["operating_stations"]["icps_differ_current"] = distance_0
+        time.sleep(wait_time)
         response = client.post("/connect", json=jsondata)
         jsondata["operating_stations"]["icps_differ_current"] = distance_2
-        jsondata["operating_stations"]["temp_manual_stop"] = 1
-        response = client.post("/connect", json=jsondata)
+        jsondata["operating_stations"]["temp_manual_stop"] = jsondata["temp_manual_stop"]
     elif (distance_1 == distance_2) and (distance_1 != distance_0) :
         jsondata["operating_stations"]["icps_differ_current"] = distance_0
+        time.sleep(wait_time)
         response = client.post("/connect", json=jsondata)
         jsondata["operating_stations"]["icps_differ_current"] = distance_1
-        jsondata["operating_stations"]["temp_manual_stop"] = 1
-        response = client.post("/connect", json=jsondata)
+        jsondata["operating_stations"]["temp_manual_stop"] = jsondata["temp_manual_stop"]
     elif (distance_0 == distance_1) and (distance_1== distance_2) :
         jsondata["operating_stations"]["icps_differ_current"] = distance_0
-        jsondata["operating_stations"]["temp_manual_stop"] = 1
-        response = client.post("/connect", json=jsondata)
+        jsondata["operating_stations"]["temp_manual_stop"] = jsondata["temp_manual_stop"]
     else:
         jsondata["operating_stations"]["icps_differ_current"] = None
-        jsondata["operating_stations"]["temp_manual_stop"] = 1
-        response = client.post("/connect", json=jsondata)
+        jsondata["operating_stations"]["temp_manual_stop"] = jsondata["temp_manual_stop"]
+
+    time.sleep(wait_time)
+    response = client.post("/connect", json=jsondata)
     return response
 
 @then(parsers.parse("返回正确的装车策略: {expected_icps_differ}"))
@@ -206,9 +211,55 @@ def check_strategy_1_error(app, db, response, expected_height_load):
     with app.app_context():
         traffics = db.session.query(Traffic).all()
         assert len(traffics) == 0
+"""
+END
+"""
+
+@given("初始化")
+def init(jsondata):
+    # 默认延迟发送时间为0
+    jsondata["delay_send"] = 0
+    # 默认手动停止为0
+    jsondata["temp_manual_stop"] = 0
+
+@given(parsers.parse("等待{time:d}秒"), target_fixture='wait_time')
+def wait_time(time):
+    return time
+
+@when(parsers.parse("手动停止"))
+def temp_manual_stop(jsondata):
+    jsondata["temp_manual_stop"] = 1
+
+@when(parsers.parse("延迟发送"))
+def delay_send(jsondata, wait_time):
+    jsondata["delay_send"] = wait_time
+
+@then(parsers.parse("返回正确的装车时间: {expected_duration:d}"))
+def check_strategy_1_duration(app, db, response, expected_duration):
+    # 确保后端无逻辑错误
+    assert response.status_code == 200
+
+    loader_id = response.json.get('loader_id')
+
+    with app.app_context():
+        traffics = db.session.query(Traffic).all()
+        assert len(traffics) == 1
+        printr(traffics[0].loadtimetotal, "loadtimetotal")
+        printr(expected_duration, "expected_duration")
+        actual_duration = traffics[0].loadtimetotal
+        time_diff = abs(expected_duration - actual_duration)
+        assert time_diff < 1
+
+"""
+END
+"""
 
 @scenario("./feature/connect.feature", "2.1.1 将任务信息传给时庐获取引导策略")
 def test_data_type0():
+    pass
+
+@scenario("./feature/test.feature", "一次装料，记录时间")
+def test_load_once():
     pass
 
 @scenario("./feature/connect.feature", "2.1.1 将任务信息传给时庐获取引导策略——异常测试(data_type=1未收到结束或移动点位响应，但请求data_type=0)")

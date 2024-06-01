@@ -27,10 +27,10 @@ from .login import (
     login
 )
 
-from .video import (
-    video_feed_new,
-    license_video_feed_new
-)
+# from .video import (
+#     video_feed_new,
+#     license_video_feed_new
+# )
 
 from .app import(
     connect,
@@ -68,5 +68,5 @@ def init_app(app:Flask):
     app.add_url_rule('/index20', endpoint='index20', view_func=index20)
     app.add_url_rule('/overview', endpoint='overview', view_func=overview)
     app.add_url_rule('/connect', endpoint='connect',view_func=connect, methods=['POST'])
-    app.add_url_rule('/video_feed_new/<video_id>', endpoint='video_feed_new', view_func=video_feed_new)
-    app.add_url_rule('/license_video_feed_new/<license_video_id>', endpoint='license_video_feed_new', view_func=license_video_feed_new)
+    # app.add_url_rule('/video_feed_new/<video_id>', endpoint='video_feed_new', view_func=video_feed_new)
+    # app.add_url_rule('/license_video_feed_new/<license_video_id>', endpoint='license_video_feed_new', view_func=license_video_feed_new)
