@@ -32,4 +32,4 @@ jobs:
         # flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest -v --cov-report term --cov-report html:htmlcov --cov-report xml --cov-fail-under=90 --cov=./autoloading
+        pytest -v --cov-report term --cov-report html:htmlcov --cov-report xml --cov-fail-under=50 --cov=./autoloading

@@ -1,9 +1,6 @@
 import logging
-import datetime
-import cv2
 from flask import Flask
 from autoloading.handlers.loaderpoint import LoadPoint, load_point_dict
-from autoloading.handlers.camera import Camera
 from autoloading.config import RUNNING
 from apscheduler.schedulers.background import BackgroundScheduler
 from autoloading.handlers.sensor import read_per_second
