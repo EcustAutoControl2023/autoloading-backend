@@ -13,7 +13,7 @@ Scenario Outline: 2.1.1 将任务信息传给时庐获取引导策略
 """
 @given(parsers.parse("测试的post文件为: {file}"), target_fixture="jsondata", converters={"file": str})
 def jsondata(file):
-    with open(file) as json_file:
+    with open(file, encoding="utf8") as json_file:
         jsondata = json.load(json_file)
     return jsondata
 
