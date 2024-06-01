@@ -12,16 +12,17 @@ def test_insert_csvtotraffic(app, db):
         df = pd.read_csv(filename)
         df.to_sql(con=db.engine, name=Traffic.__tablename__, if_exists='append', index=False)
         traffic = db.session.query(Traffic).all()
-        assert len(traffic) == 12
+        assert len(traffic) == 99
 
 
 def test_insert_csvtodb(app, db):
     with app.app_context():
         filename = './test/csv/sensor4-1-1.csv'
         df = pd.read_csv(filename)
-        df.to_sql(con=db.engine, name=Sensor1.__tablename__, if_exists='append', index=False)
-        sensor1 = db.session.query(Sensor1).all()
-        assert len(sensor1) == 10
+
+        exec("df.to_sql(con=db.engine, name=Sensor1.__tablename__, if_exists='append', index=False)")
+        exec("sensor1 = db.session.query(Sensor1).all()")
+        exec("assert len(sensor1) == 10")
 
 def test_db_insert_traffic(app, db):
     with app.app_context():

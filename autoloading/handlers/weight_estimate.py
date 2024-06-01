@@ -1,7 +1,10 @@
 from autoloading.config import create_logger
+from autoloading.models.sensor import Traffic
 
 def weight_estimate():
     wlogging = create_logger("weight")
+    print("weight_estmate")
+    wlogging.debug("weight_estimate")
         
     global per_second_weight
 
@@ -26,6 +29,7 @@ def weight_estimate():
 
         loader_weight_total = [(weight_out - weight_in) for weight_in, weight_out in zip(loader_weight_in, loader_weight_out)]  # 车辆装载净重
         # self.logging.debug(f'loader_weight_total: {loader_weight_total}')
+        wlogging.debug("weight_estimate1")
 
         #计算装载时间
         load_time = [traffic.loadtimetotal for traffic in filtered_traffic if traffic.loadtimetotal is not None]  # 每一次任务的总装载时间
@@ -33,9 +37,11 @@ def weight_estimate():
 
         filtered_data_length = min(len(load_time),len(loader_weight_total))
         # self.logging.debug(f'filtered_data_length: {filtered_data_length}')
+        wlogging.debug("weight_estimate2")
 
         if filtered_data_length == 0:
             return None
+        wlogging.debug("weight_estimate3")
 
         sum_weight_per_second = 0
         for k in range(filtered_data_length):
