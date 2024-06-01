@@ -1,8 +1,10 @@
 Feature: connect接口测试
   Scenario Outline: 2.1.1 将任务信息传给时庐获取引导策略
     Given 测试的post文件为: <file>
+    And 初始化
     And 三个装料点位: <distance_0>, <distance_1>, <distance_2>
     When 客户端发送post请求data_type=0
+    And 手动停止
     And 根据装料点位发送post请求data_type=1
     Then 返回正确的装车策略: <expected_icps_differ>
 

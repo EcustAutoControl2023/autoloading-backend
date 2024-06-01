@@ -309,6 +309,7 @@ class LoadPoint:
             # 记录开始装料时间
             if self.time_record_flag:
                 self.load_start_time = datetime.datetime.now()
+                self.logging.debug(f"load_start_time: {self.load_start_time}")
                 self.duration = float(0)
                 self.time_record_flag = False
                 update_truck_content(
@@ -325,30 +326,46 @@ class LoadPoint:
             if(self.temp_manual_stop!=0):
                 self.logging.debug("手动停止")
                 self.logging.debug(f"icps_differ_num:{self.icps_differ_num}")
+                self.logging.debug(f"icps_differ:{self.icps_differ}")
+                self.logging.debug(f'distance_0:{self.distance_0}')
+                self.logging.debug(f'distance_1:{self.distance_1}')
+                self.logging.debug(f'distance_2:{self.distance_2}')
                 if(self.icps_differ_num == '0001'):   
                     self.work_finish = 1
                     self.load_time1 = datetime.datetime.now()
+                    assert type(self.load_start_time) == datetime.datetime
+                    self.duration = (self.load_time1 - self.load_start_time).total_seconds()
                 elif(self.icps_differ_num == '0012') or (self.icps_differ_num == '0112'):  
                     if(self.icps_differ == self.distance_0):
                         self.work_finish = 0
                         self.load_time1 = datetime.datetime.now()
-                        self.icps_differ == self.distance_2
+                        assert type(self.load_start_time) == datetime.datetime
+                        self.duration = (self.load_time1 - self.load_start_time).total_seconds()
+                        self.icps_differ = self.distance_2
                     else:
                         self.work_finish = 1
                         self.load_time2 = datetime.datetime.now()
+                        assert type(self.load_start_time) == datetime.datetime
+                        self.duration = (self.load_time2 - self.load_start_time).total_seconds()
                 elif(self.icps_differ_num == '0123'):
                     if(self.icps_differ == self.distance_0):
                         self.work_finish = 0
                         self.load_time1 = datetime.datetime.now()
-                        self.icps_differ == self.distance_1
+                        assert type(self.load_start_time) == datetime.datetime
+                        self.duration = (self.load_time1 - self.load_start_time).total_seconds()
+                        self.icps_differ = self.distance_1
 
                     elif(self.icps_differ == self.distance_1):
                         self.load_time2 = datetime.datetime.now()
-                        self.icps_differ == self.distance_2
+                        assert type(self.load_start_time) == datetime.datetime
+                        self.duration = (self.load_time2 - self.load_start_time).total_seconds()
+                        self.icps_differ = self.distance_2
 
                     else:
                         self.work_finish = 1
                         self.load_time3 = datetime.datetime.now()
+                        assert type(self.load_start_time) == datetime.datetime
+                        self.duration = (self.load_time3 - self.load_start_time).total_seconds()
 
                 # FIXME:如果切换手动，是否可以认为此条数据作废？
                 if self.work_finish:
@@ -654,8 +671,6 @@ class LoadPoint:
 
 
     def load_control0(self):
-
-        # self.logging.debug('control0')
         self.logging.debug(f'control0 -> icps_differ: {self.icps_differ}')
 
         if self.icps_differ == self.distance_0 :
@@ -664,7 +679,7 @@ class LoadPoint:
             self.logging.debug(f'duration:{self.duration}')
 
             if self.duration < 1*60:  # 前一分钟持续装料
-                current_time = datetime.datetime.now()
+                # current_time = datetime.datetime.now()
                 self.load_height = self.get_sensor_data()
                 self.logging.debug(f'load_height:{self.load_height.data}')
                 self.allow_plc_work = 1        # PLC启动
@@ -672,7 +687,7 @@ class LoadPoint:
                 self.work_weight_status = 1    # 作业正在执行
                 self.work_finish = 0           # 任务未完成
             else:
-                current_time = datetime.datetime.now()
+                # current_time = datetime.datetime.now()
                 self.load_height = self.Sensor.query.order_by(self.Sensor.id.desc()).first()
                 if self.sensor_status_ok(load_height=self.load_height) is not True: # 物位计异常，无数据，程序停止
                     self.logging.debug("物位计无数据")
@@ -698,8 +713,6 @@ class LoadPoint:
 
     # 中装车点装料控制程序
     def load_control1(self):
-
-        self.logging.debug('control1')
         self.logging.debug(f'control1 -> icps_differ: {self.icps_differ}')
 
         if self.icps_differ == self.distance_1 :
@@ -738,8 +751,6 @@ class LoadPoint:
 
     # 后装车点装料控制程序
     def load_control2(self):
-
-        self.logging.debug('control2')
         self.logging.debug(f'control2 -> icps_differ: {self.icps_differ}')
 
         if self.icps_differ == self.distance_2 or self.icps_differ == self.distance_1:
@@ -818,17 +829,18 @@ class LoadPoint:
     
     def stop(self, truck_id, loader_id):
         self.logging.debug(f'truckid: {truck_id}')
+        self.logging.debug(f'loaderid: {loader_id}')
         self.logging.debug("stop!")
         self.allow_plc_work = 0
         self.work_finish = 1
         self.work_weight_status = 2
-        assert type(self.duration) == float
-        self.logging.debug(f"loadstarttime:{self.load_start_time}")
-        assert type(self.load_start_time) == datetime.datetime
+        assert type(self.duration) == float; assert type(self.load_start_time) == datetime.datetime
         self.load_end_time = self.load_start_time + timedelta(seconds=self.duration)
         self.loadstatus = "装车完成"
         self.insert_traffic_flag = True
         self.time_record_flag = True
+        self.load_start_time1_flag = True
+        self.load_start_time2_flag = True
         control_status_socket({'value':self.allow_plc_work,'loaderid':self.loader_id})
         loader_status_socket({'value':self.work_finish,'loaderid':self.loader_id})
 
@@ -867,8 +879,6 @@ class LoadPoint:
         self.s.close()
         self.s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)# UDP
         self.s.setblocking(False)
-
-
 
 
 # 将每个装料点定义成一个类的实例
