@@ -4,6 +4,8 @@ import pandas as pd
 import random
 import time
 
+flag = -1 # 0: 正常，等待提供csv文件；1:重启；2:服务停止；3:数据传输
+
 
 def read_from_csv(filepath):
     # 读取模拟的装车传感器数据
@@ -36,38 +38,52 @@ def init_udp_server(server, host, port):
     print("UDP 服务端已启动")
 
 def start_listening(server):
+    global flag
     # 测试启动条件
     def get_csv_file(msg)->bool:
         if ".csv" in msg:
             return True
         return False
 
-    msg = ''
+    csv = ''
     gen = ''
 
     while True:
-        # 等待启动条件
-        while True:
-            data, addr = server.recvfrom(1024)
-            print(f"接收到来自 {addr} 的数据: {data.decode()}")
-            server.sendto(b'3q', addr)
-            msg = data.decode()
-            if get_csv_file(msg=msg):
-                gen = read_from_csv(msg)
-                msg = ''
-                break
-            time.sleep(1)
+        data, addr = server.recvfrom(1024)
+        print(f"接收到来自 {addr} 的数据: {data.decode()}")
+        recv_data = data.decode()
+        if recv_data == 'start': # 等待启动条件
+            flag = 0
+            continue
+        elif recv_data == 'restart':
+            if flag == -1:
+                flag = 0
+                continue
+            flag = 1
+        elif recv_data == 'stop':
+            flag = 2
 
-        # 模拟传感器
-        while True:
-            data, addr = server.recvfrom(1024)
-            print(f"接收到来自 {addr} 的数据: {data.decode()}")
-            msg = data.decode()
+        if flag == 0:
+            # data, addr = server.recvfrom(1024)
+            print(f"接收到来自 {addr} 的CSV文件: {recv_data}")
+            csv = recv_data
+            server.sendto(b'3q', addr)
+            if get_csv_file(msg=csv):
+                gen = read_from_csv(csv)
+                # break
+            flag = 3
+            time.sleep(1)
+        elif flag == 1:
+            if get_csv_file(msg=csv):
+                gen = read_from_csv(csv)
+            flag = 3
+        elif flag == 2:
+            break
+        elif flag == 3: # 模拟传感器
+            # data, addr = server.recvfrom(1024)
+            print(f"接收到来自 {addr} 的数据: {recv_data}")
             # 回复数据
             server.sendto(gen.__next__(), addr)
-            if get_csv_file(msg=msg):
-                gen = read_from_csv(msg)
-                msg = ''
 
 def release_udp_server(server):
     server.close()

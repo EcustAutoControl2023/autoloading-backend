@@ -14,4 +14,3 @@ Feature: connect接口测试
       | ./test/json/postdata-1.json | [1.1, 1.2, 1.2] | [[1.1, 1.2], [1.2], []]                  |
       | ./test/json/postdata-1.json | [1.1, 1.2, 1.3] | [[1.1, 1.2, 1.3], [1.2, 1.3], [1.3], []] |
       | ./test/json/postdata-1.json | []              | []                                       |
-

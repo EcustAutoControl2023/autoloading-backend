@@ -11,7 +11,7 @@
         "distance_1": 1.1,
         "distance_2": 2.3,
         "truck_load": 40.2,
-        "load_current": 20.6,
+        "load_current": 0.5,
         "truck_weight_in": 20,
         "goods_type": "油菜籽",
         "store_id": 212,

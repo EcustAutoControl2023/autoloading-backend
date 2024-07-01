@@ -109,7 +109,7 @@ class LoadPoint:
         self.allow_work_flag = None      # 
         self.flag_load = 0               # 装料机状态；0：未装车，1：装车中，2：故障
         self.work_weight_status = 0      # 作业执行情况；0：未开始，1：正在执行，2：已完成，3：检测溢出，被动完成 
-        self.work_weight_reality = None  # 作业装料情况(当前装料量)
+        # self.work_weight_reality = None  # 作业装料情况(当前装料量)
         self.work_finish = 1             # 任务是否完成，0：未完成，1：完成
         self.time_record_flag = True     # 时间记录标志
         self.insert_traffic_flag = True   # 判断是否是新任务
@@ -126,9 +126,9 @@ class LoadPoint:
 
 
         # XXX: 定义装料高度上限
-        self.load_level_limit1 = 5#3.72      # 第一次装料高度限制
-        self.load_level_limit2 = 5#3.65       # 第二次装料高度限制
-        self.load_level_limit3 = 5#3.65       # 第三次装料高度限制
+        self.load_level_limit1 = 3.5#3.72      # 第一次装料高度限制
+        self.load_level_limit2 = 3.5#3.65       # 第二次装料高度限制
+        self.load_level_limit3 = 3.5#3.65       # 第三次装料高度限制
         self.load_height = SensorData(-1)               # 实时装料高度
 
         self.load_level_height1 = None         # 第一次装料时高度
@@ -193,11 +193,13 @@ class LoadPoint:
 
         if self.data_type == 0:  # 接收任务信息并发送引导策略
             self.logging.debug("data_type:0")
+            self.logging.debug(f"truck_id:{self.truck_id}开始任务")
+
             traffic = Traffic.query.filter_by(loaderid=self.loader_id).first()
             self.logging.debug(f'traffic: {traffic}')
             # 判断是否有新车辆到达, 如果有新车辆到达，初始化装料点状态
             if traffic is None or (traffic.truckid != self.truck_id):
-                self.logging.debug("新装料任务：{self.truck_id}")
+                self.logging.debug(f"新装料任务：{self.truck_id}")
                 self.work_finish = 0
                 self.icps_flag = 0
                 self.insert_traffic_flag = True
@@ -240,7 +242,7 @@ class LoadPoint:
             self.logging.debug(f'self.insert_traffic_flag: {self.insert_traffic_flag}')
             if self.insert_traffic_flag:
                 self.insert_traffic_flag = False
-                insert_truck_content(
+                insert_truck_content(  
                     req_time=self.req_time,
                     truck_id=self.truck_id,
                     truck_load=self.truck_load,
@@ -284,7 +286,7 @@ class LoadPoint:
                 })
             
         elif data_type == 1:  # 车辆引导到位，发送PLC控制策略
-            self.logging.debug("data_type:1")
+            self.logging.debug(f"{self.truck_id}请求data_type:1")
             self.logging.debug(f"temp_manual_stop: {self.temp_manual_stop}")
             self.logging.debug(f"loading_state: {self.loading_state}")
             self.logging.debug(f"icps_differ_current: {icps_differ_current}")
@@ -550,8 +552,8 @@ class LoadPoint:
                         self.icps_flag += 1
                         assert type(self.duration) == float; assert type(self.load_start_time) == datetime.datetime
                         self.load_end_time = self.load_start_time + timedelta(seconds=self.duration)
-                        self.time_record_flag = True
-                        self.insert_traffic_flag = True
+                        # self.time_record_flag = True
+                        # self.insert_traffic_flag = True
                         # 记录第一个装车点料高和时间
                         self.load_level_height1 = self.load_height.data
                         self.load_time1 = datetime.datetime.now()
@@ -600,7 +602,7 @@ class LoadPoint:
                 operating_stations={
                     "truck_id" : self.truck_id,
                     "work_weight_status" : self.work_weight_status,
-                    "work_weight_reality" : self.work_weight_reality,
+                    "work_weight_reality" : self.loadestimate,
                     "flag_load" : self.flag_load,
                     "height_load" : self.height_load,
                     "allow_plc_work" : self.allow_plc_work,
@@ -636,7 +638,7 @@ class LoadPoint:
                 operating_stations={
                     "truck_id": self.truck_id,
                     "work_weight_status": self.work_weight_status,
-                    "work_weight_reality": self.work_weight_reality,
+                    "work_weight_reality": self.loadestimate,
                     "flag_load": self.flag_load,
                     "height_load": self.height_load,
                     "allow_plc_work": self.allow_plc_work,
@@ -710,11 +712,10 @@ class LoadPoint:
         if self.icps_differ == self.distance_0 :
             assert type(self.duration) == float; assert type(self.load_start_time) == datetime.datetime
             self.duration = (datetime.datetime.now() - self.load_start_time).total_seconds()  # 计算装料持续时间
-            self.logging.debug(f'duration:{self.duration}')
+            self.logging.debug(f'load_control0 -> duration:{self.duration}')
             self.load_height = self.get_sensor_data()
-
+            self.logging.debug(f'load_height:{self.load_height.data}')
             if self.duration < 1*60:  # 前一分钟持续装料
-                self.logging.debug(f'load_height:{self.load_height.data}')
                 self.allow_plc_work = 1        # PLC启动
                 self.flag_load = 1             # 装料机装车中
                 self.work_weight_status = 1    # 作业正在执行
@@ -733,6 +734,7 @@ class LoadPoint:
                     self.work_finish = 0           # 任务未完成
                     self.load_time = datetime.datetime.now() - self.load_start_time
                     self.icps_differ = self.distance_1 if self.distance_0 != self.distance_1 else self.distance_2
+                    self.logging.debug("前装料点装料完毕")
 
             self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,self.duration) # 估算当前装料量
             self.logging.debug(f'loadestimate:{self.loadestimate}')
@@ -750,17 +752,19 @@ class LoadPoint:
 
             # duration = datetime.datetime.now() - self.load_start_time  # 计算装料持续时间
             self.duration = self.load_time.total_seconds() + (datetime.datetime.now() - self.load_start_time1).total_seconds()  # 计算装料持续时间
+            self.logging.debug(f'load_control1 -> duration:{self.duration}')
 
-            self.logging.debug(f'duration:{self.duration}')
+
             self.load_height = self.get_sensor_data()
             self.logging.debug(f'load_height:{self.load_height.data}')
 
 
-            if self.load_height.data < self.load_level_limit2: # 如果料高未超过限制，继续装料
-                self.allow_plc_work = 1         # PLC启动
-                self.flag_load = 1              # 装料机装车 
-                self.work_weight_status = 1     # 作业正在执 
-                self.work_finish = 0            # 任务未完成
+            # if self.load_height.data < self.load_level_limit2: # 如果料高未超过限制，继续装料
+            if self.loadestimate < self.load_current :
+                self.allow_plc_work = 1
+                self.flag_load = 1
+                self.work_weight_status = 1
+                self.work_finish = 0
             else:
                 self.allow_plc_work = 0         # PLC停止
                 self.flag_load = 0              # 装料机未装 
@@ -769,6 +773,7 @@ class LoadPoint:
                 self.icps_differ  = self.distance_2
                 self.load_time += datetime.datetime.now() - self.load_start_time1
                 self.load_start_time1_flag = True
+                self.logging.debug("中装料点装料完毕")
 
 
             self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,self.duration) # 估算当前装料量
@@ -788,12 +793,15 @@ class LoadPoint:
 
             # duration = datetime.datetime.now() - self.load_start_time  # 计算装料持续时间
             self.duration = self.load_time.total_seconds() + (datetime.datetime.now() - self.load_start_time2).total_seconds()  # 计算装料持续时间
-            self.logging.debug(f'duration:{self.duration}')
+            self.logging.debug(f'load_control2 -> duration:{self.duration}')
+            
+
             self.load_height = self.get_sensor_data()
             self.logging.debug(f'load_height:{self.load_height.data}')
 
             # if self.load_height.data < self.load_level_limit3 and self.loadestimate < self.load_current: # 如果料高未超过限制，继续装料
-            if self.load_height.data < self.load_level_limit3: # 如果料高未超过限制，继续装料
+            # if self.load_height.data < self.load_level_limit3: # 如果料高未超过限制，继续装料
+            if self.loadestimate < self.load_current :
                 self.allow_plc_work = 1
                 self.flag_load = 1
                 self.work_weight_status = 1
@@ -805,10 +813,11 @@ class LoadPoint:
                 self.work_finish = 1
                 assert type(self.duration) == float; assert type(self.load_start_time) == datetime.datetime
                 self.load_end_time = self.load_start_time + timedelta(self.duration)  # 获取任务结束时间
-                self.time_record_flag = True
-                self.insert_traffic_flag = True
+                # self.time_record_flag = True
+                # self.insert_traffic_flag = True
                 self.load_time += datetime.datetime.now() - self.load_start_time2
                 self.load_start_time2_flag = True
+                self.logging.debug("后装料点装料完毕")
 
             self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,self.duration) # 估算当前装料量
             self.logging.debug(f'loadestimate:{self.loadestimate}')
@@ -836,9 +845,9 @@ class LoadPoint:
     def weight_estimate(self, goods_type,loader_id,time_difference):
         current_load_weight = 0 # 当前载重量
         per_second_weight = None
-        bean_ratio = 0.04
-        corn_ratio = 0.0434
-        rapeseed_ratio = 0.04
+        bean_ratio = 0.0434
+        corn_ratio = 0.043
+        rapeseed_ratio = 0.043
 
         if goods_type == "黄豆":
             per_second_weight = bean_ratio
@@ -877,7 +886,7 @@ class LoadPoint:
             operating_stations={
                 "truck_id" : self.truck_id,
                 "work_weight_status": self.work_weight_status,
-                "work_weight_reality": self.work_weight_reality,
+                "work_weight_reality": self.loadestimate,
                 "flag_load": self.flag_load,
                 "height_load": self.height_load,
                 "allow_plc_work" : self.allow_plc_work,

@@ -96,7 +96,8 @@ def udp_client(serverInfo, send_data):
     # 发送请求数据
     client_socket.sendto(bytes(send_data, encoding="utf8"), (host, port))
 
-    # 接收服务器信息
-    data, addr = client_socket.recvfrom(1024)
+    # # 接收服务器信息
+    # data, addr = client_socket.recvfrom(1024)
+    # print(data.decode())
 
     client_socket.close()
