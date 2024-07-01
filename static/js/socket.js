@@ -66,10 +66,10 @@ traffic_socket.on('traffic_data_queue', function(data) {
     if (data[0]["loaderid"] === current_loaderid)
     {
 
-        if (!traffic_data_queue.isEmpty())
-        {
-            traffic_data_queue.clear();
-        }
+        // if (!traffic_data_queue.isEmpty())
+        // {
+        //     traffic_data_queue.clear();
+        // }
         for (let i = 0; i < data.length; i++) {
             // 将数据添加到队列中
             traffic_data_queue.push(data[i]);

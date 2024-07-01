@@ -1,6 +1,8 @@
 from autoloading.config import create_logger
 from autoloading.models.sensor import Traffic
 
+per_second_weight = 0.0
+
 def weight_estimate():
     wlogging = create_logger("weight")
     print("weight_estmate")
@@ -18,7 +20,7 @@ def weight_estimate():
     
     for j in range(len(goods_type)):
         #筛选数据, 注意需要去除当前正在装车的数据
-        filtered_traffic = Traffic.query.filter(Traffic.goodstype==goods_type[j]).limit(10)[:-1]
+        filtered_traffic = Traffic.query.filter_by(goodstype=goods_type[j]).order_by(Traffic.id.desc())[:10]
         # self.logging.debug(f'filtered_traffic: {filtered_traffic}')
         # 没有数据直接退出
 
@@ -40,7 +42,7 @@ def weight_estimate():
         wlogging.debug("weight_estimate2")
 
         if filtered_data_length == 0:
-            return None
+            continue
         wlogging.debug("weight_estimate3")
 
         sum_weight_per_second = 0
@@ -52,7 +54,7 @@ def weight_estimate():
             except ZeroDivisionError:
                 print('\033[31merror\033[0m')
                 wlogging.debug('\033[31merror\033[0m')
-                return None
+                continue
 
             per_second_weight[goods_type[j]] = sum_weight_per_second / filtered_data_length
 

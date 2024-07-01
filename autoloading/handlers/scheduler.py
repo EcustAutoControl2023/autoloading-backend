@@ -24,8 +24,9 @@ def sensor(app, loadpoint:LoadPoint):
     with app.app_context():
         read_per_second(loadpoint)
 
-def weight():
-    weight_estimate()
+def weight(app):
+    with app.app_context():
+        weight_estimate()
 
 # def camera(Camera, camera_dict:dict[str, Camera], loaderid:str, jobid:int):
 #     global scheduler
@@ -63,7 +64,9 @@ def schedulers_start(app:Flask):
             # FIXME: 检查定时任务是否启动
             logging.debug(f'开始接收装料点{key}的传感器数据！')
             scheduler.add_job(sensor, 'cron', second='*', args=(app, load_point_dict[key]))
-        scheduler.add_job(weight, 'cron', hour = '2',minute = '0')
+        scheduler.add_job(weight, 'cron', hour = '2',minute = '0', args=(app,))
+        # scheduler.add_job(weight, 'cron', second='*', args=(app,))
+
             # scheduler.add_job(sensor, 'date', args=(app, load_point_dict[key]))
     try:
         scheduler.start()

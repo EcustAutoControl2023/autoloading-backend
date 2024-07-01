@@ -1,6 +1,4 @@
 from flask import request
-import datetime
-import logging
 from .loaderpoint import load_point_dict
 
 
@@ -41,22 +39,26 @@ def connect():
     opening_length = operating_stations.get('opening_length',None)
     opening_width = operating_stations.get('opening_width',None)
 
-
-
-
-    return_data = load_point_dict[loader_id].load_control(
-        req_time=req_time, data_type=data_type,
-        truck_id=truck_id, truck_load=truck_load,temp_manual_stop=temp_manual_stop,
-        box_length=box_length, box_width=box_width, box_height=box_height,
-        truck_weight_in=truck_weight_in, truck_weight_out=truck_weight_out,
-        goods_type=goods_type, store_id=store_id, loader_id=loader_id,
-        load_current=load_current,
-        distance0=distance_0, distance1=distance_1, distance2=distance_2, icps_differ_current=icps_differ_current,
-        picture_url_plate=picture_url_plate, picture_url_request=picture_url_request,
-        jobid=job_id,loading_state=loading_state,type_of_opening=type_of_opening,
-        opening_length_bias=opening_length_bias,opening_width_bias=opening_width_bias,
-        opening_length=opening_length,opening_width=opening_width
-    )
+    if data_type == 2:
+        return_data = load_point_dict[loader_id].update_weightout(
+            distance_0=distance_0, distance_1=distance_1, distance_2=distance_2,
+            truck_id=truck_id, loader_id=loader_id, req_time=req_time,
+            store_id=store_id, truck_weight_out=truck_weight_out
+        )
+    else:
+        return_data = load_point_dict[loader_id].load_control(
+            req_time=req_time, data_type=data_type,
+            truck_id=truck_id, truck_load=truck_load,temp_manual_stop=temp_manual_stop,
+            box_length=box_length, box_width=box_width, box_height=box_height,
+            truck_weight_in=truck_weight_in, truck_weight_out=truck_weight_out,
+            goods_type=goods_type, store_id=store_id, loader_id=loader_id,
+            load_current=load_current,
+            distance0=distance_0, distance1=distance_1, distance2=distance_2, icps_differ_current=icps_differ_current,
+            picture_url_plate=picture_url_plate, picture_url_request=picture_url_request,
+            jobid=job_id,loading_state=loading_state,type_of_opening=type_of_opening,
+            opening_length_bias=opening_length_bias,opening_width_bias=opening_width_bias,
+            opening_length=opening_length,opening_width=opening_width
+        )
 
     return return_data
 

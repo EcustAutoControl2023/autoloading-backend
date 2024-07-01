@@ -8,29 +8,153 @@ from autoloading.handlers.loaderpoint import LoadPoint
 from autoloading.models.sensor import Traffic
 from .conftest import printr, udp_client
 
-# scenarios("feature/connect.feature")
+scenarios("feature/connect_new.feature")
 
 
-"""
-Scenario Outline: 2.1.1 将任务信息传给时庐获取引导策略
-"""
-@given(parsers.parse("测试的post文件为: {file}"), target_fixture="jsondata", converters={"file": str})
-def jsondata(file):
-    with open(file, encoding="utf8") as json_file:
-        jsondata = json.load(json_file)
-    return jsondata
+@given(parsers.parse("测试的post文件: {file}"), target_fixture="postdata", converters={"file": str})
+def postdata(file):
+    with open(file, encoding="utf8") as post_file:
+        postdata = json.load(post_file)
+    return postdata
 
-@given(parsers.parse("三个装料点位: {distance_0}, {distance_1}, {distance_2}"),
-       converters={
-           "distance_0": float,
-           "distance_1": float,
-           "distance_2": float
-       })
-def clientdata(jsondata, distance_0, distance_1, distance_2):
-    printr((distance_0, distance_1, distance_2))
-    jsondata['operating_stations']['distance_0'] = distance_0
-    jsondata['operating_stations']['distance_1'] = distance_1
-    jsondata['operating_stations']['distance_2'] = distance_2
+@given("初始化post数据")
+def init_post_data(postdata): # 初始化测试变量，仅在测试中使用
+    # 默认延迟发送时间为0
+    postdata["delay_send"] = 0
+    # 默认手动停止为0
+    postdata["temp_manual_stop"] = 0
+
+@given(parsers.parse("装料点位: {distance_list}"), target_fixture="distance_list", converters={"distance_list": ast.literal_eval})
+def clientdata(postdata, distance_list:list):
+    printr(distance_list, "distance_list")
+    postdata['operating_stations']['distance_0'] = distance_list[0] if len(distance_list) > 0 else None
+    postdata['operating_stations']['distance_1'] = distance_list[1] if len(distance_list) > 1 else None
+    postdata['operating_stations']['distance_2'] = distance_list[2] if len(distance_list) > 2 else None
+    distance_list = list(dict.fromkeys(distance_list))
+    return distance_list
+
+@when("手动停止模式")
+def temp_manual_stop(postdata):
+    postdata["temp_manual_stop"] = 1
+
+def check_response(response, data_type):
+    assert response.status_code == 200
+    responsedata = json.loads(response.data)
+    # printr(responsedata, "responsedata")
+    assert "time" in responsedata.keys()
+    assert "store_id" in responsedata.keys()
+    assert "loader_id" in responsedata.keys()
+    assert "operating_stations" in responsedata.keys()
+    assert "truck_id" in responsedata.get('operating_stations').keys()
+    if data_type == 0:
+        assert "icps_differ" in responsedata.get('operating_stations').keys()
+        assert "work_finish" in responsedata.get('operating_stations').keys()
+    elif data_type == 1 or data_type == 3:
+        assert "work_weight_status" in responsedata.get('operating_stations').keys()
+        assert "work_weight_reality" in responsedata.get('operating_stations').keys()
+        assert "flag_load" in responsedata.get('operating_stations').keys()
+        assert "height_load" in responsedata.get('operating_stations').keys()
+        assert "allow_plc_work" in responsedata.get('operating_stations').keys()
+        assert "work_finish" in responsedata.get('operating_stations').keys()
+    elif data_type == 2:
+        assert "work_total" in responsedata.get('operating_stations').keys()
+    elif data_type == 4:
+        pass
+
+@then(parsers.parse("测试装车策略（手动停止）: {expected_icps_differ_list}"), converters={"expected_icps_differ_list": ast.literal_eval})
+def check_strategy_manualstop(app, client, db, expected_icps_differ_list:list, postdata, distance_list):
+    printr(expected_icps_differ_list, "expected_icps_differ_list")
+    
+    ea_zip = zip(distance_list, expected_icps_differ_list)
+
+    # 第一次请求装车策略
+    postdata['data_type'] = 0
+    postdata['operating_stations']['icps_differ_current'] = 1.1
+    postdata['operating_stations']['temp_manual_stop'] = 0
+    response0 = client.post("/connect", json=postdata)
+    check_response(response0, 0)
+
+    with app.app_context():
+        traffics = db.session.query(Traffic).all()
+        assert len(traffics) == 2
+
+    for distance, expected_icps_differ in ea_zip:
+        printr(distance, "distance")
+        printr(expected_icps_differ, "expected_icps_differ")
+        printr(postdata, "postdata")
+
+        # 点位移动
+        postdata['data_type'] = 1
+        postdata['operating_stations']['icps_differ_current'] = distance
+        response1 = client.post("/connect", json=postdata)
+        check_response(response1, 1)
+
+        # 再次请求装车策略
+        postdata['data_type'] = 0
+        response0 = client.post("/connect", json=postdata)
+        check_response(response0, 0)
+        actual_icps_differ = response0.json.get('operating_stations').get('icps_differ')
+        actual_icps_differ = [actual_icps_differ] if type(actual_icps_differ) is not list else actual_icps_differ
+        assert response0.json.get('operating_stations').get('icps_differ') == expected_icps_differ
+
+    # 装车完成（手动停止）
+    postdata['data_type'] = 1
+    postdata['operating_stations']['temp_manual_stop'] = 1
+    response1 = client.post("/connect", json=postdata)
+    assert response1.json.get('operating_stations').get('work_finish') == 1
+    check_response(response1, 1)
+
+    # 点位移动
+    postdata['data_type'] = 1
+    postdata['operating_stations']['temp_manual_stop'] = 0
+    response1 = client.post("/connect", json=postdata)
+    check_response(response1, 1)
+
+    # 完成时再次请求装车策略
+    postdata['data_type'] = 0
+    postdata['operating_stations']['icps_differ_current'] = None
+    response0 = client.post("/connect", json=postdata)
+    check_response(response0, 0)
+    assert response0.json.get('operating_stations').get('icps_differ') == []
+    assert response0.json.get('operating_stations').get('work_finish') == 1
+
+@then("测试异常终止")
+def check_strategy_exception(app, client, db, postdata, distance_list):
+    # 第一次请求装车策略
+    postdata['data_type'] = 0
+    postdata['operating_stations']['icps_differ_current'] = 1.1
+    postdata['operating_stations']['temp_manual_stop'] = 0
+    response0 = client.post("/connect", json=postdata)
+    check_response(response0, 0)
+
+    with app.app_context():
+        traffics = db.session.query(Traffic).all()
+        assert len(traffics) == 1
+
+    # 点位移动
+    postdata['data_type'] = 1
+    postdata['operating_stations']['icps_differ_current'] = distance_list[0] if len(distance_list) > 0 else None
+    response1 = client.post("/connect", json=postdata)
+    check_response(response1, 1)
+
+    # 异常终止
+    postdata['data_type'] = 1
+    postdata['operating_stations']['temp_manual_stop'] = 1
+    response1 = client.post("/connect", json=postdata)
+    assert response1.json.get('operating_stations').get('work_finish') == (0 if len(distance_list) > 1 else 1)
+    check_response(response1, 1)
+
+    # 完成时再次请求装车策略
+    postdata['data_type'] = 0
+    postdata['operating_stations']['icps_differ_current'] = None
+    ori_truck_id = postdata['operating_stations']['truck_id']
+    postdata['operating_stations']['truck_id'] = 'test'
+    response0 = client.post("/connect", json=postdata)
+    check_response(response0, 0)
+    postdata['operating_stations']['truck_id'] = ori_truck_id
+    with app.app_context():
+        traffics = db.session.query(Traffic).all()
+        assert len(traffics) == 2
 
 @when("客户端发送post请求data_type=0", target_fixture='response0')
 def post0(client, jsondata):
@@ -228,9 +352,9 @@ def init(jsondata):
 def wait_time(time):
     return time
 
-@when(parsers.parse("手动停止"))
-def temp_manual_stop(jsondata):
-    jsondata["temp_manual_stop"] = 1
+# @when(parsers.parse("手动停止"))
+# def temp_manual_stop(jsondata):
+#     jsondata["temp_manual_stop"] = 1
 
 @when(parsers.parse("延迟发送"))
 def delay_send(jsondata, wait_time):
@@ -317,31 +441,3 @@ def change_truck_id(jsondata, truck_id_queue):
 @when("出闸")
 def change_weight_out(jsondata, weight_out_queue):
     jsondata["operating_stations"]["truck_weight_out"] = weight_out_queue.get()
-
-@scenario("./feature/connect.feature", "2.1.1 将任务信息传给时庐获取引导策略")
-def test_data_type0():
-    pass
-
-@scenario("./feature/test.feature", "一次装料，记录时间")
-def test_load_once():
-    pass
-
-@scenario("./feature/connect.feature", "2.1.3 装车完成后，获取出闸重量")
-def test_data_type2():
-    pass
-
-@scenario("./feature/connect.feature", "2.1.3 两辆车装车完成后，合作方提供第一辆的出闸重量")
-def test_two_truck():
-    pass
-
-@scenario("./feature/connect.feature", "2.1.1 将任务信息传给时庐获取引导策略——异常测试(data_type=1未收到结束或移动点位响应，但请求data_type=0)")
-def test_data_type0_exception():
-    pass
-
-# @scenario("./feature/connect.feature", "2.1.2 集卡引导到位，获取时庐的 PLC 控制策略")
-# def test_data_type1():
-#     pass
-
-@scenario("./feature/connect.feature", "2.1.2 集卡引导到位，获取时庐的 PLC 控制策略——异常测试(未请求data_type=0)")
-def test_data_type1_exception():
-    pass
