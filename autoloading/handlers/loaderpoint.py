@@ -110,9 +110,9 @@ class LoadPoint:
         self.flag_load = 0               # 装料机状态；0：未装车，1：装车中，2：故障
         self.work_weight_status = 0      # 作业执行情况；0：未开始，1：正在执行，2：已完成，3：检测溢出，被动完成 
         # self.work_weight_reality = None  # 作业装料情况(当前装料量)
-        self.work_finish = 1             # 任务是否完成，0：未完成，1：完成
+        self.work_finish = 0             # 任务是否完成，0：未完成，1：完成
         self.time_record_flag = True     # 时间记录标志
-        self.insert_traffic_flag = True   # 判断是否是新任务
+        self.insert_traffic_flag = False   # 判断是否是新任务
         self.height_load = None          # 需要返回给请求方的实时料高
         self.goods_type = ""             # 货物类型
         self.work_total = 0             # 当前任务装料总次数
@@ -195,7 +195,7 @@ class LoadPoint:
             self.logging.debug("data_type:0")
             self.logging.debug(f"truck_id:{self.truck_id}开始任务")
 
-            traffic = Traffic.query.filter_by(loaderid=self.loader_id).first()
+            traffic = Traffic.query.filter_by(loaderid=self.loader_id).order_by(Traffic.id.desc()).first()
             self.logging.debug(f'traffic: {traffic}')
             # 判断是否有新车辆到达, 如果有新车辆到达，初始化装料点状态
             if traffic is None or (traffic.truckid != self.truck_id):
@@ -339,15 +339,16 @@ class LoadPoint:
                     self.work_finish = 1
                     self.load_time1 = datetime.datetime.now()
                     assert type(self.load_start_time) == datetime.datetime
-                    self.duration = (self.load_time1 - self.load_start_time).total_seconds()
+                    # self.duration = (self.load_time1 - self.load_start_time).total_seconds()
                     self.logging.debug("前装料点装料完毕,记录装料时间1")
                     self.load_level_height1 = self.load_height.data  # 获取前装料点装料完成高度
                 elif(self.icps_differ_num == '0012') or (self.icps_differ_num == '0112'):  
                     if(self.icps_differ == self.distance_0):
                         self.work_finish = 0
                         self.load_time1 = datetime.datetime.now()
+                        self.load_time = datetime.datetime.now() - self.load_start_time # 更新当前装料所用时间
                         assert type(self.load_start_time) == datetime.datetime
-                        self.duration = (self.load_time1 - self.load_start_time).total_seconds()
+                        # self.duration = (self.load_time1 - self.load_start_time).total_seconds()
                         self.icps_differ = self.distance_2
                         self.logging.debug("前装料点装料完毕,记录装料时间1")
                         self.load_level_height1 = self.load_height.data  # 获取前装料点装料完成高度
@@ -355,7 +356,7 @@ class LoadPoint:
                         self.work_finish = 1
                         self.load_time2 = datetime.datetime.now()
                         assert type(self.load_start_time) == datetime.datetime
-                        self.duration = (self.load_time2 - self.load_start_time).total_seconds()
+                        # self.duration = (self.load_time2 - self.load_start_time).total_seconds()
                         self.logging.debug("后装料点装料完毕,记录装料时间2")
                         self.load_level_height2 = self.load_height.data  # 获取前装料点装料完成高度
                 elif(self.icps_differ_num == '0123'):
@@ -363,7 +364,9 @@ class LoadPoint:
                         self.work_finish = 0
                         self.load_time1 = datetime.datetime.now()
                         assert type(self.load_start_time) == datetime.datetime
-                        self.duration = (self.load_time1 - self.load_start_time).total_seconds()
+                        self.load_time = datetime.datetime.now() - self.load_start_time # 更新当前装料所用时间
+
+                        # self.duration = (self.load_time1 - self.load_start_time).total_seconds()
                         self.icps_differ = self.distance_1
                         self.logging.debug("前装料点装料完毕,记录装料时间1")
                         self.load_level_height1 = self.load_height.data  # 获取前装料点装料完成高度
@@ -371,8 +374,12 @@ class LoadPoint:
                     elif(self.icps_differ == self.distance_1):
                         self.load_time2 = datetime.datetime.now()
                         assert type(self.load_start_time) == datetime.datetime
-                        self.duration = (self.load_time2 - self.load_start_time).total_seconds()
+                        # self.duration = (self.load_time2 - self.load_start_time).total_seconds()
                         self.icps_differ = self.distance_2
+
+                        self.load_time = datetime.datetime.now() - self.load_start_time1 # 更新当前装料所用时间
+
+
                         self.logging.debug("中装料点装料完毕,记录装料时间2")
                         self.load_level_height2 = self.load_height.data  # 获取前装料点装料完成高度
 
@@ -380,7 +387,7 @@ class LoadPoint:
                         self.work_finish = 1
                         self.load_time3 = datetime.datetime.now()
                         assert type(self.load_start_time) == datetime.datetime
-                        self.duration = (self.load_time3 - self.load_start_time).total_seconds()
+                        # self.duration = (self.load_time3 - self.load_start_time).total_seconds()
                         self.logging.debug("后装料点装料完毕,记录装料时间3")
                         self.load_level_height3 = self.load_height.data  # 获取前装料点装料完成高度
 
@@ -611,7 +618,7 @@ class LoadPoint:
             )
 
         elif data_type == 2:
-            self.logging.debug("data_type:2")
+            self.logging.debug(f"{self.truck_id}请求data_type:2")
             update_truck_content(
                     truckid=self.truck_id,
                     loaderid=self.loader_id,
@@ -630,7 +637,7 @@ class LoadPoint:
 
         elif data_type == 3:
             # # TODO: 返回实时数据
-            self.logging.debug("data_type:3")
+            self.logging.debug(f"{self.truck_id}请求data_type:3")
             result = gen_return_data(
                 time = self.req_time,
                 store_id = self.store_id,
@@ -874,8 +881,8 @@ class LoadPoint:
         self.loadstatus = "装车完成"
         # self.insert_traffic_flag = True
         # self.time_record_flag = True
-        # self.load_start_time1_flag = True
-        # self.load_start_time2_flag = True
+        self.load_start_time1_flag = True
+        self.load_start_time2_flag = True
         control_status_socket({'value':self.allow_plc_work,'loaderid':self.loader_id})
         loader_status_socket({'value':self.work_finish,'loaderid':self.loader_id})
 
@@ -911,8 +918,8 @@ class LoadPoint:
         self.logging.debug(f"duration:{self.duration}")   
 
         # self.insert_traffic_flag = True
-        self.duration = None
-        self.load_end_time = None
+        # self.duration = None
+        # self.load_end_time = None
 
         return result
 

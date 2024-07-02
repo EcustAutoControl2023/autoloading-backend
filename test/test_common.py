@@ -74,6 +74,10 @@ def check_response(response, data_type):
 ==============================================
 """
 
+@given(parsers.parse("装车量: {load_current}"), converters={"load_current": float})
+def load_current(load_current, postdata):
+    postdata["operating_stations"]["load_current"] = load_current
+
 @given(parsers.parse("模拟的装车数据: {csv_file}"), converters={"csv_file": str})
 def send_scv(csv_file, postdata):
     loader_id = postdata.get("operating_stations").get("loader_id")
@@ -81,6 +85,15 @@ def send_scv(csv_file, postdata):
     printr(serverInfo, "ipport")
     udp_client(serverInfo=serverInfo, send_data="restart")
     udp_client(serverInfo=serverInfo, send_data=csv_file)
+
+@given(parsers.parse("车牌号: {plate_list}"), converters={"plate_list": ast.literal_eval}, target_fixture="plate_list")
+def plate_list(plate_list):
+    return plate_list
+
+@given(parsers.parse("出闸数据: {weightout_list}"), converters={"weightout_list": ast.literal_eval}, target_fixture="weightout_list")
+def weightout_list(weightout_list):
+    weightout_list = list(map(int, weightout_list))
+    return weightout_list
 
 @when("模拟装车模式", target_fixture="gen_post")
 def post_generator(client, postdata):

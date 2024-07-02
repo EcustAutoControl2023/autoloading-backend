@@ -23,9 +23,10 @@ def check_strategy_manualstop(app, client, db, expected_icps_differ_list:list, p
     response0 = client.post("/connect", json=postdata)
     check_response(response0, 0)
 
+    # 第三辆车
     with app.app_context():
         traffics = db.session.query(Traffic).all()
-        assert len(traffics) == 2
+        assert len(traffics) == 3
 
     for distance, expected_icps_differ in ea_zip:
         printr(distance, "distance")
@@ -77,6 +78,7 @@ def check_strategy_exception(app, client, db, postdata, distance_list):
     response0 = client.post("/connect", json=postdata)
     check_response(response0, 0)
 
+    # 第一辆车
     with app.app_context():
         traffics = db.session.query(Traffic).all()
         assert len(traffics) == 1
@@ -102,6 +104,8 @@ def check_strategy_exception(app, client, db, postdata, distance_list):
     response0 = client.post("/connect", json=postdata)
     check_response(response0, 0)
     postdata['operating_stations']['truck_id'] = ori_truck_id
+
+    # 第二辆车
     with app.app_context():
         traffics = db.session.query(Traffic).all()
         assert len(traffics) == 2
