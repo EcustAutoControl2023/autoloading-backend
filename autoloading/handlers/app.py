@@ -30,7 +30,6 @@ def connect():
     loader_id = str.upper(operating_stations.get('loader_id', None))
     picture_url_plate = operating_stations.get('picture_url_plate', 'https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
     picture_url_request = operating_stations.get('picture_url_request','https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png')
-    breakdowncode = operating_stations.get('breakdowncode', None)
     icps_differ_current = operating_stations.get('icps_differ_current', None)
     loading_state = operating_stations.get('loading_state', None)
     type_of_opening = operating_stations.get('type_of_opening',None)
@@ -38,6 +37,10 @@ def connect():
     opening_width_bias = operating_stations.get('opening_width_bias',None)
     opening_length = operating_stations.get('opening_length',None)
     opening_width = operating_stations.get('opening_width',None)
+    breakdowncode = operating_stations.get('breakdowncode', None)
+    emergency_stop = operating_stations.get('emergency_stop', None)
+    auto_select = operating_stations.get('auto_select', None)
+    belt_motor_run = operating_stations.get('belt_motor_run', None)
 
     if data_type == 2:
         return_data = load_point_dict[loader_id].update_weightout(
@@ -57,7 +60,9 @@ def connect():
             picture_url_plate=picture_url_plate, picture_url_request=picture_url_request,
             jobid=job_id,loading_state=loading_state,type_of_opening=type_of_opening,
             opening_length_bias=opening_length_bias,opening_width_bias=opening_width_bias,
-            opening_length=opening_length,opening_width=opening_width
+            opening_length=opening_length,opening_width=opening_width,
+            breakdowncode=breakdowncode,emergency_stop=emergency_stop,auto_select=auto_select,
+            belt_motor_run=belt_motor_run
         )
 
     return return_data

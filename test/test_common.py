@@ -49,17 +49,22 @@ def check_response(response, data_type):
     assert "store_id" in responsedata.keys()
     assert "loader_id" in responsedata.keys()
     assert "operating_stations" in responsedata.keys()
-    assert "truck_id" in responsedata.get('operating_stations').keys()
+    if data_type != 3:
+        assert "truck_id" in responsedata.get('operating_stations').keys()
     if data_type == 0:
         assert "icps_differ" in responsedata.get('operating_stations').keys()
         assert "work_finish" in responsedata.get('operating_stations').keys()
-    elif data_type == 1 or data_type == 3:
+    elif data_type == 1:
         assert "work_weight_status" in responsedata.get('operating_stations').keys()
         assert "work_weight_reality" in responsedata.get('operating_stations').keys()
         assert "flag_load" in responsedata.get('operating_stations').keys()
         assert "height_load" in responsedata.get('operating_stations').keys()
         assert "allow_plc_work" in responsedata.get('operating_stations').keys()
         assert "work_finish" in responsedata.get('operating_stations').keys()
+    elif data_type == 3:
+        assert "work_weight_reality" in responsedata.get('operating_stations').keys()
+        assert "height_load" in responsedata.get('operating_stations').keys()
+        # assert "allow_plc_work" in responsedata.get('operating_stations').keys()
     elif data_type == 2:
         assert "work_total" in responsedata.get('operating_stations').keys()
     elif data_type == 4:

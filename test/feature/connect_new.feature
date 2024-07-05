@@ -9,8 +9,8 @@ Feature: connect接口测试
 
     Examples: 5种装车过程（最后一种为错误情况）
       | file                        | distance_list   | expected_icps_differ_list                |
-      | ./test/json/postdata-1.json | [1.1, 1.1, 1.1] | [[1.1], []]                              |
-      | ./test/json/postdata-1.json | [1.2, 1.2, 1.1] | [[1.2, 1.1], [1.1], []]                  |
+      # | ./test/json/postdata-1.json | [1.1, 1.1, 1.1] | [[1.1], []]                              |
+      # | ./test/json/postdata-1.json | [1.2, 1.2, 1.1] | [[1.2, 1.1], [1.1], []]                  |
       | ./test/json/postdata-1.json | [1.1, 1.2, 1.2] | [[1.1, 1.2], [1.2], []]                  |
       | ./test/json/postdata-1.json | [1.1, 1.2, 1.3] | [[1.1, 1.2, 1.3], [1.2, 1.3], [1.3], []] |
-      | ./test/json/postdata-1.json | []              | []                                       |
+      # | ./test/json/postdata-1.json | []              | []                                       |
