@@ -2,12 +2,14 @@ import datetime
 import logging
 import socket, time
 import struct
+
+from autoloading.handlers.loaderpoint import LoadPoint
 from .socket import sensor_data
 
 from autoloading.models import db
 
 
-def read_per_second(loadpoint):  # 每秒读取一次物位
+def read_per_second(loadpoint:LoadPoint):  # 每秒读取一次物位
     # while True:
         # 任务开始时间
         # start_time = time.perf_counter()
@@ -64,7 +66,8 @@ def read_per_second(loadpoint):  # 每秒读取一次物位
             'value': int_distance,
             'tablename': loadpoint.Sensor.__tablename__
         })
-        loadpoint.reconnectudp()
+        # loadpoint.reconnectudp()
+        loadpoint.clearUDPBuffer()
         # time.sleep(1)  # 1s获取一次数据
 
 

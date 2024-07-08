@@ -3,7 +3,6 @@ from autoloading.models import db
 from autoloading.models.sensor import Traffic
 
 
-# TODO: 实现功能：车辆信息更新
 def update_truck_content(truckid:str, loaderid, update_data:dict):
     traffic = Traffic.query.filter_by(truckid=truckid, loaderid=loaderid).order_by(Traffic.id.desc()).first()
     # FIXME: 打印车辆数据

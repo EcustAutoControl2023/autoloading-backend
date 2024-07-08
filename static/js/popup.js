@@ -72,14 +72,12 @@ socket.on('center_popup', function(data) {
 
 function truck_id_confirm_message()
 {
-    // alert("TODO:向后端发送确认信息")
     socket.emit('truck_id_popup_confirm', {data: true})
     close_confirm();
 }
 
 function center_confirm_message()
 {
-    // alert("TODO:向后端发送确认信息")
     socket.emit('center_popup_confirm', {data: true})
     close_confirm();
 }

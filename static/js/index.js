@@ -116,13 +116,30 @@ function echart_3(chartid, data_queue) {
     myChart.setOption(option);
 }
 
+// TODO: socket.io 刷新重连
 var sensor_socket = io('http://localhost:5000');
-
-
+// sensor_socket.window.onbeforeunload = function() {
+//     sensor_socket.disconnect();
+// };
+// sensor_socket.window.onload = function() {
+//     sensor_socket = io.connect();
+//     // 重新绑定事件处理程序
+//     sensor_socket.on('sensor_data', (data) => {
+//         // console.log("tablename out: " + data.tablename);
+//         if (data.tablename === tablename) {
+//             console.log("current_time" + new Date().toString())
+//             console.log("tablename: " + data.value);
+//             //console.log("data: " + data.value);
+//             data_queue.push(data.value);
+//             echart_3('chart_3', data_queue);
+//         }
+//         //   console.log(data_queue.toArray())
+//     });
+// }
 sensor_socket.on('sensor_data', (data) => {
     // console.log("tablename out: " + data.tablename);
     if (data.tablename === tablename) {
-        console.log("current_time"+ new Date().toString())
+        console.log("current_time" + new Date().toString())
         console.log("tablename: " + data.value);
         //console.log("data: " + data.value);
         data_queue.push(data.value);
@@ -131,8 +148,7 @@ sensor_socket.on('sensor_data', (data) => {
     //   console.log(data_queue.toArray())
 });
 
-
-$(function () {
+$(function() {
     echart_3('chart_3', data_queue);
     let url_name = window.location.pathname.split('/')[1];
     //console.log(url_name);
@@ -157,8 +173,8 @@ $(function () {
     };
     let index = index_table[url_name];
     tablename = sensor_tablename_list[index];
-    sensor_socket.emit('traffic_data_request', {number: traffic_show_number, loaderid: loader_id_list[index]});
-    socket.emit('tab_switch', {'loader': loader_id_list[index], 'sensor': sensor_tablename_list[index]});
+    sensor_socket.emit('traffic_data_request', { number: traffic_show_number, loaderid: loader_id_list[index] });
+    socket.emit('tab_switch', { 'loader': loader_id_list[index], 'sensor': sensor_tablename_list[index] });
     //点击跳转
     // $('.t_btn7').click(function(){
     //     window.location.href = "./page/index.html?id=7";

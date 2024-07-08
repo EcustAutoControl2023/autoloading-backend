@@ -156,6 +156,7 @@ class LoadPoint:
         self.location = LoadPoint.LocationList[LoadPoint.loader_index_dict[loader_id]]
         self.stackpos = LoadPoint.StackposList[LoadPoint.loader_index_dict[loader_id]]
 
+    # TODO: 函数输入参数改为字典
     def load_control(self,
                      req_time, data_type,
                      truck_id, truck_load, box_length, box_width, box_height,
@@ -771,7 +772,6 @@ class LoadPoint:
 
 
         elif data_type == 4:
-            # TODO: 车牌弹窗确认
             from autoloading.config import TRUCK_CONFIRM
             self.logging.debug("data_type:4")
             truck_id_confirm = session.get('truck_id_popup_confirm', True)
@@ -1056,6 +1056,14 @@ class LoadPoint:
         self.s.close()
         self.s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)# UDP
         self.s.setblocking(False)
+
+    # TODO: 清空UDP FIFO
+    def clearUDPBuffer(self):
+        while True:
+            try:
+              chunk = self.s.recv(4096)
+            except BlockingIOError as b:
+              break
 
 
 # 将每个装料点定义成一个类的实例
