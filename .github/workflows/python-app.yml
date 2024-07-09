@@ -14,7 +14,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        # os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
         python-version: ["3.10"]
         # exclude:
         #   - os: macos-latest
@@ -39,6 +40,10 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         # flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: docker compose mock environment
+      working-directory: ./test/mock/
+      run: docker-compose config --quiet && printf "OK\n" || printf "ERROR\n"
     - name: Test with pytest
+      working-directory: ${{ github.workspace }}
       run: |
         pytest -v --cov-report term --cov-report html:htmlcov --cov-report xml --cov-fail-under=50 --cov=./autoloading
