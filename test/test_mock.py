@@ -70,7 +70,7 @@ def check_strategy_1_normal(app, db, client, postdata, gen_post, distance_list, 
                 assert len(traffics) == 1
 
         # # 假设客户端每隔1s请求一次装车策略
-        # time.sleep(1)
+        time.sleep(1)
 
 @then(parsers.parse("模拟请求，正常装车(车队): {expected_icps_differ_list}"), converters={"expected_icps_differ_list": ast.literal_eval})
 def check_strategy_1_normal_carlist(app, db, client, postdata, gen_post, distance_list, plate_list, weightout_list, expected_icps_differ_list):

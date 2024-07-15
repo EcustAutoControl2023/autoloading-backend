@@ -17,7 +17,7 @@ Feature: 测试LoaderPoint类
 
     Examples:
       | goods_type | loader_id | time_difference | csv_file                 | expect_value |
-      | 油菜籽     | 401A      | 2.              | ./test/csv/traffic.csv   | 31.5         |
+      | 油菜籽     | 401A      | 2.              | ./test/csv/traffic.csv   | 20.7         |
     # | 油菜籽     | 402B      | 2.              | ./test/csv/traffic-2.csv | None         |
     # | 油菜籽     | 402B      | 2.              | ./test/csv/traffic-2.csv | None         |
 

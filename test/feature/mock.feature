@@ -9,10 +9,10 @@ Feature: connect接口测试(模拟装车模式)
     Then 模拟请求，正常装车: <expected_icps_differ_list>
     Examples:
       | file                        | distance_list   | csv_file             | load_current | expected_icps_differ_list                |
-      | ./test/json/postdata-1.json | [1.1, 1.1, 1.1] | ./csv/sensor14-2.csv | 0.05         | [[1.1], []]                              |
-      | ./test/json/postdata-1.json | [1.2, 1.2, 1.1] | ./csv/sensor14-2.csv | 0.05         | [[1.2, 1.1], [1.1], []]                  |
-      | ./test/json/postdata-1.json | [1.1, 1.2, 1.2] | ./csv/sensor14-2.csv | 0.05         | [[1.1, 1.2], [1.2], []]                  |
-      | ./test/json/postdata-1.json | [1.1, 1.2, 1.3] | ./csv/sensor14-2.csv | 0.05         | [[1.1, 1.2, 1.3], [1.2, 1.3], [1.3], []] |
+      | ./test/json/postdata-1.json | [1.1, 1.1, 1.1] | ./csv/sensor14-2.csv | 5.5         | [[1.1], []]                              |
+      | ./test/json/postdata-1.json | [1.2, 1.2, 1.1] | ./csv/sensor14-2.csv | 5.5         | [[1.2, 1.1], [1.1], []]                  |
+      | ./test/json/postdata-1.json | [1.1, 1.2, 1.2] | ./csv/sensor14-2.csv | 5.5         | [[1.1, 1.2], [1.2], []]                  |
+      | ./test/json/postdata-1.json | [1.1, 1.2, 1.3] | ./csv/sensor14-2.csv | 5.5         | [[1.1, 1.2, 1.3], [1.2, 1.3], [1.3], []] |
   Scenario Outline: 5.1.3 2、反馈出闸信息
     Given 测试的post文件: <file>
     And 初始化post数据

@@ -242,6 +242,10 @@ class LoadPoint:
                 self.load_level_limit1= 1.1 + self.box_height #第一次装料高度限制，1.2为车厢底
                 self.load_level_limit2 = 1.1 + self.box_height #第二次装料高度限制
                 self.load_level_limit3 = 1.1 + self.box_height #第三次装料高度限制
+                self.logging.debug(f"self.load_level_limit1:{self.load_level_limit1}")
+                self.logging.debug(f"self.load_level_limit2:{self.load_level_limit2}")
+                self.logging.debug(f"self.load_level_limit3:{self.load_level_limit3}")
+
 
             if (self.distance_0 != self.distance_1) and (self.distance_0 != self.distance_2) and (self.distance_1 != self.distance_2):
                 self.work_total = 3
@@ -874,6 +878,10 @@ class LoadPoint:
         self.load_height = self.get_sensor_data()
         if self.load_height1_begin == 0:
             self.load_height1_begin = self.load_height.data
+            if self.load_height1_begin > 1.2:
+                self.load_height1_begin = 1.2
+            elif self.load_height1_begin < 0:
+                self.load_height1_begin = 0
         self.logging.debug(f'control0 -> icps_differ: {self.icps_differ}')
 
         if self.icps_differ == self.distance_0 :
@@ -884,6 +892,7 @@ class LoadPoint:
             # self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,self.duration) # 估算当前装料量
             self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,float(self.load_height.data), 1, 0, self.load_height1_begin) # 估算当前装料量
             self.logging.debug(f'loadestimate:{self.loadestimate}')
+            self.logging.debug(f"loadcurrent:{self.load_current}")
             if self.duration < 0*60:  # 前一分钟持续装料，改：不强制装料
                 self.allow_plc_work = 1        # PLC启动
                 self.flag_load = 1             # 装料机装车中
@@ -891,6 +900,7 @@ class LoadPoint:
                 self.work_finish = 0           # 任务未完成
             else:
                 self.logging.debug(f'load_height:{self.load_height.data}')
+                self.logging.debug(f"self.loadestimate > self.load_current:{self.loadestimate > self.load_current}")
                 if self.load_height.data < self.load_level_limit1 and self.loadestimate <= self.load_current: # 如果料高/重量未超过限制，继续装料
                     self.allow_plc_work = 1
                     self.flag_load = 1
@@ -1102,27 +1112,29 @@ class LoadPoint:
         # truck_bottom_pos = self.TruckBottomPos[loader_id]
         # load_height_limit = self.LoadHeightLimit[loader_id]
         # estimate_param = self.EstimateParameter[goods_type][loader_id]
+        self.logging.debug(f"load_weight_begin:{load_weight_begin}")
+        self.logging.debug(f"load_height_begin:{load_height_begin}")
 
         if load_height < 1:  # 503南物位计数据上窜下跳
             return 0
         
         if goods_type == "黄豆":
             if height_num == 1:
-                current_load_weight = 0 + (load_height - load_weight_begin) * 9
+                current_load_weight = 0 + (load_height - load_height_begin) * 9
             elif height_num == 2:
                 current_load_weight = load_weight_begin + (load_height - load_height_begin) * 9
             else:
                 current_load_weight = load_weight_begin + (load_height - load_height_begin) * 9
         elif goods_type == "玉米":
             if height_num == 1:
-                current_load_weight = 0 + (load_height - load_weight_begin) * 9
+                current_load_weight = 0 + (load_height - load_height_begin) * 9
             elif height_num == 2:
                 current_load_weight = load_weight_begin + (load_height - load_height_begin) * 9
             else:
                 current_load_weight = load_weight_begin + (load_height - load_height_begin) * 9
         elif goods_type == "油菜籽":
             if height_num==1:
-                current_load_weight = 0 + (load_height-load_weight_begin) * 9
+                current_load_weight = 0 + (load_height - load_height_begin) * 9
             elif height_num==2:
                 current_load_weight = load_weight_begin + (load_height-load_height_begin) * 9
             else:
