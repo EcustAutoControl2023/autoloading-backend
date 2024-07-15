@@ -127,9 +127,9 @@ class LoadPoint:
 
 
         # XXX: 定义装料高度上限
-        self.load_level_limit1 = 3.5#3.72      # 第一次装料高度限制
-        self.load_level_limit2 = 3.5#3.65       # 第二次装料高度限制
-        self.load_level_limit3 = 3.5#3.65       # 第三次装料高度限制
+        self.load_level_limit1 = 3.2 #3.72      # 第一次装料高度限制
+        self.load_level_limit2 = 3.2 #3.65       # 第二次装料高度限制
+        self.load_level_limit3 = 3.2 #3.65       # 第三次装料高度限制
         self.load_height = SensorData(-1)               # 实时装料高度
 
         self.load_level_height1 = None         # 第一次装料时高度
@@ -181,7 +181,7 @@ class LoadPoint:
         self.distance_0     = distance0
         self.distance_1     = distance1
         self.distance_2     = distance2
-        self.load_current   = load_current - 3  # 保守装，少2吨，临时调整
+        self.load_current   = load_current - 1.5  # 保守装，少2吨，临时调整
         self.goods_type     = goods_type
         self.truck_weight_out = truck_weight_out
         self.jobid          = jobid
@@ -481,7 +481,7 @@ class LoadPoint:
                                 truckid=self.truck_id,
                                 loaderid=self.loader_id,
                                 update_data={
-                                    "load_level_height3": self.load_level_height1,
+                                    "load_level_height2": self.load_level_height2,
                                 }
                             )
                     elif self.icps_differ == self.distance_2 : # 判断车辆引导位置，执行相应装料点控制程序
@@ -839,30 +839,33 @@ class LoadPoint:
             self.logging.debug(f'load_control0 -> duration:{self.duration}')
             self.load_height = self.get_sensor_data()
             self.logging.debug(f'load_height:{self.load_height.data}')
-            self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,self.duration) # 估算当前装料量
+            # self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,self.duration) # 估算当前装料量
+            self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,float(self.load_height.data), 1) # 估算当前装料量
             self.logging.debug(f'loadestimate:{self.loadestimate}')
-
-            if self.duration < 0*60:  # 前一分钟持续装料
+            if self.duration < 0*60:  # 前一分钟持续装料，改：不强制装料
                 self.allow_plc_work = 1        # PLC启动
                 self.flag_load = 1             # 装料机装车中
                 self.work_weight_status = 1    # 作业正在执行
                 self.work_finish = 0           # 任务未完成
             else:
-                if self.load_height.data < self.load_level_limit1 and self.loadestimate < self.load_current: # 如果料高未超过限制，继续装料
+                self.logging.debug(f'load_height:{self.load_height.data}')
+                if self.load_height.data < self.load_level_limit1 and self.loadestimate <= self.load_current: # 如果料高/重量未超过限制，继续装料
                     self.allow_plc_work = 1
                     self.flag_load = 1
                     self.work_weight_status = 1
                     self.work_finish = 0
-                elif self.loadestimate >= self.load_current: # 如果重量达到，任务结束
-                    self.allow_plc_work = 0        # PLC停止
-                    self.flag_load = 0             # 装料机未装车
-                    self.work_weight_status = 2    # 作业已完成
-                    self.work_finish = 1           # 任务已完成
+                elif self.loadestimate > self.load_current:
+                    self.allow_plc_work = 0
+                    self.flag_load = 0
+                    self.work_weight_status = 2
+                    self.work_finish = 1
                     self.load_time = datetime.datetime.now() - self.load_start_time
+                    self.load_end_time = datetime.datetime.now()
+                    self.load_start_time2_flag = True
                     self.icps_differ = None
                     self.icps_flag = 2
-                    self.logging.debug("重量达到，任务结束")
-                else: # 如果料高超过限制，停止装料，任务未完成
+                    self.logging.debug("重量达到,任务结束")
+                else:  # 如果料高超过限制，停止装料
                     self.allow_plc_work = 0        # PLC停止
                     self.flag_load = 0             # 装料机未装车
                     self.work_weight_status = 2    # 作业已完成
@@ -885,10 +888,10 @@ class LoadPoint:
             self.duration = self.load_time.total_seconds() + (datetime.datetime.now() - self.load_start_time1).total_seconds()  # 计算装料持续时间
             self.logging.debug(f'load_control1 -> duration:{self.duration}')
 
+
             self.load_height = self.get_sensor_data()
             self.logging.debug(f'load_height:{self.load_height.data}')
-            self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,self.duration) # 估算当前装料量
-            self.logging.debug(f'loadestimate:{self.loadestimate}')
+
 
             # if self.load_height.data < self.load_level_limit2: # 如果料高未超过限制，继续装料
             # if self.loadestimate < self.load_current :
@@ -897,16 +900,17 @@ class LoadPoint:
                 self.flag_load = 1
                 self.work_weight_status = 1
                 self.work_finish = 0
-            elif self.loadestimate >= self.load_current: # 如果重量达到，任务结束
-                self.allow_plc_work = 0
-                self.flag_load = 0
-                self.work_weight_status = 2
-                self.work_finish = 1
-                self.load_time += datetime.datetime.now() - self.load_start_time1
-                self.load_start_time1_flag = True
-                self.icps_differ = None
-                self.icps_flag = 2
-                self.logging.debug("重量达到，任务结束")
+            elif self.loadestimate > self.load_current:
+                    self.allow_plc_work = 0
+                    self.flag_load = 0
+                    self.work_weight_status = 2
+                    self.work_finish = 1
+                    self.load_time += datetime.datetime.now() - self.load_start_time1
+                    self.load_end_time = datetime.datetime.now()
+                    self.load_start_time1_flag = True
+                    self.icps_differ = None
+                    self.icps_flag = 2
+                    self.logging.debug("重量达到,任务结束")
             else:
                 self.allow_plc_work = 0         # PLC停止
                 self.flag_load = 0              # 装料机未装 
@@ -916,6 +920,13 @@ class LoadPoint:
                 self.load_time += datetime.datetime.now() - self.load_start_time1
                 self.load_start_time1_flag = True
                 self.logging.debug("中装料点装料完毕")
+
+
+            # self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,self.duration) # 估算当前装料量
+            self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,float(self.load_height.data), 2)
+            self.logging.debug(f'loadestimate:{self.loadestimate}')
+
+
 
     # 后装车点装料控制程序
     def load_control2(self):
@@ -955,7 +966,8 @@ class LoadPoint:
                 self.load_start_time2_flag = True
                 self.logging.debug("后装料点装料完毕")
 
-            self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,self.duration) # 估算当前装料量
+            # self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,self.duration) # 估算当前装料量
+            self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,float(self.load_height.data), 3)
             self.logging.debug(f'loadestimate:{self.loadestimate}')
 
     def sensor_status_ok(self, load_height)-> bool:
@@ -977,13 +989,13 @@ class LoadPoint:
         else:
             return SensorData(load_height.data)
 
-    # 预估重量
-    def weight_estimate(self, goods_type,loader_id,time_difference) -> float:
+    # 预估重量：用时间估计
+    def weight_estimate_old(self, goods_type,loader_id,time_difference) -> float:
         current_load_weight = 0 # 当前载重量
         per_second_weight = None
         bean_ratio = 0.0434
         corn_ratio = 0.043
-        rapeseed_ratio = 0.048  # 0.043
+        rapeseed_ratio = 0.048 * 1.2  # 0.043
 
         if goods_type == "黄豆":
             per_second_weight = bean_ratio
@@ -995,6 +1007,38 @@ class LoadPoint:
         assert per_second_weight is not None
     
         current_load_weight = per_second_weight * time_difference
+
+        return current_load_weight
+
+    # 预估重量2：用高度估计
+    def weight_estimate(self, goods_type,loader_id,load_height, height_num) -> float:
+        # height_num，第1，2，3堆
+        current_load_weight = 0 # 当前载重量
+
+        if load_height < 1:  # 503南物位计数据上窜下跳
+            return 0
+        
+        if goods_type == "黄豆":
+            if height_num==1:
+                current_load_weight = 23*(load_height-1.2)/(3.5-1.2)
+            elif height_num==2:
+                current_load_weight = 23+abs(load_height-3)*5.2/(3.4-3)
+            else:
+                current_load_weight = 23+abs(load_height-3)*5.2/(3.4-3) # 不对，现场没有第3堆数据
+        elif goods_type == "玉米":
+            if height_num==1:
+                current_load_weight = 23*(load_height-1.2)/(3.5-1.2)
+            elif height_num==2:
+                current_load_weight = 23+abs(load_height-3)*5.2/(3.4-3)
+            else:
+                current_load_weight = 23+abs(load_height-3)*5.2/(3.4-3) # 不对，现场没有第3堆数据
+        elif goods_type == "油菜籽" :
+            if height_num==1:
+                current_load_weight = 23*(load_height-1.2)/(3.5-1.2)
+            elif height_num==2:
+                current_load_weight = 23+abs(load_height-3)*5.2/(3.4-3)
+            else:
+                current_load_weight = 23+abs(load_height-3)*5.2/(3.4-3) # 不对，现场没有第3堆数据
 
         return current_load_weight
     
@@ -1057,11 +1101,10 @@ class LoadPoint:
         self.s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)# UDP
         self.s.setblocking(False)
 
-    # TODO: 清空UDP FIFO
     def clearUDPBuffer(self):
         while True:
             try:
-              chunk = self.s.recv(4096)
+                buf = self.s.recv(4096)
             except BlockingIOError as b:
               break
 

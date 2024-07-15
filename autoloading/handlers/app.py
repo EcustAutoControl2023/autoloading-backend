@@ -21,7 +21,7 @@ def connect():
     distance_1 = operating_stations.get('distance_1', None)
     distance_2 = operating_stations.get('distance_2', None)
     truck_load = operating_stations.get('truck_load', None)
-    load_current = operating_stations.get('load_current', None)
+    load_current = operating_stations.get('load_current', 0)
     truck_weight_in = operating_stations.get('truck_weight_in', None)
     truck_weight_out = operating_stations.get('truck_weight_out', None)
     truck_weight_out = 0 if (truck_weight_out is None) or (isinstance(truck_weight_out, dict) or (isinstance(truck_weight_out, list))) else truck_weight_out
