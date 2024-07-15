@@ -59,7 +59,7 @@ def call_weight_estimate(app, db, lpdict, goods_type, loader_id, time_difference
     with app.app_context():
         df = pd.read_csv(csv_file)
         df.to_sql(con=db.engine, name=Traffic.__tablename__, if_exists='append', index=False)
-        estimated_weight = lpdict.get(loader_id).weight_estimate(goods_type, loader_id, time_difference)
+        estimated_weight = lpdict.get(loader_id).weight_estimate(goods_type, loader_id, 3.5, 1, 0, 1.2)
 
         print(f'\033[31mestimated_weight: {estimated_weight}\033[0m')
         return estimated_weight
