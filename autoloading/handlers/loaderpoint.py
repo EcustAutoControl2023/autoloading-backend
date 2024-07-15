@@ -484,7 +484,9 @@ class LoadPoint:
                             )
                     elif self.icps_differ == self.distance_1 : # 判断车辆引导位置，执行相应装料点控制程序
                         if self.load_height2_begin == 0:
-                            self.load_height2_begin = self.load_height.data
+                            self.load_height_queue = Queue(maxsize=10)
+                            self.loader_id_list = list()
+                            self.load_height2_begin = self.get_sensor_data().data
                         self.icps_flag = 1
                         self.load_control1()
                         # self.logging.debug(f'load_current:{self.load_current}')
@@ -522,7 +524,9 @@ class LoadPoint:
                             )
                     elif self.icps_differ == self.distance_2 : # 判断车辆引导位置，执行相应装料点控制程序
                         if self.load_height3_begin == 0:
-                            self.load_height3_begin = self.load_height.data
+                            self.load_height_queue = Queue(maxsize=10)
+                            self.load_height_list = list()
+                            self.load_height3_begin = self.get_sensor_data().data
                         self.icps_flag = 2
                         self.load_control2()
                         # self.logging.debug(f'load_current:{self.load_current}')
@@ -567,7 +571,9 @@ class LoadPoint:
                             )
                     elif self.icps_differ == self.distance_2 : # 判断车辆引导位置，执行相应装料点控制程序
                         if self.load_height2_begin == 0:
-                            self.load_height2_begin = self.load_height.data
+                            self.load_height_queue = Queue(maxsize=10)
+                            self.loader_id_list = list()
+                            self.load_height2_begin = self.get_sensor_data().data
                         self.icps_flag = 1
                         self.load_control2()
                         # self.logging.debug(f'load_current:{self.load_current}')
@@ -611,7 +617,9 @@ class LoadPoint:
                             )
                     elif self.icps_differ == self.distance_1 : # 判断车辆引导位置，执行相应装料点控制程序
                         if self.load_height2_begin == 0:
-                            self.load_height2_begin = self.load_height.data
+                            self.load_height_queue = Queue(maxsize=10)
+                            self.loader_id_list = list()
+                            self.load_height2_begin = self.get_sensor_data().data
                         self.icps_flag = 1
                         self.load_control2()
                         # self.logging.debug(f'load_current:{self.load_current}')
