@@ -78,6 +78,10 @@ class LoadPoint:
         "601A", "602A", "603A", "604A",
         "601B", "602B", "603B", "604B",
     ]
+    LoadCoefficient = {
+        "黄豆": [(9.5, 10.5), 10, 9],
+        "油菜籽": [(9, 9.8), 9.8, 9]
+    }
 
     def __init__(self, loader_id:str):
         self.Sensor = LoadPoint.SensorList[LoadPoint.loader_index_dict[loader_id]]
@@ -1150,28 +1154,18 @@ class LoadPoint:
 
         if load_height < 1:  # 503南物位计数据上窜下跳
             return 0
-        
-        if goods_type == "黄豆":
-            if height_num == 1:
-                current_load_weight = 0 + (load_height - load_height_begin) * 9
-            elif height_num == 2:
-                current_load_weight = load_weight_begin + (load_height - load_height_begin) * 9
-            else:
-                current_load_weight = load_weight_begin + (load_height - load_height_begin) * 9
-        elif goods_type == "玉米":
-            if height_num == 1:
-                current_load_weight = 0 + (load_height - load_height_begin) * 9
-            elif height_num == 2:
-                current_load_weight = load_weight_begin + (load_height - load_height_begin) * 9
-            else:
-                current_load_weight = load_weight_begin + (load_height - load_height_begin) * 9
-        elif goods_type == "油菜籽":
-            if height_num==1:
-                current_load_weight = 0 + (load_height - load_height_begin) * 9
-            elif height_num==2:
-                current_load_weight = load_weight_begin + (load_height - load_height_begin) * 9
-            else:
-                current_load_weight = load_weight_begin + (load_height - load_height_begin) * 9
+        if height_num == 1:
+            co11, co12 = self.LoadCoefficient[goods_type][height_num-1]
+            if load_height - load_height_begin < 0.9:
+                current_load_weight = co11 * (load_height - load_height_begin)
+            elif load_height - load_height_begin >= 0.9:
+                current_load_weight = co11 * 0.9 + (load_height - load_height_begin - 0.9) * co12
+        elif height_num == 2:
+            co2 = self.LoadCoefficient[goods_type][height_num-1]
+            current_load_weight = load_weight_begin + (load_height - load_height_begin) * co2
+        else:
+            co3 = self.LoadCoefficient[goods_type][height_num-1]
+            current_load_weight = load_weight_begin + (load_height - load_height_begin) * co3
 
         return current_load_weight
 
