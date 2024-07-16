@@ -318,6 +318,10 @@ def change_truck_id(jsondata, truck_id_queue):
 def change_weight_out(jsondata, weight_out_queue):
     jsondata["operating_stations"]["truck_weight_out"] = weight_out_queue.get()
 
+@given(parsers.parse("装车量: {load_current}"), converters={"load_current": float})
+def load_current(load_current, jsondata):
+    jsondata["operating_stations"]["load_current"] = load_current
+
 @scenario("./feature/connect.feature", "2.1.1 将任务信息传给时庐获取引导策略")
 def test_data_type0():
     pass

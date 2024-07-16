@@ -37,6 +37,12 @@ def update_truck_content(truckid:str, loaderid, update_data:dict):
             traffic.loadendtime = value
         elif 'loadtimetotal'  == key:
             traffic.loadtimetotal = value
+        elif 'loadheight1begin' == key:
+            traffic.loadheight1begin = value
+        elif 'loadheight2begin' == key:
+            traffic.loadheight2begin = value
+        elif 'loadheight3begin' == key:
+            traffic.loadheight3begin = value
 
 
     db.session.commit()

@@ -79,6 +79,9 @@ class Traffic(db.Model):
     opening_width_bias = db.Column(db.Float, nullable=True)
     opening_length = db.Column(db.Float, nullable=True)
     opening_width = db.Column(db.Float, nullable=True)
+    loadheight1begin = db.Column(db.Float, nullable=True)
+    loadheight2begin = db.Column(db.Float, nullable=True)
+    loadheight3begin = db.Column(db.Float, nullable=True)
 
     @staticmethod
     def before_insert(target,value,initiator):
