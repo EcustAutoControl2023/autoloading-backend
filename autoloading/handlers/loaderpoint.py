@@ -234,9 +234,12 @@ class LoadPoint:
                 self.load_height_queue = Queue(maxsize=10)
                 self.load_height_list = list()
                 self.load_height = SensorData(-1)
-                self.load_level_limit1 = 0.85 + self.box_height #第一次装料高度限制，1.2为车厢底
-                self.load_level_limit2 = 0.85 + self.box_height #第二次装料高度限制
-                self.load_level_limit3 = 0.85 + self.box_height #第三次装料高度限制
+                self.load_level_limit1 = 0.9 + self.box_height #第一次装料高度限制，1.2为车厢底
+                self.load_level_limit2 = 0.9 + self.box_height #第二次装料高度限制
+                self.load_level_limit3 = 0.9 + self.box_height #第三次装料高度限制
+                self.logging.debug(f"load_level_limit1{self.load_level_limit1}")
+                self.logging.debug(f"load_level_limit2{self.load_level_limit2}")
+                self.logging.debug(f"load_level_limit3{self.load_level_limit3}")
 
 
             if (self.distance_0 != self.distance_1) and (self.distance_0 != self.distance_2) and (self.distance_1 != self.distance_2):
@@ -357,22 +360,7 @@ class LoadPoint:
                         "load_start_time": self.load_start_time,
                     }
                 )
-                # 记录初始高度，第1堆料开始前
-                if self.load_height1_begin == 0:
-                    self.load_height1_begin = self.get_sensor_data().data
-                    if 1.3 < self.load_height1_begin < 2.5:  # 如果扫描到底部加强筋，强制赋值
-                        self.load_height1_begin = 1.2
-                    elif self.load_height1_begin < 0:
-                        self.load_height1_begin = 0 
-                    elif self.load_height1_begin > 3.5: # 如果扫描到的是顶部的加强筋，不装料，不估计重量
-                        pass
-                    update_truck_content(
-                        truckid=self.truck_id,
-                        loaderid=self.loader_id,
-                        update_data={
-                            "loadheight1begin": self.load_height1_begin,
-                        }
-                    )
+
 
             if(self.temp_manual_stop!=0):
                 self.logging.debug("手动停止")
@@ -446,13 +434,12 @@ class LoadPoint:
                 return self.stop(self.truck_id,self.loader_id)
 
             self.logging.debug(f'icps_differ_num: {self.icps_differ_num}')
-            self.logging.debug(f'icps_differ: {self.icps_differ}')
 
             if self.work_finish == 0:
-                if self.duration > 1500 :
-                    self.time_record_flag = True
-                    self.insert_traffic_flag = True
-                    return None
+                # if self.duration > 1500 :
+                #     self.time_record_flag = True
+                #     self.insert_traffic_flag = True
+                #     return None
                 if self.icps_differ_num == '0123': # 装料三次的控制程序
                     if self.icps_differ == self.distance_0 : # 判断车辆引导位置，执行相应装料点控制程序
                         self.load_control0() # 执行前装料点控制程序
@@ -492,6 +479,7 @@ class LoadPoint:
                             )
                     elif self.icps_differ == self.distance_1 : # 判断车辆引导位置，执行相应装料点控制程序
                         if self.load_height2_begin == 0:
+                            self.logging.debug("重置物位高度")
                             self.load_height_queue = Queue(maxsize=10)
                             self.load_height_list = list()
                             self.load_height2_begin = self.get_sensor_data().data
@@ -920,13 +908,39 @@ class LoadPoint:
             })
 
     def load_control0(self):
-        self.logging.debug(f'control0 -> icps_differ: {self.icps_differ}')
+
+        # 记录初始高度，第1堆料开始前
+        self.logging.debug(f'allow_plc_work: {self.allow_plc_work}')
+        self.logging.debug(f'len(self.load_height_list): {len(self.load_height_list)}')
+        self.logging.debug(f'len(set(self.load_height_list)): {len(set(self.load_height_list))}')
+        self.load_height = self.get_sensor_data() # 读取物位计数据，存入列表
+        if self.load_height1_begin == 0:
+            load_height1_begin = self.load_height.data
+            if len(self.load_height_list) == 10: # 如果扫描到底部加强筋，强制赋值
+                if 1.3 < load_height1_begin < 2.5 \
+                    and len(set(self.load_height_list)) == 1: # 最近十条数据相同
+                    self.load_height1_begin = 1.2
+                elif load_height1_begin < 0:
+                    self.load_height1_begin = 0
+                elif load_height1_begin > 3.5: # 如果扫描到的是顶部的加强筋，不装料，不估计重量
+                    self.load_height1_begin = load_height1_begin
+                else: # 正常记录
+                    self.load_height1_begin = load_height1_begin
+                update_truck_content(
+                    truckid=self.truck_id,
+                    loaderid=self.loader_id,
+                    update_data={
+                        "loadheight1begin": self.load_height1_begin,
+                    }
+                )
+
+        self.logging.debug(f'load_control0 -> icps_differ: {self.icps_differ}')
 
         if self.icps_differ == self.distance_0 :
             assert type(self.duration) == float; assert type(self.load_start_time) == datetime.datetime
             self.duration = (datetime.datetime.now() - self.load_start_time).total_seconds()  # 计算装料持续时间
             self.logging.debug(f'load_control0 -> duration:{self.duration}')
-            self.load_height = self.get_sensor_data()
+            # self.load_height = self.get_sensor_data()
             self.logging.debug(f'load_height:{self.load_height.data}')
             # self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,self.duration) # 估算当前装料量
             self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,float(self.load_height.data), 1, 0, self.load_height1_begin) # 估算当前装料量
@@ -967,7 +981,7 @@ class LoadPoint:
 
     # 中装车点装料控制程序
     def load_control1(self):
-        self.logging.debug(f'control1 -> icps_differ: {self.icps_differ}')
+        self.logging.debug(f'load_control1 -> icps_differ: {self.icps_differ}')
 
         if self.icps_differ == self.distance_1 :
 
@@ -1022,7 +1036,7 @@ class LoadPoint:
 
     # 后装车点装料控制程序
     def load_control2(self):
-        self.logging.debug(f'control2 -> icps_differ: {self.icps_differ}')
+        self.logging.debug(f'load_control2 -> icps_differ: {self.icps_differ}')
 
         if self.icps_differ == self.distance_2 or self.icps_differ == self.distance_1:
 
@@ -1033,7 +1047,6 @@ class LoadPoint:
             # duration = datetime.datetime.now() - self.load_start_time  # 计算装料持续时间
             self.duration = self.load_time.total_seconds() + (datetime.datetime.now() - self.load_start_time2).total_seconds()  # 计算装料持续时间
             self.logging.debug(f'load_control2 -> duration:{self.duration}')
-            
 
             self.load_height = self.get_sensor_data()
             self.logging.debug(f'load_height:{self.load_height.data}')
@@ -1059,10 +1072,10 @@ class LoadPoint:
                 self.logging.debug("后装料点装料完毕")
 
             # self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,self.duration) # 估算当前装料量
-            if self.work_total == 2:
-                self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,float(self.load_height.data), 2, self.load_weight1_end, self.load_height2_begin)
-            else:
+            if self.work_total == 3:
                 self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,float(self.load_height.data), 3, self.load_weight2_end, self.load_height3_begin)
+            else:
+                self.loadestimate = self.weight_estimate(self.goods_type,self.loader_id,float(self.load_height.data), 2, self.load_weight1_end, self.load_height2_begin)
             self.logging.debug(f'loadestimate:{self.loadestimate}')
 
     def sensor_status_ok(self, load_height)-> bool:
@@ -1088,8 +1101,10 @@ class LoadPoint:
                 load_height = self.load_height_list[-1]
             if self.load_height_queue.full():
                 self.load_height_queue.get()
-            self.load_height_queue.put(load_height)
-            self.load_height_list = list(self.load_height_queue.queue)
+            if self.allow_plc_work == 1:
+                self.load_height_queue.put(load_height)
+                self.load_height_list = list(self.load_height_queue.queue)
+                self.logging.debug(f"load_height_list:{self.load_height_list}")
             return SensorData(load_height)
 
     # 预估重量：用时间估计
@@ -1154,12 +1169,18 @@ class LoadPoint:
 
         if load_height < 1:  # 503南物位计数据上窜下跳
             return 0
+
+        if load_height_begin == 0: # 有十条数据再开始估计重量
+            return 0
+
         if height_num == 1:
             co11, co12 = self.LoadCoefficient[goods_type][height_num-1]
             if load_height - load_height_begin < 0.9:
                 current_load_weight = co11 * (load_height - load_height_begin)
+                self.logging.debug(f"[delta_height < 0.9] current_load_weight:{current_load_weight}")
             elif load_height - load_height_begin >= 0.9:
                 current_load_weight = co11 * 0.9 + (load_height - load_height_begin - 0.9) * co12
+                self.logging.debug(f"[delta_height >= 0.9] current_load_weight:{current_load_weight}")
         elif height_num == 2:
             co2 = self.LoadCoefficient[goods_type][height_num-1]
             current_load_weight = load_weight_begin + (load_height - load_height_begin) * co2

@@ -1,6 +1,7 @@
 import ast
 import datetime
 import json
+from time import sleep
 from pytest_bdd import given, when, then, parsers
 from autoloading.handlers.loaderpoint import LoadPoint
 from autoloading.models.sensor import Traffic
@@ -83,13 +84,31 @@ def check_response(response, data_type):
 def load_current(load_current, postdata):
     postdata["operating_stations"]["load_current"] = load_current
 
+@given("模拟停止下料", target_fixture="mock_stop")
+def stop():
+    def mock_stop(postdata):
+        loader_id = postdata.get("operating_stations").get("loader_id")
+        serverInfo = LoadPoint.ServerList[LoadPoint.loader_index_dict[loader_id]]
+        udp_client(serverInfo=serverInfo, send_data="stop")
+    return mock_stop
+
+@given("模拟继续下料", target_fixture="mock_resume")
+def resume():
+    def mock_resume(postdata):
+        loader_id = postdata.get("operating_stations").get("loader_id")
+        serverInfo = LoadPoint.ServerList[LoadPoint.loader_index_dict[loader_id]]
+        udp_client(serverInfo=serverInfo, send_data="resume")
+    return mock_resume
+
 @given(parsers.parse("模拟的装车数据: {csv_file}"), converters={"csv_file": str})
-def send_scv(csv_file, postdata):
+def send_scv(csv_file, postdata, mock_stop):
     loader_id = postdata.get("operating_stations").get("loader_id")
     serverInfo = LoadPoint.ServerList[LoadPoint.loader_index_dict[loader_id]]
     printr(serverInfo, "ipport")
     udp_client(serverInfo=serverInfo, send_data="restart")
     udp_client(serverInfo=serverInfo, send_data=csv_file)
+    sleep(1)
+    mock_stop(postdata)
 
 @given(parsers.parse("车牌号: {plate_list}"), converters={"plate_list": ast.literal_eval}, target_fixture="plate_list")
 def plate_list(plate_list):
@@ -99,6 +118,11 @@ def plate_list(plate_list):
 def weightout_list(weightout_list):
     weightout_list = list(map(int, weightout_list))
     return weightout_list
+
+@given(parsers.parse("物料种类: {material_type}"), converters={"material_type": str}, target_fixture="material_type")
+def material_type(material_type, postdata):
+    postdata["operating_stations"]["goods_type"] = material_type
+    return material_type
 
 @when("模拟装车模式", target_fixture="gen_post")
 def post_generator(client, postdata):
@@ -114,3 +138,4 @@ def post_generator(client, postdata):
             if josnresponse.get("operating_stations").get("work_finish") == 1:
                 break
     return gen_post(client, postdata)
+

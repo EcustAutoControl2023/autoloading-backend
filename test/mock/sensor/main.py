@@ -47,6 +47,7 @@ def start_listening(server):
 
     csv = ''
     gen = ''
+    send_data = ''
 
     while True:
         data, addr = server.recvfrom(1024)
@@ -62,6 +63,8 @@ def start_listening(server):
             flag = 1
         elif recv_data == 'stop':
             flag = 2
+        elif recv_data == 'resume':
+            flag = 3
 
         if flag == 0:
             # data, addr = server.recvfrom(1024)
@@ -78,12 +81,15 @@ def start_listening(server):
                 gen = read_from_csv(csv)
             flag = 3
         elif flag == 2:
-            break
+            print(f"接收到来自 {addr} 的数据: {recv_data}")
+            if send_data != '':
+                server.sendto(send_data, addr)
         elif flag == 3: # 模拟传感器
             # data, addr = server.recvfrom(1024)
             print(f"接收到来自 {addr} 的数据: {recv_data}")
             # 回复数据
-            server.sendto(gen.__next__(), addr)
+            send_data = gen.__next__()
+            server.sendto(send_data, addr)
 
 def release_udp_server(server):
     server.close()
