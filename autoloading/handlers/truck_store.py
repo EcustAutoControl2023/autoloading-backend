@@ -53,7 +53,7 @@ def update_truck_content(truckid:str, loaderid, update_data:dict):
         'truckweightout': traffic.truckweightout,
         'goodstype': traffic.goodstype,
         'truckload': traffic.truckload,
-        'loadcurrent': None, #FIXME
+        'loadcurrent': traffic.loadcurrent,
         'storeid': traffic.storeid,
         'loaderid': traffic.loaderid,
         'modified': True

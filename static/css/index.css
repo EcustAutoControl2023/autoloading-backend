@@ -70,7 +70,8 @@
     margin-bottom: 20px;
 }
 .data_content .data_main .main_center .center_text1{
-    width: 985px;
+    /* width: 985px; */
+    width: 143.5%;
     height: 240px;
     margin-left: 25px;
     margin-right: 25px;
