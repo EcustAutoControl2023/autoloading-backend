@@ -16,6 +16,7 @@
         "goods_type": "油菜籽",
         "store_id": 212,
         "loader_id": "602A",
+        "type_of_opening": "侧开",
         "temp_manual_stop": 0,
         "loading_state": true
     }
