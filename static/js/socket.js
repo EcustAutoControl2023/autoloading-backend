@@ -88,10 +88,16 @@ traffic_socket.on('traffic_data', function(data) {
     {
         if (data.modified)
         {
-            traffic_data_queue.popRight();
+            // traffic_data_queue.popRight();
+            traffic_data_queue.updateElem(
+                ["truckid", data.truckid],
+                data
+            )
         }
-        // 将新的数据添加到队列中
-        traffic_data_queue.push(data);
+        else{
+            // 将新的数据添加到队列中
+            traffic_data_queue.push(data);
+        }
         // console.log(traffic_data_queue);
         show_table_data('#car-data', traffic_data_queue);
     }

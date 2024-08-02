@@ -1306,6 +1306,23 @@ class LoadPoint:
                 else:
                     # 此后每次加一秒
                     self.load_stop_time += datetime.timedelta(seconds=1)
+
+            load1_usingtime = 0
+            # 如果高度离限制仅差0.1
+            if (self.load_level_limit1 - load_height) <= 0.1:
+                # 计算下料速率
+                duration = ((datetime.datetime.now() - self.load_start_time) - self.load_stop_time).total_seconds()           # 第一堆装料时间，秒
+                if duration > 0: # 第一堆装料时间大于零
+                    discharge_speed = self.load_weight1_end / duration  # 放料速率，吨/秒
+                else:
+                    discharge_speed = 0.004
+                self.logging.debug(f"放料速率:{discharge_speed}")
+                if discharge_speed < 0.004:
+                    discharge_speed = 0.004  # 假设第一堆中间有停料，给最小装料速度，估计
+                elif discharge_speed > 0.006:
+                    discharge_speed = 0.006   # 按最快7分钟装25吨算
+                load1_usingtime = float(duration) * discharge_speed  # 按时间估计第1堆装料重量
+
             co11, co12 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num-1]
             if load_height - load_height_begin < 0.9:
                 current_load_weight = co11 * (load_height - load_height_begin)
@@ -1313,6 +1330,11 @@ class LoadPoint:
             elif load_height - load_height_begin >= 0.9:
                 current_load_weight = co11 * 0.9 + (load_height - load_height_begin - 0.9) * co12
                 self.logging.debug(f"[delta_height >= 0.9] current_load_weight:{current_load_weight}")
+
+            # 放料时间和高度同时判断，谁先到都可以停
+            if load1_usingtime > current_load_weight:
+                current_load_weight = load1_usingtime
+
         elif height_num == 2:
             co2 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num-1]
             load2_usingheight = (load_height - load_height_begin) * co2

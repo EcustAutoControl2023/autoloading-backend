@@ -40,6 +40,20 @@ class Queue {
     isEmpty() {
         return this.items.length === 0;
     }
+
+    updateElem(filter, prop){
+        for (let i = this.items.length - 1; i >= 0; i--) {
+            for (let data in this.items[i])
+            {
+                if (this.items[i][filter[0]] == filter[1]) {
+                    for (let key in prop) {
+                        this.items[i][key] = prop[key]
+                    }
+                    return
+                }
+            }
+        }
+    }
 }
 
 let tablename = '';
