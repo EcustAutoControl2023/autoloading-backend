@@ -44,7 +44,7 @@ jobs:
     - name: Docker Compose Action
       uses: hoverkraft-tech/compose-action@v2.0.1
       with:
-        cwd: "{{ github.workspace }}/test/mock/"
+        cwd: "${{ github.workspace }}/test/mock/"
         compose-file: "docker-compose.yml"
     # - name: docker compose mock environment
     #   working-directory: ./test/mock/
