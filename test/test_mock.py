@@ -1,10 +1,12 @@
 import ast
 import time
 from pytest_bdd import then, parsers, scenarios
+from autoloading.handlers.loaderpoint import SensorData
 from autoloading.models.sensor import Traffic
 
 from .conftest import printr
 from .test_common import *
+exec(f'from autoloading.models.sensor import Sensor13')
 exec(f'from autoloading.models.sensor import Sensor14')
 
 scenarios("feature/mock.feature")
@@ -200,9 +202,13 @@ def check_strategy_1_normal_weight_estimate(app, db, client, postdata, gen_post,
             responsedata.get('operating_stations').get('work_finish') != 1:
             while True:
                 with app.app_context():
-                    load_height = db.session.query(Sensor14).all()[-1]
+                    load_height = SensorData(-1)
+                    if responsedata.get('operating_stations').get('loader_id') == "601A":
+                        load_height = db.session.query(Sensor13).all()[-1]
+                    elif responsedata.get('operating_stations').get('loader_id') == "602A":
+                        load_height = db.session.query(Sensor14).all()[-1]
                     printr(load_height.data, "sensor")
-                    if load_height.data < 3.7:
+                    if load_height.data < 3.4:
                         break
                     else:
                         time.sleep(1)

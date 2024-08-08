@@ -49,21 +49,22 @@ Feature: connect接口测试(模拟装车模式)
       | ./test/json/postdata-1.json | [1.2, 1.2, 1.1] | ./csv/sensor14-2.csv | 0.0          | [[1.2, 1.1], [], []]          |
       | ./test/json/postdata-1.json | [1.1, 1.2, 1.2] | ./csv/sensor14-2.csv | 0.0          | [[1.1, 1.2], [], []]          |
       | ./test/json/postdata-1.json | [1.1, 1.2, 1.3] | ./csv/sensor14-2.csv | 0.0          | [[1.1, 1.2, 1.3], [], [], []] |
-  # Scenario Outline: 5.1.1 1、集卡引导到位，获取时庐的PLC控制策略，重量估计测试
-  #   Given 测试的post文件: <file>
-  #   And 初始化post数据
-  #   And 装料点位: <distance_list>
-  #   And 模拟停止下料
-  #   And 模拟继续下料
-  #   And 模拟的装车数据: <csv_file>
-  #   And 物料种类: <material_type>
-  #   And 装车量: <load_current>
-  #   When 模拟装车模式
-  # #   And 模拟重量估计公式（高度）
-  #   Then 模拟请求，重量测试: <expected_weight_list>
-  #   Examples:
-  #     | file                        | distance_list   | csv_file             | material_type | load_current | expected_weight_list          |
-  #     # | ./test/json/postdata-1.json | [1.1, 1.1, 1.1] | ./csv/sensor14-3.csv | 油菜籽        | 28.3         | [[1.1], []]                   |
-  #     # | ./test/json/postdata-1.json | [1.2, 1.2, 1.1] | ./csv/sensor14-3.csv | 油菜籽        | 28.3         | [[1.2, 1.1], [], []]          |
-  #     # | ./test/json/postdata-1.json | [1.1, 1.2, 1.2] | ./csv/sensor14-3.csv | 油菜籽        | 28.3         | [[1.1, 1.2], [], []]          |
-  #     | ./test/json/postdata-1.json | [1.1, 1.2, 1.3] | ./csv/sensor6-16-2.csv | 油菜籽        | 38.3         | [[1.1, 1.2, 1.3], [], [], []] |
+  Scenario Outline: 5.1.1 1、集卡引导到位，获取时庐的PLC控制策略，重量估计测试
+    Given 测试的post文件: <file>
+    And 初始化post数据
+    And 装料点位: <distance_list>
+    And 模拟停止下料
+    And 模拟继续下料
+    And 模拟的装车数据: <csv_file>
+    And 物料种类: <material_type>
+    And 装车量: <load_current>
+    When 模拟装车模式
+  #   And 模拟重量估计公式（高度）
+    Then 模拟请求，重量测试: <expected_weight_list>
+    Examples:
+      | file                        | distance_list   | csv_file             | material_type | load_current | expected_weight_list          |
+      # | ./test/json/postdata-1.json | [1.1, 1.1, 1.1] | ./csv/sensor14-3.csv | 油菜籽        | 28.3         | [[1.1], []]                   |
+      # | ./test/json/postdata-1.json | [1.2, 1.2, 1.1] | ./csv/sensor14-3.csv | 油菜籽        | 28.3         | [[1.2, 1.1], [], []]          |
+      | ./test/json/postdata-601A.json | [1.2, 1.2, 1.1] | ./csv/sensor16-8-14.csv | 黄豆        | 28.54         | [[1.2, 1.1], [], []]          |
+      # | ./test/json/postdata-1.json | [1.1, 1.2, 1.2] | ./csv/sensor14-3.csv | 油菜籽        | 28.3         | [[1.1, 1.2], [], []]          |
+      | ./test/json/postdata-602A.json | [1.1, 1.2, 1.3] | ./csv/sensor16-8-7.csv | 黄豆        | 29.46        | [[1.1, 1.2, 1.3], [], [], []] |

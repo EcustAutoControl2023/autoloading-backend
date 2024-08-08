@@ -78,16 +78,42 @@ class LoadPoint:
         "601A", "602A", "603A", "604A",
         "601B", "602B", "603B", "604B",
     ]
+    # LoadCoefficient = {
+    #     "黄豆": {
+    #         "侧开": [(9, 10), 9, 8],
+    #         "全开": [(9.5, 10.5), 10, 9],
+    #         "半开": [(9.5, 10.5), 10, 9]
+    #     },
+    #     "油菜籽": {
+    #         "侧开": [(9, 9.8), 9.8, 9],
+    #         "全开": [(9.7, 10.7), 9.7, 9.2],
+    #         "半开": [(9.7, 10.7), 9.7, 9.2]
+    #     }
+    # }
+
+    # LoadCoefficient = {
+    #     "黄豆": {
+    #         "侧开": [(0.37, 0.1646, 6.8624, 0.5091), 9, 8],
+    #         "全开": [(-0.7263, 5.3778, 1.1984, 0.2529), 10, 9],
+    #         "半开": [(-0.7263, 5.3778, 1.1984, 0.2529), 10, 9]
+    #     },
+    #     "油菜籽": {
+    #         "侧开": [(-0.6926, 5.239, 1.5352, 0.2067), 9.8, 9],
+    #         "全开": [(-0.6926, 5.239, 1.5352, 0.2067), 9.7, 9.2],
+    #         "半开": [(-0.6926, 5.239, 1.5352, 0.2067), 9.7, 9.2]
+    #     }
+    # }
+
     LoadCoefficient = {
         "黄豆": {
-            "侧开": [(9, 10), 9, 8],
-            "全开": [(9.5, 10.5), 10, 9],
-            "半开": [(9.5, 10.5), 10, 9]
+            "侧开": [(0.37, 0.1646, 6.8624, 0.5091), (0.37, 0.1646, 6.8624, 0.5091), (0.37, 0.1646, 6.8624, 0.5091)],
+            "全开": [(-0.7263, 5.3778, 1.1984, 0.2529), (-0.7263, 5.3778, 1.1984, 0.2529), (-0.7263, 5.3778, 1.1984, 0.2529)],
+            "半开": [(-0.7263, 5.3778, 1.1984, 0.2529), (-0.7263, 5.3778, 1.1984, 0.2529), (-0.7263, 5.3778, 1.1984, 0.2529)]
         },
         "油菜籽": {
-            "侧开": [(9, 9.8), 9.8, 9],
-            "全开": [(9.7, 10.7), 9.7, 9.2],
-            "半开": [(9.7, 10.7), 9.7, 9.2]
+            "侧开": [(-0.6926, 5.239, 1.5352, 0.2067), (-0.6926, 5.239, 1.5352, 0.2067), (-0.6926, 5.239, 1.5352, 0.2067)],
+            "全开": [(-0.6926, 5.239, 1.5352, 0.2067), (-0.6926, 5.239, 1.5352, 0.2067), (-0.6926, 5.239, 1.5352, 0.2067)],
+            "半开": [(-0.6926, 5.239, 1.5352, 0.2067), (-0.6926, 5.239, 1.5352, 0.2067), (-0.6926, 5.239, 1.5352, 0.2067)]
         }
     }
 
@@ -163,7 +189,9 @@ class LoadPoint:
         self.load_time = datetime.timedelta(0)            # 装料所用时间
         self.load_start_time1_flag = True   #中装料点时间记录控制标志
         self.load_start_time2_flag = True   #后装料点时间记录控制标志
-        self.load_stop_time = datetime.timedelta(0)       # 第一堆料停料时间段
+        self.load_stop_time1 = datetime.timedelta(0)       # 第一堆料停料时间段
+        self.load_stop_time2 = datetime.timedelta(0)       # 第二堆料停料时间段
+        self.load_stop_time3 = datetime.timedelta(0)       # 第三堆料停料时间段
 
         self.loadestimate = 0         # 装料预估重量
         self.truck_weight_out = 0        # 合作方给出场重量
@@ -247,7 +275,9 @@ class LoadPoint:
                 self.load_level_limit1 = 0.85 + self.box_height #第一次装料高度限制，1.2为车厢底
                 self.load_level_limit2 = 0.85 + self.box_height #第二次装料高度限制
                 self.load_level_limit3 = 0.85 + self.box_height #第三次装料高度限制
-                self.load_stop_time = datetime.timedelta(0)     #初始化停料时间
+                self.load_stop_time1 = datetime.timedelta(0)     #初始化停料时间
+                self.load_stop_time2 = datetime.timedelta(0)     #初始化停料时间
+                self.load_stop_time3 = datetime.timedelta(0)     #初始化停料时间
                 self.logging.debug(f"load_level_limit1{self.load_level_limit1}")
                 self.logging.debug(f"load_level_limit2{self.load_level_limit2}")
                 self.logging.debug(f"load_level_limit3{self.load_level_limit3}")
@@ -759,6 +789,7 @@ class LoadPoint:
             self.logging.debug(f"[type1]work_finish:{self.work_finish}")
             self.logging.debug(f"[type1]loadstatus:{self.loadstatus}")
             self.logging.debug(f"[type1]allow_plc_work:{self.allow_plc_work}")
+            self.logging.debug(f"[type1]loadestimate:{self.loadestimate}")
             result = gen_return_data(
                 time = self.req_time,
                 store_id = self.store_id,
@@ -881,7 +912,6 @@ class LoadPoint:
                     # "allow_plc_work": self.allow_plc_work,
                     # "work_finish" : self.work_finish,
                 })
-            return result
 
 
         elif data_type == 4:
@@ -970,9 +1000,9 @@ class LoadPoint:
                 else: # 正常记录
                     self.load_height1_begin = self.load_height_list[0]
                     if 1.2<self.load_height1_begin <1.5:
-                        self.load_level_limit1 = self.load_height1_begin - 0.35 + self.box_height #修改第一次装料高度限制，按照实际箱底算
-                        self.load_level_limit2 = self.load_height1_begin - 0.35 + self.box_height #修改第二次装料高度限制，按照实际箱底算
-                        self.load_level_limit3 = self.load_height1_begin - 0.35 + self.box_height #修改第二次装料高度限制，按照实际箱底算
+                        self.load_level_limit1 = self.load_height1_begin - 0.38 + self.box_height #修改第一次装料高度限制，按照实际箱底算
+                        self.load_level_limit2 = self.load_height1_begin - 0.38 + self.box_height #修改第二次装料高度限制，按照实际箱底算
+                        self.load_level_limit3 = self.load_height1_begin - 0.38 + self.box_height #修改第二次装料高度限制，按照实际箱底算
                 update_truck_content(
                     truckid=self.truck_id,
                     loaderid=self.loader_id,
@@ -1220,9 +1250,6 @@ class LoadPoint:
 
         if load_height_begin == 0: # 有十条数据再开始估计重量
             return 0
-        self.logging.debug(f"self.type_of_opening:{self.type_of_opening}")
-        if self.type_of_opening == None:
-            self.type_of_opening = "侧开"
 
         if height_num == 1:
             co11, co12 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num-1]
@@ -1284,7 +1311,7 @@ class LoadPoint:
         return current_load_weight
 
     # 预估重量4：用高度和时间同时估计
-    def weight_estimate(self, goods_type,loader_id,load_height, height_num, load_weight_begin, load_height_begin) -> float:
+    def weight_estimate_v3(self, goods_type,loader_id,load_height, height_num, load_weight_begin, load_height_begin) -> float:
         # height_num，第1，2，3堆
         current_load_weight = 0 # 当前载重量
         self.logging.debug(f"[weight_estimate] load_weight_begin:{load_weight_begin}")
@@ -1300,29 +1327,12 @@ class LoadPoint:
             if len(set(self.load_height_list)) == 1:
                 self.logging.debug("第一堆料停止放料，记录停料时间")
                 # 一秒一个物位计数据
-                if self.load_stop_time.total_seconds() == 0:
+                if self.load_stop_time1.total_seconds() == 0:
                     # 满足条件已经有10秒未下料
-                    self.load_stop_time = datetime.timedelta(seconds=10)
+                    self.load_stop_time1 = datetime.timedelta(seconds=10)
                 else:
                     # 此后每次加一秒
-                    self.load_stop_time += datetime.timedelta(seconds=1)
-
-            load1_usingtime = 0
-            # 如果高度离限制仅差0.1
-            if (self.load_level_limit1 - load_height) <= 0.1:
-                # 计算下料速率
-                duration = ((datetime.datetime.now() - self.load_start_time) - self.load_stop_time).total_seconds()           # 第一堆装料时间，秒
-                if duration > 0: # 第一堆装料时间大于零
-                    discharge_speed = self.load_weight1_end / duration  # 放料速率，吨/秒
-                else:
-                    discharge_speed = 0.004
-                self.logging.debug(f"放料速率:{discharge_speed}")
-                if discharge_speed < 0.004:
-                    discharge_speed = 0.004  # 假设第一堆中间有停料，给最小装料速度，估计
-                elif discharge_speed > 0.006:
-                    discharge_speed = 0.006   # 按最快7分钟装25吨算
-                load1_usingtime = float(duration) * discharge_speed  # 按时间估计第1堆装料重量
-
+                    self.load_stop_time1 += datetime.timedelta(seconds=1)
             co11, co12 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num-1]
             if load_height - load_height_begin < 0.9:
                 current_load_weight = co11 * (load_height - load_height_begin)
@@ -1330,11 +1340,6 @@ class LoadPoint:
             elif load_height - load_height_begin >= 0.9:
                 current_load_weight = co11 * 0.9 + (load_height - load_height_begin - 0.9) * co12
                 self.logging.debug(f"[delta_height >= 0.9] current_load_weight:{current_load_weight}")
-
-            # 放料时间和高度同时判断，谁先到都可以停
-            if load1_usingtime > current_load_weight:
-                current_load_weight = load1_usingtime
-
         elif height_num == 2:
             co2 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num-1]
             load2_usingheight = (load_height - load_height_begin) * co2
@@ -1342,17 +1347,21 @@ class LoadPoint:
             duration_height2 = (datetime.datetime.now() - self.load_start_time1).total_seconds()  # 第2堆装料时间，秒
             assert isinstance(self.load_time1, datetime.datetime)
             # 第一堆装料时间，考虑停料
-            duration_height1 = ((self.load_start_time - self.load_time1) - self.load_stop_time).total_seconds()           # 第一堆装料时间，秒
+            duration_height1 = ((self.load_time1 - self.load_start_time) - self.load_stop_time1).total_seconds()           # 第一堆装料时间，秒
+            self.logging.debug(f"第一堆装料停料时间:{self.load_stop_time1}")
+            self.logging.debug(f"第一堆装料时间:{duration_height1}")
             if duration_height1 > 0: # 第一堆装料时间大于零
                 discharge_speed = self.load_weight1_end / duration_height1  # 放料速率，吨/秒
             else:
-                discharge_speed = 0.004
+                discharge_speed = 0.04
             self.logging.debug(f"放料速率:{discharge_speed}")
-            if discharge_speed < 0.004:
-                discharge_speed = 0.004  # 假设第一堆中间有停料，给最小装料速度，估计
-            elif discharge_speed > 0.006:
-                discharge_speed = 0.006   # 按最快7分钟装25吨算
+            if discharge_speed < 0.04:
+                discharge_speed = 0.04  # 假设第一堆中间有停料，给最小装料速度，估计
+            elif discharge_speed > 0.07:
+                discharge_speed = 0.07   # 按最快7分钟装25吨算
             load2_usingtime = float(duration_height2)* discharge_speed  # 按时间估计第2堆装料重量
+            self.logging.debug(f"按物位估计重量:{load2_usingheight}")
+            self.logging.debug(f"按时间估计重量:{load2_usingtime}")
             # 假设移车后60秒内料位不上升
             if duration_height2 < 60 and ((load_height - load_height_begin) < 0.0033 * duration_height2):
                 # 第2堆放料时间小于60秒且料高变化小于最小料高变化（60秒高度最小升高0.2)
@@ -1366,22 +1375,192 @@ class LoadPoint:
             duration_height3 = (datetime.datetime.now() - self.load_start_time2).total_seconds()  # 第3堆装料时间，秒
             assert isinstance(self.load_time1, datetime.datetime)
             # 第一堆装料时间，考虑停料
-            duration_height1 = ((self.load_start_time - self.load_time1) - self.load_stop_time).total_seconds()           # 第一堆装料时间，秒
+            duration_height1 = ((self.load_time1 - self.load_start_time) - self.load_stop_time1).total_seconds()           # 第一堆装料时间，秒
             if duration_height1 > 0: # 第一堆装料时间大于零
                 discharge_speed = self.load_weight1_end / duration_height1  # 放料速率，吨/秒
             else:
-                discharge_speed = 0.004
-            if discharge_speed < 0.004:
-                discharge_speed = 0.004  # 假设第一堆中间有停料，给最小装料速度，估计
-            elif discharge_speed > 0.006:
-                discharge_speed = 0.006  # 按最快7分钟装25吨算
+                discharge_speed = 0.04
+            if discharge_speed < 0.04:
+                discharge_speed = 0.04  # 假设第一堆中间有停料，给最小装料速度，估计
+            elif discharge_speed > 0.07:
+                discharge_speed = 0.07  # 按最快7分钟装25吨算
             load3_usingtime = float(duration_height3) * discharge_speed  # 按时间估计第3堆装料重量
             # 假设移车后60秒内料位不上升
             if duration_height3 < 60 and ((load_height - load_height_begin) < 0.0033 * duration_height3):
-                # 第2堆放料时间小于60秒且料高变化小于最小料高变化（60秒高度最小升高0.2)
+                # 第3堆放料时间小于60秒且料高变化小于最小料高变化（60秒高度最小升高0.2)
                 current_load_weight = load_weight_begin + load3_usingtime  # 料位不变，按放料时间计算重量
             if load3_usingheight > load3_usingtime * 1.2:  # 料位上升过快，但实际下料速度不变，用时间估计
                 current_load_weight = load_weight_begin + load3_usingtime
+        return current_load_weight
+
+    # 预估重量5：用高度和时间同时估计
+    def weight_estimate(self, goods_type,loader_id,load_height, height_num, load_weight_begin, load_height_begin) -> float:
+        if self.type_of_opening == None:
+            self.type_of_opening = "侧开"
+        # height_num，第1，2，3堆
+        current_load_weight = 0 # 当前载重量
+        self.logging.debug(f"[weight_estimate] load_weight_begin:{load_weight_begin}")
+        self.logging.debug(f"[weight_estimate] load_height_begin:{load_height_begin}")
+
+        if load_height < 1:  # 503南物位计数据上窜下跳
+            return 0
+
+        if load_height_begin == 0: # 有十条数据再开始估计重量
+            return 0
+
+        if height_num == 1:
+            if len(set(self.load_height_list)) == 1:
+                self.logging.debug("第一堆料停止放料，记录停料时间")
+                # 一秒一个物位计数据
+                if self.load_stop_time1.total_seconds() == 0:
+                    # 满足条件已经有10秒未下料
+                    self.load_stop_time1 = datetime.timedelta(seconds=10)
+                else:
+                    # 此后每次加一秒
+                    self.load_stop_time1 += datetime.timedelta(seconds=1)
+            co11, co12, co13, co14 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num - 1]
+            load_height_lift = load_height - load_height_begin
+            if load_height_lift <= 0:
+                current_load_weight = 0
+            else:
+                current_load_weight = co11 * load_height_lift ** 3 + co12 * load_height_lift ** 2 + co13 * load_height_lift + co14
+                current_load_weight = current_load_weight if current_load_weight >= 0 else 0
+            self.logging.debug(f"[delta_height >= 0.9] current_load_weight:{current_load_weight}")
+        elif height_num == 2:
+            load2_usingheight   = 0
+            load2_usingtime     = 0
+            current_load_weight_usingtime   = self.loadestimate
+            current_load_weight_usingheight = self.loadestimate
+
+            # 第二堆参数和第一堆一样
+            co21, co22, co23, co24 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num - 1]
+            # 1. 计算初始高度重量
+            load_height2_lift_begin = load_height_begin - self.load_height1_begin
+            load_weight2_begin = 0
+            if load_height2_lift_begin <= 0:
+                load_weight2_begin = 0
+            else:
+                self.logging.debug(f"load_height2_lift_begin:{load_height2_lift_begin}")
+                load_weight2_begin = co21 * load_height2_lift_begin ** 3 + co22 * load_height2_lift_begin ** 2 + co23 * load_height2_lift_begin + co24
+                load_weight2_begin = load_weight2_begin if load_weight2_begin >= 0 else 0
+                self.logging.debug(f"load_weight2_begin:{load_weight2_begin}")
+            # 2. 计算当前高度重量
+            load_height2_lift_current = load_height - self.load_height1_begin
+            load_weight2_current = 0
+            if load_height2_lift_current <= 0:
+                load_weight2_current = 0
+            else:
+                self.logging.debug(f"load_height2_lift_current:{load_height2_lift_current}")
+                load_weight2_current = co21 * load_height2_lift_current ** 3 + co22 * load_height2_lift_current ** 2 + co23 * load_height2_lift_current + co24
+                load_weight2_current = load_weight2_current if load_weight2_current >= 0 else 0
+                self.logging.debug(f"load_weight2_current:{load_weight2_current}")
+
+            # 3. 步骤3 - 步骤2
+            load2_usingheight = load_weight2_current - load_weight2_begin
+            current_load_weight_usingheight = load_weight_begin + load2_usingheight
+
+            if self.work_total == 3:
+                duration_height2 = ((datetime.datetime.now() - self.load_start_time1) - self.load_stop_time2).total_seconds()  # 第2堆装料时间，秒
+            else:
+                duration_height2 = ((datetime.datetime.now() - self.load_start_time2) - self.load_stop_time2).total_seconds()  # 第2堆装料时间，秒
+
+            assert isinstance(self.load_time1, datetime.datetime)
+            # 第一堆装料时间，考虑停料
+            duration_height1 = ((self.load_time1 - self.load_start_time) - self.load_stop_time1).total_seconds()           # 第一堆装料时间，秒
+            self.logging.debug(f"第一堆装料停料时间:{self.load_stop_time1}")
+            self.logging.debug(f"第一堆装料时间:{duration_height1}")
+            if duration_height1 > 0: # 第一堆装料时间大于零
+                discharge_speed = self.load_weight1_end / duration_height1  # 放料速率，吨/秒
+            else:
+                discharge_speed = 0.04
+            if discharge_speed < 0.04:
+                discharge_speed = 0.04  # 假设第一堆中间有停料，给最小装料速度，估计
+            elif discharge_speed > 0.07:
+                discharge_speed = 0.07   # 按最快7分钟装25吨算
+            self.logging.debug(f"放料速率:{discharge_speed}")
+            load2_usingtime = float(duration_height2)* discharge_speed  # 按时间估计第2堆装料重量
+            self.logging.debug(f"按物位估计重量:{load2_usingheight}")
+            self.logging.debug(f"按时间估计重量:{load2_usingtime}")
+            # 假设移车后60秒内料位不上升
+            if duration_height2 <= 60 and ((load_height - load_height_begin) < 0.0033 * duration_height2):
+                # 第2堆放料时间小于60秒且料高变化小于最小料高变化（60秒高度最小升高0.2)
+                current_load_weight_usingtime = load_weight_begin + load2_usingtime # 料位不变，按放料时间计算重量
+            if duration_height2 > 60 and ((load_height - load_height_begin) < 0.0033):
+                # 高度不变，时间大于1分钟，说明停料，增加的重量为0
+                current_load_weight_usingtime = self.loadestimate # 增加重量为零（使用上一次估计的重量）
+                self.load_stop_time2 += datetime.timedelta(seconds=1) # 停料时间增加1秒
+            self.logging.debug(f"current_load_weight_usingtime:{current_load_weight_usingtime}")
+            self.logging.debug(f"current_load_weight_usingheight:{current_load_weight_usingheight}")
+            if load2_usingtime >= 0 and load2_usingheight > 0: # 高度和时间都有结果
+                # 如果高度的结果大于时间的120%，小于时间的80%，用时间的结果；否则用高度的结果
+                if current_load_weight_usingheight > current_load_weight_usingtime * 1.2 or \
+                    current_load_weight_usingheight < current_load_weight_usingtime * 0.8:
+                    current_load_weight = current_load_weight_usingtime
+                else:
+                    current_load_weight = current_load_weight_usingheight if current_load_weight_usingheight > current_load_weight_usingtime else current_load_weight_usingtime
+            else:
+                current_load_weight = current_load_weight_usingtime
+        else:
+            load3_usingheight   = 0
+            load3_usingtime     = 0
+            current_load_weight_usingtime   = self.loadestimate
+            current_load_weight_usingheight = self.loadestimate
+
+            # 第三堆参数和第一堆一样
+            co31, co32, co33, co34 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num - 1]
+            # 1. 计算初始高度重量
+            load_height3_lift_begin = load_height_begin - self.load_height1_begin
+            load_weight3_begin = 0
+            if load_height3_lift_begin <= 0:
+                load_weight3_begin = 0
+            else:
+                load_weight3_begin = co31 * load_height3_lift_begin ** 3 + co32 * load_height3_lift_begin ** 2 + co33 * load_height3_lift_begin + co34
+                load_weight3_begin = load_weight3_begin if load_weight3_begin >= 0 else 0
+            # 2. 计算当前高度重量
+            load_height3_lift_current = load_height - self.load_height1_begin
+            load_weight3_current = 0
+            if load_height3_lift_current <= 0:
+                load_weight3_current = 0
+            else:
+                load_weight3_current = co31 * load_height3_lift_current ** 3 + co32 * load_height3_lift_current ** 2 + co33 * load_height3_lift_current + co34
+                load_weight3_current = load_weight3_current if load_weight3_current >= 0 else 0
+
+            # 3. 步骤3 - 步骤2
+            load3_usingheight = load_weight3_current - load_weight3_begin
+            current_load_weight_usingheight = load_weight_begin + load3_usingheight
+
+            duration_height3 = ((datetime.datetime.now() - self.load_start_time2) - self.load_stop_time3).total_seconds()  # 第3堆装料时间，秒
+            assert isinstance(self.load_time1, datetime.datetime)
+            # 第一堆装料时间，考虑停料
+            duration_height1 = ((self.load_time1 - self.load_start_time) - self.load_stop_time1).total_seconds()           # 第一堆装料时间，秒
+            if duration_height1 > 0: # 第一堆装料时间大于零
+                discharge_speed = self.load_weight1_end / duration_height1  # 放料速率，吨/秒
+            else:
+                discharge_speed = 0.04
+            if discharge_speed < 0.04:
+                discharge_speed = 0.04  # 假设第一堆中间有停料，给最小装料速度，估计
+            elif discharge_speed > 0.07:
+                discharge_speed = 0.07  # 按最快7分钟装25吨算
+            load3_usingtime = float(duration_height3) * discharge_speed  # 按时间估计第3堆装料重量
+            # 假设移车后60秒内料位不上升
+            if duration_height3 <= 60 and ((load_height - load_height_begin) < 0.0033 * duration_height3):
+                # 第3堆放料时间小于60秒且料高变化小于最小料高变化（60秒高度最小升高0.2)
+                current_load_weight_usingtime = load_weight_begin + load3_usingtime # 料位不变，按放料时间计算重量
+            if duration_height3 > 60 and ((load_height - load_height_begin) < 0.0033):
+                # 高度不变，时间大于1分钟，说明停料，增加的重量为0
+                current_load_weight_usingtime = self.loadestimate # 增加重量为零（使用上一次估计的重量）
+                self.load_stop_time3 += datetime.timedelta(seconds=1) # 停料时间加1秒
+            self.logging.debug(f"current_load_weight_usingtime:{current_load_weight_usingtime}")
+            self.logging.debug(f"current_load_weight_usingheight:{current_load_weight_usingheight}")
+            if load3_usingtime >= 0 and load3_usingheight > 0: # 高度和时间都有结果
+                # 如果高度的结果大于时间的120%，小于时间的80%，用时间的结果；否则用高度的结果
+                if current_load_weight_usingheight > current_load_weight_usingtime * 1.2 or \
+                    current_load_weight_usingheight < current_load_weight_usingtime * 0.8:
+                    current_load_weight = current_load_weight_usingtime
+                else:
+                    current_load_weight = current_load_weight_usingheight if current_load_weight_usingheight > current_load_weight_usingtime else current_load_weight_usingtime
+            else:
+                current_load_weight = current_load_weight_usingtime
         return current_load_weight
 
     def stop(self, truck_id, loader_id):
