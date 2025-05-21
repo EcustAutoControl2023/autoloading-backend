@@ -78,6 +78,11 @@ class LoadPoint:
         "601A", "602A", "603A", "604A",
         "601B", "602B", "603B", "604B",
     ]
+    GoodsTypeList = [
+            "黄豆",
+            "油菜籽",
+            "玉米"
+    ]
     # LoadCoefficient = {
     #     "黄豆": {
     #         "侧开": [(9, 10), 9, 8],
@@ -133,7 +138,7 @@ class LoadPoint:
         self.truck_load = 0        # 车辆最大载重
         self.data_type  = -1       # 数据类型，0：请求作业策略；1：请求允许作业；2：出闸重量；3：请求实时作业情况数据；4：识别有误弹窗确认
         self.store_id   = 0        # 装料仓库编号
-        self.loader_id  = 0        # 装料机编号
+        self.loader_id  = loader_id        # 装料机编号
         self.box_length = 0        # 箱体长
         self.box_width  = 0        # 箱体宽
         self.box_height = 0        # 箱体高
@@ -176,7 +181,7 @@ class LoadPoint:
         self.load_height3_begin = 0           # 新增，第3堆初始高度
         self.load_weight1_end = 0                  # 新增，第1堆结束重量
         self.load_weight2_end = 0                  # 新增，第2堆结束重量
-        self.load_height_queue = Queue(maxsize=10) # 新增，最近10条高度（队列）
+        self.load_height_queue = Queue(maxsize=20) # 新增，最近10条高度（队列）
         self.load_height_list = list()             # 新增，最近10条高度（list）
 
         self.load_level_height1 = None         # 第一次装料时高度
@@ -205,6 +210,8 @@ class LoadPoint:
         self.loadstatus = '未装车'
         self.location = LoadPoint.LocationList[LoadPoint.loader_index_dict[loader_id]]
         self.stackpos = LoadPoint.StackposList[LoadPoint.loader_index_dict[loader_id]]
+
+        self.speed = 0.35 # 下料速率
 
     # TODO: 函数输入参数改为字典
     def load_control(self,
@@ -269,7 +276,7 @@ class LoadPoint:
                 self.load_height3_begin = 0
                 self.load_weight1_end = 0
                 self.load_weight2_end = 0
-                self.load_height_queue = Queue(maxsize=10)
+                self.load_height_queue = Queue(maxsize=20)
                 self.load_height_list = list()
                 self.load_height = SensorData(-1)
                 self.load_level_limit1 = 0.85 + self.box_height #第一次装料高度限制，1.2为车厢底
@@ -394,6 +401,11 @@ class LoadPoint:
                 self.logging.debug(f"load_start_time: {self.load_start_time}")
                 self.duration = float(0)
                 self.time_record_flag = False
+                # 获取当前的物料种类调整系数
+                from autoloading.handlers.config import get_config
+                co_config = get_config(loader_id=self.loader_id, goods_type=self.goods_type)
+                self.speed = co_config['weight'] / co_config['duration']
+                logging.debug(f'下料速率: {self.speed}')
                 update_truck_content(
                     truckid=self.truck_id,
                     loaderid=self.loader_id,
@@ -521,7 +533,7 @@ class LoadPoint:
                     elif self.icps_differ == self.distance_1 : # 判断车辆引导位置，执行相应装料点控制程序
                         if self.load_height2_begin == 0:
                             self.logging.debug("重置物位高度")
-                            self.load_height_queue = Queue(maxsize=10)
+                            self.load_height_queue = Queue(maxsize=20)
                             self.load_height_list = list()
                             self.load_height2_begin = self.get_sensor_data().data
                             if self.load_height2_begin < 1.2:
@@ -576,7 +588,7 @@ class LoadPoint:
                     elif self.icps_differ == self.distance_2 : # 判断车辆引导位置，执行相应装料点控制程序
                         if self.load_height3_begin == 0:
                             self.logging.debug("重置物位高度")
-                            self.load_height_queue = Queue(maxsize=10)
+                            self.load_height_queue = Queue(maxsize=20)
                             self.load_height_list = list()
                             self.load_height3_begin = self.get_sensor_data().data
                             if self.load_height3_begin < 1.2:
@@ -637,7 +649,7 @@ class LoadPoint:
                     elif self.icps_differ == self.distance_2 : # 判断车辆引导位置，执行相应装料点控制程序
                         if self.load_height2_begin == 0:
                             self.logging.debug("重置物位高度")
-                            self.load_height_queue = Queue(maxsize=10)
+                            self.load_height_queue = Queue(maxsize=20)
                             self.load_height_list = list()
                             self.load_height2_begin = self.get_sensor_data().data
                             if self.load_height2_begin < 1.2:
@@ -697,7 +709,7 @@ class LoadPoint:
                     elif self.icps_differ == self.distance_1 : # 判断车辆引导位置，执行相应装料点控制程序
                         if self.load_height2_begin == 0:
                             self.logging.debug("重置物位高度")
-                            self.load_height_queue = Queue(maxsize=10)
+                            self.load_height_queue = Queue(maxsize=20)
                             self.load_height_list = list()
                             self.load_height2_begin = self.get_sensor_data().data
                             if self.load_height2_begin < 1.2:
@@ -823,95 +835,95 @@ class LoadPoint:
                     "work_total" : self.work_total,
                 })
 
-        elif data_type == 3:
-            # TODO: 返回实时数据
-            self.logging.debug(f"{self.truck_id}请求data_type:3")
-            self.logging.debug(f"auto_select:{self.auto_select}")
-
-            if self.auto_select == False:
-                self.logging.debug("手动停止")
-                self.logging.debug(f"icps_differ_num:{self.icps_differ_num}")
-                self.logging.debug(f"icps_differ:{self.icps_differ}")
-                self.logging.debug(f'distance_0:{self.distance_0}')
-                self.logging.debug(f'distance_1:{self.distance_1}')
-                self.logging.debug(f'distance_2:{self.distance_2}')
-                self.load_height = self.get_sensor_data()
-                if(self.icps_differ_num == '0001'):   
-                    self.work_finish = 1
-                    self.load_time1 = datetime.datetime.now()
-                    assert type(self.load_start_time) == datetime.datetime
-                    # self.duration = (self.load_time1 - self.load_start_time).total_seconds()
-                    self.logging.debug("前装料点装料完毕,记录装料时间1")
-                    self.load_level_height1 = self.load_height.data  # 获取前装料点装料完成高度
-                elif(self.icps_differ_num == '0012') or (self.icps_differ_num == '0112'):  
-                    if(self.icps_differ == self.distance_0):
-                        self.work_finish = 0
-                        self.load_time1 = datetime.datetime.now()
-                        assert type(self.load_start_time) == datetime.datetime
-                        self.load_time = datetime.datetime.now() - self.load_start_time # 更新当前装料所用时间
-                        assert type(self.load_start_time) == datetime.datetime
-                        # self.duration = (self.load_time1 - self.load_start_time).total_seconds()
-                        self.icps_differ = self.distance_2
-                        self.logging.debug("前装料点装料完毕,记录装料时间1")
-                        self.load_level_height1 = self.load_height.data  # 获取前装料点装料完成高度
-                    else:
-                        self.work_finish = 1
-                        self.load_time2 = datetime.datetime.now()
-                        assert type(self.load_start_time) == datetime.datetime
-                        # self.duration = (self.load_time2 - self.load_start_time).total_seconds()
-                        self.logging.debug("后装料点装料完毕,记录装料时间2")
-                        self.load_level_height2 = self.load_height.data  # 获取前装料点装料完成高度
-                elif(self.icps_differ_num == '0123'):
-                    if(self.icps_differ == self.distance_0):
-                        self.work_finish = 0
-                        self.load_time1 = datetime.datetime.now()
-                        assert type(self.load_start_time) == datetime.datetime
-                        self.load_time = datetime.datetime.now() - self.load_start_time # 更新当前装料所用时间
-
-                        # self.duration = (self.load_time1 - self.load_start_time).total_seconds()
-                        self.icps_differ = self.distance_1
-                        self.logging.debug("前装料点装料完毕,记录装料时间1")
-                        self.load_level_height1 = self.load_height.data  # 获取前装料点装料完成高度
-
-                    elif(self.icps_differ == self.distance_1):
-                        self.load_time2 = datetime.datetime.now()
-                        assert type(self.load_start_time) == datetime.datetime
-                        # self.duration = (self.load_time2 - self.load_start_time).total_seconds()
-                        self.icps_differ = self.distance_2
-
-                        # self.load_time += datetime.datetime.now() - self.load_start_time1 # 更新当前装料所用时间
-
-
-                        self.logging.debug("中装料点装料完毕,记录装料时间2")
-                        self.load_level_height2 = self.load_height.data  # 获取前装料点装料完成高度
-
-                    else:
-                        self.work_finish = 1
-                        self.load_time3 = datetime.datetime.now()
-                        # assert type(self.load_start_time) == datetime.datetime
-                        # self.duration = (self.load_time3 - self.load_start_time).total_seconds()
-                        self.logging.debug("后装料点装料完毕,记录装料时间3")
-                        self.load_level_height3 = self.load_height.data  # 获取前装料点装料完成高度
-
-                # FIXME:如果切换手动，是否可以认为此条数据作废？
-                if self.work_finish:
-                    self.icps_flag += 1
-
-                self.stop(self.truck_id,self.loader_id)
-
-            result = gen_return_data(
-                time = self.req_time,
-                store_id = self.store_id,
-                loader_id = self.loader_id,
-                operating_stations={
-                    # "truck_id": self.truck_id,
-                    # "work_weight_status": self.work_weight_status,
-                    "work_weight_reality": self.loadestimate,
-                    # "flag_load": self.flag_load,
-                    "height_load": self.height_load,
-                    # "allow_plc_work": self.allow_plc_work,
-                    # "work_finish" : self.work_finish,
-                })
+        # elif data_type == 3:
+        #     # TODO: 返回实时数据
+        #     self.logging.debug(f"{self.truck_id}请求data_type:3")
+        #     self.logging.debug(f"auto_select:{self.auto_select}")
+        #
+        #     if self.auto_select == False:
+        #         self.logging.debug("手动停止")
+        #         self.logging.debug(f"icps_differ_num:{self.icps_differ_num}")
+        #         self.logging.debug(f"icps_differ:{self.icps_differ}")
+        #         self.logging.debug(f'distance_0:{self.distance_0}')
+        #         self.logging.debug(f'distance_1:{self.distance_1}')
+        #         self.logging.debug(f'distance_2:{self.distance_2}')
+        #         self.load_height = self.get_sensor_data()
+        #         if(self.icps_differ_num == '0001'):   
+        #             self.work_finish = 1
+        #             self.load_time1 = datetime.datetime.now()
+        #             assert type(self.load_start_time) == datetime.datetime
+        #             # self.duration = (self.load_time1 - self.load_start_time).total_seconds()
+        #             self.logging.debug("前装料点装料完毕,记录装料时间1")
+        #             self.load_level_height1 = self.load_height.data  # 获取前装料点装料完成高度
+        #         elif(self.icps_differ_num == '0012') or (self.icps_differ_num == '0112'):  
+        #             if(self.icps_differ == self.distance_0):
+        #                 self.work_finish = 0
+        #                 self.load_time1 = datetime.datetime.now()
+        #                 assert type(self.load_start_time) == datetime.datetime
+        #                 self.load_time = datetime.datetime.now() - self.load_start_time # 更新当前装料所用时间
+        #                 assert type(self.load_start_time) == datetime.datetime
+        #                 # self.duration = (self.load_time1 - self.load_start_time).total_seconds()
+        #                 self.icps_differ = self.distance_2
+        #                 self.logging.debug("前装料点装料完毕,记录装料时间1")
+        #                 self.load_level_height1 = self.load_height.data  # 获取前装料点装料完成高度
+        #             else:
+        #                 self.work_finish = 1
+        #                 self.load_time2 = datetime.datetime.now()
+        #                 assert type(self.load_start_time) == datetime.datetime
+        #                 # self.duration = (self.load_time2 - self.load_start_time).total_seconds()
+        #                 self.logging.debug("后装料点装料完毕,记录装料时间2")
+        #                 self.load_level_height2 = self.load_height.data  # 获取前装料点装料完成高度
+        #         elif(self.icps_differ_num == '0123'):
+        #             if(self.icps_differ == self.distance_0):
+        #                 self.work_finish = 0
+        #                 self.load_time1 = datetime.datetime.now()
+        #                 assert type(self.load_start_time) == datetime.datetime
+        #                 self.load_time = datetime.datetime.now() - self.load_start_time # 更新当前装料所用时间
+        #
+        #                 # self.duration = (self.load_time1 - self.load_start_time).total_seconds()
+        #                 self.icps_differ = self.distance_1
+        #                 self.logging.debug("前装料点装料完毕,记录装料时间1")
+        #                 self.load_level_height1 = self.load_height.data  # 获取前装料点装料完成高度
+        #
+        #             elif(self.icps_differ == self.distance_1):
+        #                 self.load_time2 = datetime.datetime.now()
+        #                 assert type(self.load_start_time) == datetime.datetime
+        #                 # self.duration = (self.load_time2 - self.load_start_time).total_seconds()
+        #                 self.icps_differ = self.distance_2
+        #
+        #                 # self.load_time += datetime.datetime.now() - self.load_start_time1 # 更新当前装料所用时间
+        #
+        #
+        #                 self.logging.debug("中装料点装料完毕,记录装料时间2")
+        #                 self.load_level_height2 = self.load_height.data  # 获取前装料点装料完成高度
+        #
+        #             else:
+        #                 self.work_finish = 1
+        #                 self.load_time3 = datetime.datetime.now()
+        #                 # assert type(self.load_start_time) == datetime.datetime
+        #                 # self.duration = (self.load_time3 - self.load_start_time).total_seconds()
+        #                 self.logging.debug("后装料点装料完毕,记录装料时间3")
+        #                 self.load_level_height3 = self.load_height.data  # 获取前装料点装料完成高度
+        #
+        #         # FIXME:如果切换手动，是否可以认为此条数据作废？
+        #         if self.work_finish:
+        #             self.icps_flag += 1
+        #
+        #         self.stop(self.truck_id,self.loader_id)
+        #
+        #     result = gen_return_data(
+        #         time = self.req_time,
+        #         store_id = self.store_id,
+        #         loader_id = self.loader_id,
+        #         operating_stations={
+        #             # "truck_id": self.truck_id,
+        #             # "work_weight_status": self.work_weight_status,
+        #             "work_weight_reality": self.loadestimate,
+        #             # "flag_load": self.flag_load,
+        #             "height_load": self.height_load,
+        #             # "allow_plc_work": self.allow_plc_work,
+        #             # "work_finish" : self.work_finish,
+        #         })
 
 
         elif data_type == 4:
@@ -940,6 +952,95 @@ class LoadPoint:
             result = {'message': '无请求参数 KEY/VALUE 类型'}
 
         return jsonify(result)
+
+    def manual_stop(self, auto_select):
+        self.logging.debug(f"{self.truck_id}请求data_type:3")
+        self.logging.debug(f"auto_select:{self.auto_select}")
+
+        if auto_select == False:
+            self.logging.debug("手动停止")
+            self.logging.debug(f"icps_differ_num:{self.icps_differ_num}")
+            self.logging.debug(f"icps_differ:{self.icps_differ}")
+            self.logging.debug(f'distance_0:{self.distance_0}')
+            self.logging.debug(f'distance_1:{self.distance_1}')
+            self.logging.debug(f'distance_2:{self.distance_2}')
+            self.load_height = self.get_sensor_data()
+            if(self.icps_differ_num == '0001'):   
+                self.work_finish = 1
+                self.load_time1 = datetime.datetime.now()
+                assert type(self.load_start_time) == datetime.datetime
+                # self.duration = (self.load_time1 - self.load_start_time).total_seconds()
+                self.logging.debug("前装料点装料完毕,记录装料时间1")
+                self.load_level_height1 = self.load_height.data  # 获取前装料点装料完成高度
+            elif(self.icps_differ_num == '0012') or (self.icps_differ_num == '0112'):  
+                if(self.icps_differ == self.distance_0):
+                    self.work_finish = 0
+                    self.load_time1 = datetime.datetime.now()
+                    assert type(self.load_start_time) == datetime.datetime
+                    self.load_time = datetime.datetime.now() - self.load_start_time # 更新当前装料所用时间
+                    assert type(self.load_start_time) == datetime.datetime
+                    # self.duration = (self.load_time1 - self.load_start_time).total_seconds()
+                    self.icps_differ = self.distance_2
+                    self.logging.debug("前装料点装料完毕,记录装料时间1")
+                    self.load_level_height1 = self.load_height.data  # 获取前装料点装料完成高度
+                else:
+                    self.work_finish = 1
+                    self.load_time2 = datetime.datetime.now()
+                    assert type(self.load_start_time) == datetime.datetime
+                    # self.duration = (self.load_time2 - self.load_start_time).total_seconds()
+                    self.logging.debug("后装料点装料完毕,记录装料时间2")
+                    self.load_level_height2 = self.load_height.data  # 获取前装料点装料完成高度
+            elif(self.icps_differ_num == '0123'):
+                if(self.icps_differ == self.distance_0):
+                    self.work_finish = 0
+                    self.load_time1 = datetime.datetime.now()
+                    assert type(self.load_start_time) == datetime.datetime
+                    self.load_time = datetime.datetime.now() - self.load_start_time # 更新当前装料所用时间
+
+                    # self.duration = (self.load_time1 - self.load_start_time).total_seconds()
+                    self.icps_differ = self.distance_1
+                    self.logging.debug("前装料点装料完毕,记录装料时间1")
+                    self.load_level_height1 = self.load_height.data  # 获取前装料点装料完成高度
+
+                elif(self.icps_differ == self.distance_1):
+                    self.load_time2 = datetime.datetime.now()
+                    assert type(self.load_start_time) == datetime.datetime
+                    # self.duration = (self.load_time2 - self.load_start_time).total_seconds()
+                    self.icps_differ = self.distance_2
+
+                    # self.load_time += datetime.datetime.now() - self.load_start_time1 # 更新当前装料所用时间
+
+
+                    self.logging.debug("中装料点装料完毕,记录装料时间2")
+                    self.load_level_height2 = self.load_height.data  # 获取前装料点装料完成高度
+
+                else:
+                    self.work_finish = 1
+                    self.load_time3 = datetime.datetime.now()
+                    # assert type(self.load_start_time) == datetime.datetime
+                    # self.duration = (self.load_time3 - self.load_start_time).total_seconds()
+                    self.logging.debug("后装料点装料完毕,记录装料时间3")
+                    self.load_level_height3 = self.load_height.data  # 获取前装料点装料完成高度
+
+            # FIXME:如果切换手动，是否可以认为此条数据作废？
+            if self.work_finish:
+                self.icps_flag += 1
+
+            self.stop(self.truck_id,self.loader_id)
+
+        return gen_return_data(
+            time = self.req_time,
+            store_id = self.store_id,
+            loader_id = self.loader_id,
+            operating_stations={
+                # "truck_id": self.truck_id,
+                # "work_weight_status": self.work_weight_status,
+                "work_weight_reality": self.loadestimate,
+                # "flag_load": self.flag_load,
+                "height_load": self.height_load,
+                # "allow_plc_work": self.allow_plc_work,
+                # "work_finish" : self.work_finish,
+            })
 
     def update_weightout(self, 
                          distance_0, distance_1, distance_2,
@@ -1177,6 +1278,10 @@ class LoadPoint:
             if len(self.load_height_list) != 0 and self.load_height_list[-1] > load_height:
                 load_height = self.load_height_list[-1]
                 self.load_height.data = load_height
+            # 如果前一个物位值和当前物位值相差大于0.02米，则约束为前一个物位值+0.02
+            if len(self.load_height_list) != 0 and abs(self.load_height_list[-1] - load_height) > 0.02:
+                load_height = self.load_height_list[-1] + 0.02
+                self.load_height.data = load_height
             if self.load_height_queue.full():
                 self.load_height_queue.get()
             if self.allow_plc_work == 1:
@@ -1238,160 +1343,6 @@ class LoadPoint:
 
         return current_load_weight
 
-    # 预估重量2：用高度估计
-    def weight_estimate_v1(self, goods_type,loader_id,load_height, height_num, load_weight_begin, load_height_begin) -> float:
-        # height_num，第1，2，3堆
-        current_load_weight = 0 # 当前载重量
-        self.logging.debug(f"[weight_estimate] load_weight_begin:{load_weight_begin}")
-        self.logging.debug(f"[weight_estimate] load_height_begin:{load_height_begin}")
-
-        if load_height < 1:  # 503南物位计数据上窜下跳
-            return 0
-
-        if load_height_begin == 0: # 有十条数据再开始估计重量
-            return 0
-
-        if height_num == 1:
-            co11, co12 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num-1]
-            if load_height - load_height_begin < 0.9:
-                current_load_weight = co11 * (load_height - load_height_begin)
-                self.logging.debug(f"[delta_height < 0.9] current_load_weight:{current_load_weight}")
-            elif load_height - load_height_begin >= 0.9:
-                current_load_weight = co11 * 0.9 + (load_height - load_height_begin - 0.9) * co12
-                self.logging.debug(f"[delta_height >= 0.9] current_load_weight:{current_load_weight}")
-        elif height_num == 2:
-            co2 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num-1]
-            current_load_weight = load_weight_begin + (load_height - load_height_begin) * co2
-        else:
-            co3 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num-1]
-            current_load_weight = load_weight_begin + (load_height - load_height_begin) * co3
-        return current_load_weight
-
-    # 预估重量3：用高度和时间同时估计
-    def weight_estimate_v2(self, goods_type,loader_id,load_height, height_num, load_weight_begin, load_height_begin) -> float:
-        # height_num，第1，2，3堆
-        current_load_weight = 0 # 当前载重量
-        self.logging.debug(f"[weight_estimate] load_weight_begin:{load_weight_begin}")
-        self.logging.debug(f"[weight_estimate] load_height_begin:{load_height_begin}")
-
-        if load_height < 1:  # 503南物位计数据上窜下跳
-            return 0
-
-        if load_height_begin == 0: # 有十条数据再开始估计重量
-            return 0
-
-        if height_num == 1:
-            co11, co12 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num-1]
-            if load_height - load_height_begin < 0.9:
-                current_load_weight = co11 * (load_height - load_height_begin)
-                self.logging.debug(f"[delta_height < 0.9] current_load_weight:{current_load_weight}")
-            elif load_height - load_height_begin >= 0.9:
-                current_load_weight = co11 * 0.9 + (load_height - load_height_begin - 0.9) * co12
-                self.logging.debug(f"[delta_height >= 0.9] current_load_weight:{current_load_weight}")
-        elif height_num == 2:
-            co2 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num-1]
-            load2_usingheight = (load_height - load_height_begin) * co2
-            current_load_weight = load_weight_begin + load2_usingheight  # 正常情况用物位估计，以下考虑异常情况
-            duration_height2 = (datetime.datetime.now() - self.load_start_time1).total_seconds()  # 第2堆装料时间，秒
-            load2_usingtime = int(duration_height2)/60*2  # 按时间估计第2堆装料重量
-            if duration_height2 < 60 and ((load_height - load_height_begin) < 0.0033 * duration_height2): # 第2堆放料时间大于30秒且料高小于0.1
-                current_load_weight = load_weight_begin + load2_usingtime # 料位不变，按放料时间计算重量
-            if load2_usingheight > load2_usingtime: # 料位上升过快，但实际下料速度不变，用时间估计
-                current_load_weight = load_weight_begin + load2_usingtime
-        else:
-            co3 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num-1]
-            load3_usingheight = (load_height - load_height_begin) * co3
-            current_load_weight = load_weight_begin + load3_usingheight  # 正常情况用物位估计，以下考虑异常情况
-            duration_height3 = (datetime.datetime.now() - self.load_start_time2).total_seconds()  # 第3堆装料时间，秒
-            load3_usingtime = int(duration_height3) / 60 * 2  # 按时间估计第3堆装料重量
-            if duration_height3 < 60 and ((load_height - load_height_begin) < 0.0033 * duration_height3):  # 第3堆放料时间大于30秒且料高小于0.1
-                current_load_weight = load_weight_begin + load3_usingtime  # 料位不变，按放料时间计算重量
-            if load3_usingheight > load3_usingtime:  # 料位上升过快，但实际下料速度不变，用时间估计
-                current_load_weight = load_weight_begin + load3_usingtime
-        return current_load_weight
-
-    # 预估重量4：用高度和时间同时估计
-    def weight_estimate_v3(self, goods_type,loader_id,load_height, height_num, load_weight_begin, load_height_begin) -> float:
-        # height_num，第1，2，3堆
-        current_load_weight = 0 # 当前载重量
-        self.logging.debug(f"[weight_estimate] load_weight_begin:{load_weight_begin}")
-        self.logging.debug(f"[weight_estimate] load_height_begin:{load_height_begin}")
-
-        if load_height < 1:  # 503南物位计数据上窜下跳
-            return 0
-
-        if load_height_begin == 0: # 有十条数据再开始估计重量
-            return 0
-
-        if height_num == 1:
-            if len(set(self.load_height_list)) == 1:
-                self.logging.debug("第一堆料停止放料，记录停料时间")
-                # 一秒一个物位计数据
-                if self.load_stop_time1.total_seconds() == 0:
-                    # 满足条件已经有10秒未下料
-                    self.load_stop_time1 = datetime.timedelta(seconds=10)
-                else:
-                    # 此后每次加一秒
-                    self.load_stop_time1 += datetime.timedelta(seconds=1)
-            co11, co12 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num-1]
-            if load_height - load_height_begin < 0.9:
-                current_load_weight = co11 * (load_height - load_height_begin)
-                self.logging.debug(f"[delta_height < 0.9] current_load_weight:{current_load_weight}")
-            elif load_height - load_height_begin >= 0.9:
-                current_load_weight = co11 * 0.9 + (load_height - load_height_begin - 0.9) * co12
-                self.logging.debug(f"[delta_height >= 0.9] current_load_weight:{current_load_weight}")
-        elif height_num == 2:
-            co2 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num-1]
-            load2_usingheight = (load_height - load_height_begin) * co2
-            current_load_weight = load_weight_begin + load2_usingheight  # 正常情况用物位估计，以下考虑异常情况
-            duration_height2 = (datetime.datetime.now() - self.load_start_time1).total_seconds()  # 第2堆装料时间，秒
-            assert isinstance(self.load_time1, datetime.datetime)
-            # 第一堆装料时间，考虑停料
-            duration_height1 = ((self.load_time1 - self.load_start_time) - self.load_stop_time1).total_seconds()           # 第一堆装料时间，秒
-            self.logging.debug(f"第一堆装料停料时间:{self.load_stop_time1}")
-            self.logging.debug(f"第一堆装料时间:{duration_height1}")
-            if duration_height1 > 0: # 第一堆装料时间大于零
-                discharge_speed = self.load_weight1_end / duration_height1  # 放料速率，吨/秒
-            else:
-                discharge_speed = 0.04
-            self.logging.debug(f"放料速率:{discharge_speed}")
-            if discharge_speed < 0.04:
-                discharge_speed = 0.04  # 假设第一堆中间有停料，给最小装料速度，估计
-            elif discharge_speed > 0.07:
-                discharge_speed = 0.07   # 按最快7分钟装25吨算
-            load2_usingtime = float(duration_height2)* discharge_speed  # 按时间估计第2堆装料重量
-            self.logging.debug(f"按物位估计重量:{load2_usingheight}")
-            self.logging.debug(f"按时间估计重量:{load2_usingtime}")
-            # 假设移车后60秒内料位不上升
-            if duration_height2 < 60 and ((load_height - load_height_begin) < 0.0033 * duration_height2):
-                # 第2堆放料时间小于60秒且料高变化小于最小料高变化（60秒高度最小升高0.2)
-                current_load_weight = load_weight_begin + load2_usingtime # 料位不变，按放料时间计算重量
-            if load2_usingheight > load2_usingtime * 1.2:  # 料位上升过快，但实际下料速度不变，用时间估计
-                current_load_weight = load_weight_begin + load2_usingtime
-        else:
-            co3 = self.LoadCoefficient[goods_type][self.type_of_opening][height_num-1]
-            load3_usingheight = (load_height - load_height_begin) * co3
-            current_load_weight = load_weight_begin + load3_usingheight  # 正常情况用物位估计，以下考虑异常情况
-            duration_height3 = (datetime.datetime.now() - self.load_start_time2).total_seconds()  # 第3堆装料时间，秒
-            assert isinstance(self.load_time1, datetime.datetime)
-            # 第一堆装料时间，考虑停料
-            duration_height1 = ((self.load_time1 - self.load_start_time) - self.load_stop_time1).total_seconds()           # 第一堆装料时间，秒
-            if duration_height1 > 0: # 第一堆装料时间大于零
-                discharge_speed = self.load_weight1_end / duration_height1  # 放料速率，吨/秒
-            else:
-                discharge_speed = 0.04
-            if discharge_speed < 0.04:
-                discharge_speed = 0.04  # 假设第一堆中间有停料，给最小装料速度，估计
-            elif discharge_speed > 0.07:
-                discharge_speed = 0.07  # 按最快7分钟装25吨算
-            load3_usingtime = float(duration_height3) * discharge_speed  # 按时间估计第3堆装料重量
-            # 假设移车后60秒内料位不上升
-            if duration_height3 < 60 and ((load_height - load_height_begin) < 0.0033 * duration_height3):
-                # 第3堆放料时间小于60秒且料高变化小于最小料高变化（60秒高度最小升高0.2)
-                current_load_weight = load_weight_begin + load3_usingtime  # 料位不变，按放料时间计算重量
-            if load3_usingheight > load3_usingtime * 1.2:  # 料位上升过快，但实际下料速度不变，用时间估计
-                current_load_weight = load_weight_begin + load3_usingtime
-        return current_load_weight
 
     # 预估重量5：用高度和时间同时估计
     def weight_estimate(self, goods_type,loader_id,load_height, height_num, load_weight_begin, load_height_begin) -> float:
@@ -1472,9 +1423,9 @@ class LoadPoint:
             if duration_height1 > 0: # 第一堆装料时间大于零
                 discharge_speed = self.load_weight1_end / duration_height1  # 放料速率，吨/秒
             else:
-                discharge_speed = 0.04
-            if discharge_speed < 0.04:
-                discharge_speed = 0.04  # 假设第一堆中间有停料，给最小装料速度，估计
+                discharge_speed = 0.035
+            if discharge_speed < 0.035:
+                discharge_speed = 0.035  # 假设第一堆中间有停料，给最小装料速度，估计
             elif discharge_speed > 0.07:
                 discharge_speed = 0.07   # 按最快7分钟装25吨算
             self.logging.debug(f"放料速率:{discharge_speed}")
@@ -1482,10 +1433,10 @@ class LoadPoint:
             self.logging.debug(f"按物位估计重量:{load2_usingheight}")
             self.logging.debug(f"按时间估计重量:{load2_usingtime}")
             # 假设移车后60秒内料位不上升
-            if duration_height2 <= 60 and ((load_height - load_height_begin) < 0.0033 * duration_height2):
+            if duration_height2 <= 120 and ((load_height - load_height_begin) < 0.0033 * duration_height2):
                 # 第2堆放料时间小于60秒且料高变化小于最小料高变化（60秒高度最小升高0.2)
                 current_load_weight_usingtime = load_weight_begin + load2_usingtime # 料位不变，按放料时间计算重量
-            if duration_height2 > 60 and ((load_height - load_height_begin) < 0.0033):
+            if duration_height2 > 120 and ((load_height - load_height_begin) < 0.0033):
                 # 高度不变，时间大于1分钟，说明停料，增加的重量为0
                 current_load_weight_usingtime = self.loadestimate # 增加重量为零（使用上一次估计的重量）
                 self.load_stop_time2 += datetime.timedelta(seconds=1) # 停料时间增加1秒
@@ -1536,17 +1487,17 @@ class LoadPoint:
             if duration_height1 > 0: # 第一堆装料时间大于零
                 discharge_speed = self.load_weight1_end / duration_height1  # 放料速率，吨/秒
             else:
-                discharge_speed = 0.04
-            if discharge_speed < 0.04:
-                discharge_speed = 0.04  # 假设第一堆中间有停料，给最小装料速度，估计
+                discharge_speed = 0.035
+            if discharge_speed < 0.035:
+                discharge_speed = 0.035  # 假设第一堆中间有停料，给最小装料速度，估计
             elif discharge_speed > 0.07:
                 discharge_speed = 0.07  # 按最快7分钟装25吨算
             load3_usingtime = float(duration_height3) * discharge_speed  # 按时间估计第3堆装料重量
             # 假设移车后60秒内料位不上升
-            if duration_height3 <= 60 and ((load_height - load_height_begin) < 0.0033 * duration_height3):
+            if duration_height3 <= 120 and ((load_height - load_height_begin) < 0.0033 * duration_height3):
                 # 第3堆放料时间小于60秒且料高变化小于最小料高变化（60秒高度最小升高0.2)
                 current_load_weight_usingtime = load_weight_begin + load3_usingtime # 料位不变，按放料时间计算重量
-            if duration_height3 > 60 and ((load_height - load_height_begin) < 0.0033):
+            if duration_height3 > 120 and ((load_height - load_height_begin) < 0.0033):
                 # 高度不变，时间大于1分钟，说明停料，增加的重量为0
                 current_load_weight_usingtime = self.loadestimate # 增加重量为零（使用上一次估计的重量）
                 self.load_stop_time3 += datetime.timedelta(seconds=1) # 停料时间加1秒

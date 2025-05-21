@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>自动装车系统平台</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}">
+    <style>
+        #loader_id {
+            float: left;
+        }
+
+        body {
+            background-color: #f2f2f2;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #2C58A6;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            top: 25%;
+        }
+
+        h1 {
+            color: #f1f1f1;
+            text-align: center;
+        }
+
+        label {
+            color: #f1f1f1;
+            display: block;
+            margin-bottom: 10px;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 90%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        button {
+            display: block;
+            width: 90%;
+            padding: 10px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        #form {
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <script src="{{url_for('static',filename='js/jQuery.js')}}"></script>
+    <script>
+        var float_point_num = 3;
+        function calculateRate() {
+            var duration = document.getElementById('duration').value;
+            var weight = document.getElementById('weight').value;
+
+            if (duration && weight) {
+                var rate = weight / duration;
+                document.getElementById('rate').value = rate.toFixed(float_point_num);
+            }
+        }
+        function calculateWeight() {
+            var duration = document.getElementById('duration').value;
+            var rate = document.getElementById('rate').value;
+
+            if (duration && rate) {
+                var weight = rate * duration;
+                document.getElementById('weight').value = weight.toFixed(float_point_num);
+            }
+        }
+        function changeDefaultValue() {
+            var loader_id = document.getElementById('loader_id').value;
+            var goods_type = document.getElementById('goods_type').value;
+            var duration = 0;
+            var weight = 0;
+            $.ajax({
+                url: 'config/get_config/' + loader_id + '/' + goods_type,
+                type: 'GET',
+                success: function (response) {
+                    duration = response.duration;
+                    weight = response.weight;
+                    document.getElementById('duration').value = duration;
+                    document.getElementById('weight').value = weight;
+                    calculateRate();
+                }
+            });
+        }
+    </script>
+</head>
+
+<body onload="calculateRate()">
+    <div class="container">
+        <h1>第一堆参数配置</h1>
+        <form method="POST" action="{{url_for('config') }}">
+            <table style="margin-left: auto; margin-right: auto;">
+                <tr>
+                    <td>
+                        <label for="料口">料口:</label>
+                        <!-- 下拉框, put onto left side -->
+                        <select name="loader_id" id="loader_id" onchange="changeDefaultValue()"
+                            value="{{select.loader_id}}" style="align-self: center;">
+                            {% for loader_id in lld %}
+                            <option value="{{loader_id}}" {% if loader_id==select.loader_id %}selected{% endif %}>
+                                {{loader_id}}</option>
+                            {% endfor %}
+                        </select>
+                        <!-- 下拉框 goods_type -->
+                        <label for="货物类型">货物类型:</label>
+                        <select name="goods_type" id="goods_type" onchange="changeDefaultValue()"
+                            style="align-self: center;">
+                            {% for goods_type in goods_type_list %}
+                            <option value="{{goods_type}}" {% if goods_type==select.goods_type %}selected{% endif %}>
+                                {{goods_type}}</option>
+                            {% endfor %}
+                        </select>
+
+                    </td>
+
+                    <td>
+
+                        <label for="装车时长">装车时长:</label>
+                        <input type="text" id="duration" name="duration" required oninput="calculateRate()"
+                            value={{configs.duration}}>
+
+                        <label for="估计重量">估计重量:</label>
+                        <input type="text" id="weight" name="weight" required oninput="calculateRate()"
+                            value={{configs.weight}}>
+
+                        <label for="速率">速率:</label>
+                        <input type="text" id="rate" name="rate" required oninput="calculateWeight()">
+
+                    </td>
+                </tr>
+            </table>
+            <input type="submit" value="更新">
+        </form>
+    </div>
+</body>
+
+</html>

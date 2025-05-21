@@ -1,4 +1,9 @@
 from flask import Flask
+from .config import (
+    config,
+    get_goods_type_list,
+    get_config
+)
 from .index import (
     index1,
     index2,
@@ -68,5 +73,8 @@ def init_app(app:Flask):
     app.add_url_rule('/index20', endpoint='index20', view_func=index20)
     app.add_url_rule('/overview', endpoint='overview', view_func=overview)
     app.add_url_rule('/connect', endpoint='connect',view_func=connect, methods=['POST'])
+    app.add_url_rule('/config', endpoint='config',view_func=config, methods=['GET','POST'])
+    app.add_url_rule('/config/get_goods_type_list', endpoint='get_goods_type_list',view_func=get_goods_type_list, methods=['GET'])
+    app.add_url_rule('/config/get_config/<loader_id>/<goods_type>', endpoint='get_config',view_func=get_config, methods=['GET'])
     # app.add_url_rule('/video_feed_new/<video_id>', endpoint='video_feed_new', view_func=video_feed_new)
     # app.add_url_rule('/license_video_feed_new/<license_video_id>', endpoint='license_video_feed_new', view_func=license_video_feed_new)

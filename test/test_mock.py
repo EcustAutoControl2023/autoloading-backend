@@ -203,9 +203,10 @@ def check_strategy_1_normal_weight_estimate(app, db, client, postdata, gen_post,
             while True:
                 with app.app_context():
                     load_height = SensorData(-1)
-                    if responsedata.get('operating_stations').get('loader_id') == "601A":
+                    printr(f"loader id: {responsedata.get('loader_id')}")
+                    if responsedata.get('loader_id') == "601A":
                         load_height = db.session.query(Sensor13).all()[-1]
-                    elif responsedata.get('operating_stations').get('loader_id') == "602A":
+                    elif responsedata.get('loader_id') == "602A":
                         load_height = db.session.query(Sensor14).all()[-1]
                     printr(load_height.data, "sensor")
                     if load_height.data < 3.4:
@@ -226,6 +227,7 @@ def check_strategy_1_normal_weight_estimate(app, db, client, postdata, gen_post,
         weight_estimate_new = responsedata.get('operating_stations').get('work_weight_reality')
         printr(weight_estimate_new, "weight_estimate")
         assert weight_estimate_new >= weight_estimate_old
+        weight_estimate_old = weight_estimate_new
 
         # 装车完成测试
         if responsedata.get('operating_stations').get('work_finish') == 1:

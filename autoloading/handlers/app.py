@@ -48,6 +48,8 @@ def connect():
             truck_id=truck_id, loader_id=loader_id, req_time=req_time,
             store_id=store_id, truck_weight_out=truck_weight_out
         )
+    elif data_type == 3:
+        return_data = load_point_dict[loader_id].manual_stop(auto_select)
     else:
         return_data = load_point_dict[loader_id].load_control(
             req_time=req_time, data_type=data_type,

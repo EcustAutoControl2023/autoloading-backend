@@ -4,6 +4,29 @@ from .base import db
 # 装料口数量
 loader_num = 20
 
+# 每个料口的配置信息，每种物料对应的装车时间，重量估算值
+class LoaderConfig(db.Model):
+    '''
+    LoaderDB
+    '''
+    id = db.Column(db.Integer, primary_key=True)
+    store_id = db.Column(db.Integer, nullable=False)
+    loader_id = db.Column(db.String(20), nullable=False)
+    update_time = db.Column(db.DateTime, nullable=True)
+    co_config = db.relationship('CoConfig', backref='loader_config', lazy='dynamic')
+
+class CoConfig(db.Model):
+    '''
+    CoConfigDB
+
+    '''
+    id = db.Column(db.Integer, primary_key=True)
+    goods_type = db.Column(db.String(20), nullable=False)
+    duration = db.Column(db.Integer)
+    weight = db.Column(db.Float)
+    loader_id = db.Column(db.Integer, db.ForeignKey('loader_config.id'))
+
+
 # 初始化数据表及属性
 class SensorBase(db.Model):
     '''

@@ -7,7 +7,7 @@ import pytest
 from autoloading import create_app
 from autoloading.models import get_db
 
-from autoloading.models.sensor import loader_num, Traffic
+from autoloading.models.sensor import loader_num, Traffic, CoConfig, LoaderConfig
 for i in range(loader_num):
     exec(f'from autoloading.models.sensor import Sensor{i+1}')
 
@@ -82,6 +82,8 @@ def db(app):
 
         for i in range(loader_num):
             exec(f'db.session.query(Sensor{i+1}).delete()')
+        # db.session.query(CoConfig).delete()
+        # db.session.query(LoaderConfig).delete()
         db.session.query(Traffic).delete()
         db.session.commit()
 

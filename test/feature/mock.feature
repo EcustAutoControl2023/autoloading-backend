@@ -62,9 +62,9 @@ Feature: connect接口测试(模拟装车模式)
   #   And 模拟重量估计公式（高度）
     Then 模拟请求，重量测试: <expected_weight_list>
     Examples:
-      | file                        | distance_list   | csv_file             | material_type | load_current | expected_weight_list          |
-      # | ./test/json/postdata-1.json | [1.1, 1.1, 1.1] | ./csv/sensor14-3.csv | 油菜籽        | 28.3         | [[1.1], []]                   |
-      # | ./test/json/postdata-1.json | [1.2, 1.2, 1.1] | ./csv/sensor14-3.csv | 油菜籽        | 28.3         | [[1.2, 1.1], [], []]          |
-      | ./test/json/postdata-601A.json | [1.2, 1.2, 1.1] | ./csv/sensor16-8-14.csv | 黄豆        | 28.54         | [[1.2, 1.1], [], []]          |
-      # | ./test/json/postdata-1.json | [1.1, 1.2, 1.2] | ./csv/sensor14-3.csv | 油菜籽        | 28.3         | [[1.1, 1.2], [], []]          |
-      | ./test/json/postdata-602A.json | [1.1, 1.2, 1.3] | ./csv/sensor16-8-7.csv | 黄豆        | 29.46        | [[1.1, 1.2, 1.3], [], [], []] |
+      | file                           | distance_list   | csv_file                | material_type | load_current | expected_weight_list          |
+    # | ./test/json/postdata-1.json    | [1.1, 1.1, 1.1] | ./csv/sensor14-3.csv    | 油菜籽        | 28.3         | [[1.1], []]                   |
+    # | ./test/json/postdata-1.json    | [1.2, 1.2, 1.1] | ./csv/sensor14-3.csv    | 油菜籽        | 28.3         | [[1.2, 1.1], [], []]          |
+      | ./test/json/postdata-601A.json | [1.2, 1.2, 1.1] | ./csv/sensor16-8-14.csv | 黄豆          | 28.54        | [[1.2, 1.1], [], []]          |
+    # | ./test/json/postdata-1.json    | [1.1, 1.2, 1.2] | ./csv/sensor14-3.csv    | 油菜籽        | 28.3         | [[1.1, 1.2], [], []]          |
+      | ./test/json/postdata-602A.json | [1.1, 1.2, 1.3] | ./csv/sensor16-8-7.csv  | 黄豆          | 29.46        | [[1.1, 1.2, 1.3], [], [], []] |
