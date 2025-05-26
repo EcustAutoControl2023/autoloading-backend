@@ -81,12 +81,12 @@ def db(app):
     with app.app_context():
         yield db
 
-        # for i in range(loader_num):
-        #     exec(f'db.session.query(Sensor{i+1}).delete()')
-        # # db.session.query(CoConfig).delete()
-        # # db.session.query(LoaderConfig).delete()
-        # db.session.query(Traffic).delete()
-        # db.session.commit()
+        for i in range(loader_num):
+            exec(f"db.session.query(Sensor{i + 1}).delete()")
+        # db.session.query(CoConfig).delete()
+        # db.session.query(LoaderConfig).delete()
+        db.session.query(Traffic).delete()
+        db.session.commit()
 
 
 def printr(msg, prefix="XXX"):
