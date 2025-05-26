@@ -7,6 +7,7 @@ Feature: 测试LoaderPoint类
 
   Scenario Outline: 重量估计函数测试
     Given 物料类型: <goods_type>
+    And 开口类型: <opening_type>
     And 装料点: <loader_id>
     And 装料用时: <time_difference>
     And 模拟Traffic表数据: <csv_file>
@@ -16,8 +17,8 @@ Feature: 测试LoaderPoint类
     Then 检查估计的重量: <expect_value>
 
     Examples:
-      | goods_type | loader_id | time_difference | csv_file                 | expect_value |
-      | 油菜籽     | 401A      | 2.              | ./test/csv/traffic.csv   | 23.025       |
-    # | 油菜籽     | 402B      | 2.              | ./test/csv/traffic-2.csv | None         |
-    # | 油菜籽     | 402B      | 2.              | ./test/csv/traffic-2.csv | None         |
+      | goods_type |opening_type| loader_id | time_difference | csv_file                 | expect_value |
+      | 油菜籽     |侧开        | 401A      | 2.              | ./test/csv/traffic.csv   | 21.643       |
+    # | 油菜籽     |侧开| 402B      | 2.              | ./test/csv/traffic-2.csv | None         |
+    # | 油菜籽     |侧开| 402B      | 2.              | ./test/csv/traffic-2.csv | None         |
 

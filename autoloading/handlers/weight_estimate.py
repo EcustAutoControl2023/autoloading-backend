@@ -11,7 +11,7 @@ def weight_estimate():
     global per_second_weight
 
     goods_type = [
-        "玉米", "黄豆", "大麦",
+        "玉米", "黄豆", "油菜籽",
     ]
     weight_array = [0 for _ in range(len(goods_type))] 
 

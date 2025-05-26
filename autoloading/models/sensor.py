@@ -29,9 +29,10 @@ class CoConfig(db.Model):
 
 # 初始化数据表及属性
 class SensorBase(db.Model):
-    '''
+    """
     SensorDB
-    '''
+    """
+
     __abstract__ = True
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.Integer)
@@ -40,33 +41,43 @@ class SensorBase(db.Model):
     tablename = db.Column(db.String(10), nullable=True)
 
     @staticmethod
-    def before_insert(target,value,initiator):
-        database_capacity = type(initiator).query.order_by(type(initiator).id.desc()).count()
+    def before_insert(target, value, initiator):
+        database_capacity = (
+            type(initiator).query.order_by(type(initiator).id.desc()).count()
+        )
         # 数据库容量大于10,000条时，删除最早的一条数据
         if database_capacity >= 100000:
             # 删除最早的一条数据
-            ids_to_delete = type(initiator).query.order_by(type(initiator).id.desc()).offset(10).all()
+            ids_to_delete = (
+                type(initiator)
+                .query.order_by(type(initiator).id.desc())
+                .offset(10)
+                .all()
+            )
             for id in ids_to_delete:
                 db.session.delete(id)
             # db.session.commit()
 
+
 # 使用SensorBase创建20个数据表Sensor类（Sensor1~Sensor20)，用db.create_all()创建20个数据表
 def create_sensor_table_class():
-    for i in range(1, loader_num+1):
-        class_name = 'Sensor' + str(i)
-        sensor_class = type(class_name, (SensorBase,), {
-            '__tablename__': 'sensor' + str(i)
-            })
+    for i in range(1, loader_num + 1):
+        class_name = "Sensor" + str(i)
+        sensor_class = type(
+            class_name, (SensorBase,), {"__tablename__": "sensor" + str(i)}
+        )
         globals()[sensor_class.__name__] = sensor_class
         # 添加trigger
         # exec(f'db.event.listen({sensor_class.__name__}, "before_insert",{sensor_class.__name__}.before_insert)')
 
+
 create_sensor_table_class()
 
+
 class Traffic(db.Model):
-    '''
+    """
     TrafficDB
-    '''
+    """
 
     id = db.Column(db.Integer, primary_key=True)
     time = db.Column(db.String(20), nullable=False)
@@ -80,9 +91,14 @@ class Traffic(db.Model):
     goodstype = db.Column(db.String(10), nullable=False)
     storeid = db.Column(db.Integer, nullable=False)
     loaderid = db.Column(db.String(20), nullable=True)
+
+    # FIXME: 弃用
     loadlevelheight1 = db.Column(db.Integer, nullable=True)
     loadlevelheight2 = db.Column(db.Integer, nullable=True)
     loadlevelheight3 = db.Column(db.Integer, nullable=True)
+    # INFO: 改用
+    loadlevelheightlist = db.Column(db.String(256), nullable=True)
+
     loadstarttime = db.Column(db.DateTime, nullable=True)
     loadendtime = db.Column(db.DateTime, nullable=True)
     loadtimetotal = db.Column(db.Integer, nullable=True)
@@ -94,30 +110,46 @@ class Traffic(db.Model):
     location = db.Column(db.String(20), nullable=True)
     stackpos = db.Column(db.String(20), nullable=True)
     loadheight = db.Column(db.Float, nullable=True)
+
+    # FIXME: 弃用
     loadpoint1 = db.Column(db.Float, nullable=True)
     loadpoint2 = db.Column(db.Float, nullable=True)
     loadpoint3 = db.Column(db.Float, nullable=True)
+    # INFO: 改用
+    loadpointlist = db.Column(db.String(256), nullable=True)
+
     type_of_opening = db.Column(db.String(20), nullable=True)
     opening_length_bias = db.Column(db.Float, nullable=True)
     opening_width_bias = db.Column(db.Float, nullable=True)
     opening_length = db.Column(db.Float, nullable=True)
     opening_width = db.Column(db.Float, nullable=True)
+
+    # FIXME: 弃用
     loadheight1begin = db.Column(db.Float, nullable=True)
     loadheight2begin = db.Column(db.Float, nullable=True)
     loadheight3begin = db.Column(db.Float, nullable=True)
+    # INFO: 改用
+    loadheightbeginlist = db.Column(db.String(256), nullable=True)
+
+    # INFO: 新增->记录每个点位使用的时间
+    loadtimelist = db.Column(db.String(256), nullable=True)
+
+    # INFO: 新增->记录每个点位的重量
+    loadweightendlist = db.Column(db.String(256), nullable=True)
 
     @staticmethod
-    def before_insert(target,value,initiator):
-        logging.debug('trigger before insert')
+    def before_insert(target, value, initiator):
+        logging.debug("trigger before insert")
         database_capacity = Traffic.query.order_by(Traffic.id.desc()).count()
-        logging.debug('database_capacity is %s',database_capacity) 
+        logging.debug("database_capacity is %s", database_capacity)
         # 数据库容量大于10,000条时，删除最早的一条数据
         if database_capacity >= 100000:
-            logging.debug('database is full')
+            logging.debug("database is full")
             # 删除最早的一条数据
             traffic = Traffic.query.order_by(Traffic.id.asc()).first()
             db.session.delete(traffic)
             # db.session.commit()
+
 
 # 添加监听器
 # db.event.listen(Traffic, 'before_insert',Traffic.before_insert)

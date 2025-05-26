@@ -7,9 +7,6 @@
         "box_length": 10.2,
         "box_width": 5.6,
         "box_height": 2.8,
-        "distance_0": 1.1,
-        "distance_1": 1.1,
-        "distance_2": 2.3,
         "truck_load": 40.2,
         "load_current": 20.6,
         "truck_weight_in": 20,
@@ -18,6 +15,7 @@
         "loader_id": "602A",
         "type_of_opening": "侧开",
         "temp_manual_stop": 0,
-        "loading_state": true
+        "loading_state": true,
+        "guide_position": [1, 2, 3, 4, 5]
     }
 }

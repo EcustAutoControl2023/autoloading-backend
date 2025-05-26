@@ -7,9 +7,6 @@
         "box_length": 10.2,
         "box_width": 5.6,
         "box_height": 2.8,
-        "distance_0": 1.1,
-        "distance_1": 1.1,
-        "distance_2": 2.3,
         "truck_load": 40.2,
         "load_current": 20.6,
         "truck_weight_in": 20,
@@ -19,6 +16,7 @@
         "type_of_opening": "侧开",
         "picture_url_plate": "https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png",
         "temp_manual_stop": 0,
-        "icps_differ_current": null
+        "icps_differ_current": null,
+        "guide_position": [1, 2, 3, 4, 5]
     }
 }
