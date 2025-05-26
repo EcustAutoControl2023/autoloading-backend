@@ -427,6 +427,7 @@ class LoadPoint:
                 self.icps_flag = 0
                 self.insert_traffic_flag = True
                 self.time_record_flag = True
+                self.loadstatus = "装车中" if self.work_finish == 0 else "装车完成"
 
                 # FIXME: 弃用
                 self.load_start_time1_flag = True
@@ -652,7 +653,10 @@ class LoadPoint:
                     return None
                 previous_icps_differ_index = self.icps_differ_index
                 self.load_control_final()
-                if self.icps_differ_index != previous_icps_differ_index:
+                if (
+                    self.icps_differ_index != previous_icps_differ_index
+                    or self.work_finish
+                ):
                     self.logging.debug(
                         f"第{previous_icps_differ_index + 1}个装车点位装料完毕，记录装车数据"
                     )
@@ -667,6 +671,13 @@ class LoadPoint:
                     # 记录装车点位装料完成时估计装车重量
                     self.load_weight_end_list[previous_icps_differ_index] = (
                         self.loadestimate
+                    )
+                    self.logging.debug(f"load_time_list: {self.load_time_list}")
+                    self.logging.debug(
+                        f"load_level_height_list: {self.load_level_height_list}"
+                    )
+                    self.logging.debug(
+                        f"load_weight_end_list: {self.load_weight_end_list}"
                     )
 
                     # 更新数据库
@@ -825,7 +836,6 @@ class LoadPoint:
 
     # 装料高度控制
     def load_control_final(self):
-        # 记录初始高度，第1堆料开始前
         self.logging.debug(f"len(self.load_height_list): {len(self.load_height_list)}")
         self.logging.debug(
             f"len(set(self.load_height_list)): {len(set(self.load_height_list))}"
@@ -852,8 +862,10 @@ class LoadPoint:
             self.icps_differ_index == 0
             and int(self.load_height_begin_list[self.icps_differ_index]) == 0
         ):
-            self.load_height_begin_list[self.icps_differ_index] = self.load_height.data
             if len(self.load_height_list) == 10:
+                self.load_height_begin_list[self.icps_differ_index] = (
+                    self.load_height_list[0]
+                )
                 if (
                     1.5 < self.load_height_begin_list[self.icps_differ_index] < 2.5
                     and len(set(self.load_height_list)) == 1
@@ -882,7 +894,7 @@ class LoadPoint:
                     # 修改每次装料高度限制，按照实际箱底算
                     for i in range(len(self.guide_position)):
                         self.load_level_limit_list[i] = (
-                            self.load_level_limit_list[self.icps_differ_index]
+                            self.load_height_begin_list[self.icps_differ_index]
                             - 0.3
                             + self.box_height
                         )
@@ -901,11 +913,8 @@ class LoadPoint:
             # 后续只需记录高度
         elif self.load_height_begin_list[self.icps_differ_index] == 0:
             self.logging.debug("重置物位高度")
-            self.load_height_queue = Queue(maxsize=20)
-            self.load_height_list = list()
-            self.load_height_begin_list[self.icps_differ_index] = (
-                self.get_sensor_data().data
-            )
+            self.load_height = self.get_sensor_data(reset=True)
+            self.load_height_begin_list[self.icps_differ_index] = self.load_height.data
             load_heightn_begin = self.load_height_begin_list[self.icps_differ_index]
             if load_heightn_begin < 1.2:
                 self.load_height_begin_list[self.icps_differ_index] = 1.2
@@ -997,7 +1006,11 @@ class LoadPoint:
         else:
             return True
 
-    def get_sensor_data(self) -> SensorData:
+    def get_sensor_data(self, reset=False) -> SensorData:
+        if reset:
+            self.load_height_queue = Queue(maxsize=20)
+            self.load_height_list = list()
+            self.load_height = SensorData(-1)
         load_height = self.Sensor.query.order_by(self.Sensor.id.desc()).first()
         if load_height is None:
             self.logging.debug("物位计无数据")

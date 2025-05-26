@@ -8,12 +8,15 @@ from autoloading import create_app
 from autoloading.models import get_db
 
 from autoloading.models.sensor import loader_num, Traffic, CoConfig, LoaderConfig
+
 for i in range(loader_num):
-    exec(f'from autoloading.models.sensor import Sensor{i+1}')
+    exec(f"from autoloading.models.sensor import Sensor{i + 1}")
+
 
 def pytest_sessionfinish(session, exitstatus):
     # printr("all down")
     pass
+
 
 @pytest.fixture
 def app():
@@ -27,11 +30,8 @@ def app():
     db_path = os.path.join(os.path.realpath(""), "test/test.db")
     # db_path='/mnt/BaiduSyncdisk/OB/notes/2--Inputs/代码/自动装车/autoloading-backend/test/test.db'
 
-    db_uri = f'sqlite:///{db_path}'
-    app = create_app({
-        "TESTING": True,
-        "SQLALCHEMY_DATABASE_URI": db_uri
-    })
+    db_uri = f"sqlite:///{db_path}"
+    app = create_app({"TESTING": True, "SQLALCHEMY_DATABASE_URI": db_uri})
 
     yield app
 
@@ -73,6 +73,7 @@ class AuthActions:
 def auth(client):
     return AuthActions(client)
 
+
 # 确保每次使用完数据库后清除所有插入的数据
 @pytest.fixture
 def db(app):
@@ -80,16 +81,17 @@ def db(app):
     with app.app_context():
         yield db
 
-        for i in range(loader_num):
-            exec(f'db.session.query(Sensor{i+1}).delete()')
-        # db.session.query(CoConfig).delete()
-        # db.session.query(LoaderConfig).delete()
-        db.session.query(Traffic).delete()
-        db.session.commit()
+        # for i in range(loader_num):
+        #     exec(f'db.session.query(Sensor{i+1}).delete()')
+        # # db.session.query(CoConfig).delete()
+        # # db.session.query(LoaderConfig).delete()
+        # db.session.query(Traffic).delete()
+        # db.session.commit()
 
 
-def printr(msg, prefix='XXX'):
-    print(f'\033[31m{prefix}: {msg}\033[0m')
+def printr(msg, prefix="XXX"):
+    print(f"\033[31m{prefix}: {msg}\033[0m")
+
 
 def udp_client(serverInfo, send_data):
     host, port = serverInfo

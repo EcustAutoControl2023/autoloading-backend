@@ -247,7 +247,7 @@ def check_strategy_1_normal_weight_estimate(
     # 等待数据库中有传感器数据（新数据库最开始没有数据）
     printr(expected_weight_list, "expected_weight_list")
 
-    sleep(1.1)
+    sleep(2.1)
 
     icps_index = 0
 
@@ -293,7 +293,7 @@ def check_strategy_1_normal_weight_estimate(
                     elif responsedata.get("loader_id") == "602A":
                         load_height = db.session.query(Sensor14).all()[-1]
                     printr(load_height.data, "sensor")
-                    if load_height.data < 3.4:
+                    if load_height.data < 3:
                         break
                     else:
                         time.sleep(1)
