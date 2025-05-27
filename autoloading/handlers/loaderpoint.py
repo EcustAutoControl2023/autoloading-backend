@@ -870,9 +870,9 @@ class LoadPoint:
                     1.5 < self.load_height_begin_list[self.icps_differ_index] < 2.5
                     and len(set(self.load_height_list)) == 1
                 ):  # 最近十条数据相同，表示扫描到底部加强筋，强制赋值
-                    self.load_height1_begin = 1.2
+                    self.load_height_begin_list[self.icps_differ_index] = 1.2
                 elif self.load_height_begin_list[self.icps_differ_index] < 1.2:
-                    self.load_height1_begin = 1.2
+                    self.load_height_begin_list[self.icps_differ_index] = 1.2
                 elif (
                     self.load_height_begin_list[self.icps_differ_index] > 3.5
                 ):  # 如果扫描到的是顶部的加强筋，不装料，不估计重量
