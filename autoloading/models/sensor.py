@@ -20,8 +20,8 @@ class CoConfig(db.Model):
     CoConfigDB
 
     '''
+    goods_type = db.Column(db.String(20), nullable=True)
     id = db.Column(db.Integer, primary_key=True)
-    goods_type = db.Column(db.String(20), nullable=False)
     duration = db.Column(db.Integer)
     weight = db.Column(db.Float)
     loader_id = db.Column(db.Integer, db.ForeignKey('loader_config.id'))
@@ -88,7 +88,7 @@ class Traffic(db.Model):
     boxheight = db.Column(db.Float, nullable=False)
     truckweightin = db.Column(db.Float, nullable=True)
     truckweightout = db.Column(db.Float, nullable=False)
-    goodstype = db.Column(db.String(10), nullable=False)
+    goodstype = db.Column(db.String(10), nullable=True)
     storeid = db.Column(db.Integer, nullable=False)
     loaderid = db.Column(db.String(20), nullable=True)
 

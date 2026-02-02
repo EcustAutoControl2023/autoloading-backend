@@ -200,11 +200,47 @@ class LoadPoint:
                 (-0.6926, 5.239, 1.5352, 0.2067),
             ],
         },
+        "高粱": {
+            "侧开": [
+                (-0.6926, 5.239, 1.5352, 0.2067),
+                (-0.6926, 5.239, 1.5352, 0.2067),
+                (-0.6926, 5.239, 1.5352, 0.2067),
+            ],
+            "全开": [
+                (-0.6926, 5.239, 1.5352, 0.2067),
+                (-0.6926, 5.239, 1.5352, 0.2067),
+                (-0.6926, 5.239, 1.5352, 0.2067),
+            ],
+            "半开": [
+                (-0.6926, 5.239, 1.5352, 0.2067),
+                (-0.6926, 5.239, 1.5352, 0.2067),
+                (-0.6926, 5.239, 1.5352, 0.2067),
+            ],
+        },
+        "大麦": {
+            "侧开": [
+                (-0.6926, 5.239, 1.5352, 0.2067),
+                (-0.6926, 5.239, 1.5352, 0.2067),
+                (-0.6926, 5.239, 1.5352, 0.2067),
+            ],
+            "全开": [
+                (-0.6926, 5.239, 1.5352, 0.2067),
+                (-0.6926, 5.239, 1.5352, 0.2067),
+                (-0.6926, 5.239, 1.5352, 0.2067),
+            ],
+            "半开": [
+                (-0.6926, 5.239, 1.5352, 0.2067),
+                (-0.6926, 5.239, 1.5352, 0.2067),
+                (-0.6926, 5.239, 1.5352, 0.2067),
+            ],
+        },
     }
 
     GoodsCoefficient = {
         "黄豆": {"巴西": 0.90, "美国": 1},
         "油菜籽": {"巴西": 0.94, "美国": 0.94},
+        "高粱": {"巴西": 0.94, "美国": 0.94},
+        "大麦": {"巴西": 0.94, "美国": 0.94},
     }
 
     def __init__(self, loader_id: str):
@@ -406,17 +442,17 @@ class LoadPoint:
 
         if self.data_type == 0:  # 接收任务信息并发送引导策略
             self.logging.debug("data_type:0")
-            self.logging.debug(f"truck_id:{self.truck_id}开始任务")
-            self.logging.debug(
-                f"引导点位列表: {self.guide_position}, 引导点位个数: {len(self.guide_position)}"
-            )
+            # self.logging.debug(f"truck_id:{self.truck_id}开始任务")
+            # self.logging.debug(
+            #     f"引导点位列表: {self.guide_position}, 引导点位个数: {len(self.guide_position)}"
+            # )
 
             traffic = (
                 Traffic.query.filter_by(loaderid=self.loader_id)
                 .order_by(Traffic.id.desc())
                 .first()
             )
-            self.logging.debug(f"traffic: {traffic}")
+            # self.logging.debug(f"traffic: {traffic}")
             # 判断是否有新车辆到达, 如果有新车辆到达，初始化装料点状态
             if traffic is None or (traffic.truckid != self.truck_id):
                 self.logging.debug(f"新装料任务：{self.truck_id}")
@@ -503,10 +539,10 @@ class LoadPoint:
             # self.logging.debug(f"distance_2:{self.distance_2}")
             # self.logging.debug(f"icps_differ:{self.icps_differ}")
 
-            self.logging.debug(f"icps_differ_index: {self.icps_differ_index}")
-            self.logging.debug(
-                f"icps_differ: {self.guide_position[self.icps_differ_index]}"
-            )
+            # self.logging.debug(f"icps_differ_index: {self.icps_differ_index}")
+            # self.logging.debug(
+            #     f"icps_differ: {self.guide_position[self.icps_differ_index]}"
+            # )
 
             if self.guide_position is not None and len(self.guide_position) > 0:
                 self.work_total = len(self.guide_position)  # 装车点位个数
@@ -585,7 +621,7 @@ class LoadPoint:
             self.logging.debug(f"{self.truck_id}请求data_type:1")
             self.logging.debug(f"temp_manual_stop: {self.temp_manual_stop}")
             self.logging.debug(f"loading_state: {self.loading_state}")
-            self.logging.debug(f"icps_differ_current: {icps_differ_current}")
+            # self.logging.debug(f"icps_differ_current: {icps_differ_current}")
 
             if icps_differ_current != None:
                 self.icps_differ_index = icps_differ_current
@@ -593,8 +629,8 @@ class LoadPoint:
                     f"【调试变量】更正装料点位->icps_differ: {self.icps_differ_index}"
                 )
 
-            # self.logging.debug(f"loading_state:{self.loading_state}")
-            # self.logging.debug(f"loading_state==false:{self.loading_state==0}")
+            self.logging.debug(f"loading_state:{self.loading_state}")
+            self.logging.debug(f"loading_state==false:{self.loading_state == 0}")
             if self.loading_state == 0:
                 self.allow_plc_work = 0
                 result = gen_return_data(
@@ -610,12 +646,12 @@ class LoadPoint:
                     },
                 )
 
-                return result
+                return jsonify(result)
 
             # 记录开始装料时间
             if self.time_record_flag:
                 self.load_start_time = datetime.datetime.now()
-                self.logging.debug(f"load_start_time: {self.load_start_time}")
+                # self.logging.debug(f"load_start_time: {self.load_start_time}")
                 self.duration = float(0)
                 self.time_record_flag = False
                 # 获取当前的物料种类调整系数
@@ -637,7 +673,7 @@ class LoadPoint:
             # FIXME: 待修改
             if self.temp_manual_stop != 0:
                 self.logging.debug("手动停止")
-                self.logging.debug(f"料高列表: {self.load_height_list}")
+                # self.logging.debug(f"料高列表: {self.load_height_list}")
                 self.logging.debug(
                     f"在第{self.icps_differ_index + 1}个点位[{self.guide_position[self.icps_differ_index]}]手动停止"
                 )
@@ -647,10 +683,15 @@ class LoadPoint:
             self.logging.debug(f"当前策略: {self.print_current_policy()}")
 
             if self.work_finish == 0:
-                if self.duration > 1800:
+                if self.duration > 3600:
                     self.time_record_flag = True
                     self.insert_traffic_flag = True
-                    return None
+                    return jsonify(
+                        {
+                            "message": "装车时间过长，任务已终止",
+                            "work_finish": self.work_finish,
+                        }
+                    )
                 previous_icps_differ_index = self.icps_differ_index
                 self.load_control_final()
                 if (
@@ -672,13 +713,13 @@ class LoadPoint:
                     self.load_weight_end_list[previous_icps_differ_index] = (
                         self.loadestimate
                     )
-                    self.logging.debug(f"load_time_list: {self.load_time_list}")
-                    self.logging.debug(
-                        f"load_level_height_list: {self.load_level_height_list}"
-                    )
-                    self.logging.debug(
-                        f"load_weight_end_list: {self.load_weight_end_list}"
-                    )
+                    # self.logging.debug(f"load_time_list: {self.load_time_list}")
+                    # self.logging.debug(
+                    #     f"load_level_height_list: {self.load_level_height_list}"
+                    # )
+                    # self.logging.debug(
+                    #     f"load_weight_end_list: {self.load_weight_end_list}"
+                    # )
 
                     # 更新数据库
                     update_truck_content(
@@ -836,10 +877,10 @@ class LoadPoint:
 
     # 装料高度控制
     def load_control_final(self):
-        self.logging.debug(f"len(self.load_height_list): {len(self.load_height_list)}")
-        self.logging.debug(
-            f"len(set(self.load_height_list)): {len(set(self.load_height_list))}"
-        )
+        # self.logging.debug(f"len(self.load_height_list): {len(self.load_height_list)}")
+        # self.logging.debug(
+        #     f"len(set(self.load_height_list)): {len(set(self.load_height_list))}"
+        # )
         # 记录开始时间
         if self.load_start_time_flag_list[self.icps_differ_index]:
             self.load_start_time_list[self.icps_differ_index] = datetime.datetime.now()
@@ -1188,8 +1229,8 @@ class LoadPoint:
             loadn_usingtime = (
                 float(duration_heightn) * discharge_speed
             )  # 按时间估计第2堆装料重量
-            self.logging.debug(f"按物位估计重量:{loadn_usingheight}")
-            self.logging.debug(f"按时间估计重量:{loadn_usingtime}")
+            # self.logging.debug(f"按物位估计重量:{loadn_usingheight}")
+            # self.logging.debug(f"按时间估计重量:{loadn_usingtime}")
             # 假设移车后60秒内料位不上升
             if duration_heightn <= 240:
                 # 第2堆放料时间小于60秒且料高变化小于最小料高变化（60秒高度最小升高0.2)
@@ -1205,12 +1246,8 @@ class LoadPoint:
                 self.load_stop_time_list[self.icps_differ_index] += datetime.timedelta(
                     seconds=1
                 )  # 停料时间增加1秒
-            self.logging.debug(
-                f"current_load_weight_usingtime:{current_load_weight_usingtime}"
-            )
-            self.logging.debug(
-                f"current_load_weight_usingheight:{current_load_weight_usingheight}"
-            )
+            self.logging.debug(f"按时间估计重量:{current_load_weight_usingtime}")
+            self.logging.debug(f"按物位估计重量:{current_load_weight_usingheight}")
             if loadn_usingtime >= 0 and loadn_usingheight > 0:  # 高度和时间都有结果
                 # 如果高度的结果大于时间的120%，小于时间的80%，用时间的结果；否则用高度的结果
                 if (
@@ -1233,7 +1270,6 @@ class LoadPoint:
         self.logging.debug(f"auto_select:{self.auto_select}")
 
         if auto_select == False:
-            self.logging.debug(f"料高列表: {self.load_height_list}")
             self.logging.debug(
                 f"在第{self.icps_differ_index + 1}个点位[{self.guide_position[self.icps_differ_index]}]手动停止"
             )
